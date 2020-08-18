@@ -1,4 +1,5 @@
 #define OLC_PGE_APPLICATION
+#define OLC_PGE_GAMEPAD
 #include "tetris.hpp"
 
 int main()
@@ -6,7 +7,7 @@ int main()
   tetris_clone::TetrisClone tetris;
 	if (tetris.Construct(256, 225, 4, 4))
   {
-		tetris.Start();
+    tetris.Start();
   }
 	return 0;
 }
