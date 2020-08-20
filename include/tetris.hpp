@@ -1,11 +1,11 @@
 #pragma once
 
+#include <chrono>
 #include <map>
 #include <memory>
 #include <random>
 #include <vector>
 
-#include "olcPGEX_Gamepad.h"
 #include "olcPixelGameEngine.h"
 
 namespace tetris_clone {
@@ -24,13 +24,12 @@ struct GameState {
   GameState()
       : grid{},
         das_counter{},
-        das_reset_signal{},
         gravity_counter{},
-        gravity_disable_counter{},
         entry_delay_counter{},
         spawn_new_tetromino{},
         level{},
         lines{},
+        lines_until_next_level{},
         active_tetromino{},
         next_tetromino{},
         score{},
@@ -41,13 +40,12 @@ struct GameState {
   using Grid = std::array<std::array<int, H>, W>;
   Grid grid;
   int gravity_counter;
-  int gravity_disable_counter;
   int das_counter;
-  int das_reset_signal;
   int entry_delay_counter;
   bool spawn_new_tetromino;
   int level;
   int lines;
+  int lines_until_next_level;
   TetrominoState active_tetromino;
   Tetromino next_tetromino;
   int score;
@@ -77,14 +75,20 @@ using KeyBindings = std::map<KeyAction, olc::Key>;
 using KeyStates = std::map<KeyAction, bool>;
 using KeyEvents = std::map<KeyAction, KeyEvent>;
 
+struct LineClearAnimationInfo {
+  std::vector<int> rows;
+  int animation_frame{};
+};
+
 class TetrisClone : public olc::PixelGameEngine {
  public:
-  TetrisClone();
+  TetrisClone(const int start_level = 0);
 
- public:
   bool OnUserCreate() override;
 
   bool OnUserUpdate(float fElapsedTime) override;
+
+  // void setStartLevel(const int level);
 
  private:
   void RenderGameState(const GameState<>& state);
@@ -93,6 +97,8 @@ class TetrisClone : public olc::PixelGameEngine {
                   const olc::Pixel color = olc::WHITE);
   void RenderText(const GameState<>& state);
   void RenderDebug(const GameState<>& state);
+  void RenderLineClearAnimation(GameState<>& state,
+                                LineClearAnimationInfo& line_clear_info_);
 
   template <typename GridContainer>
   void RenderGrid(const int x_start, const int y_start,
@@ -105,17 +111,20 @@ class TetrisClone : public olc::PixelGameEngine {
           continue;
         }
         DrawSprite(x_start + i * x_spacing, y_start + j * y_spacing,
-                   block_sprites_[level][grid[i][j] * color].get());
+                   block_sprites_[level % 10][grid[i][j] * color].get());
       }
     }
   }
+
   void spawnNewTetromino(GameState<>& state);
   Tetromino getRandomTetromino();
   KeyEvents getKeyEvents(KeyStates& current_key_state);
-  GameState<> getNewState();
+  GameState<> getNewState(const int level);
 
   std::unique_ptr<olc::Sprite> bg_ptr_;
+  std::unique_ptr<olc::Sprite> bg_flash_ptr_;
   std::vector<std::vector<std::unique_ptr<olc::Sprite>>> block_sprites_;
+  std::vector<std::unique_ptr<olc::Sprite>> counter_sprites_;
   GameState<> state_;
   std::random_device real_rng_;
   std::default_random_engine fake_rng_;
@@ -123,6 +132,8 @@ class TetrisClone : public olc::PixelGameEngine {
   KeyStates key_states_;
   KeyBindings key_bindings_;
   bool debug_mode_;
+  std::chrono::time_point<std::chrono::high_resolution_clock> frame_end_;
+  LineClearAnimationInfo line_clear_info_;
 };
 
 }  // namespace tetris_clone
