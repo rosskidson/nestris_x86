@@ -7,8 +7,8 @@
 #include <sstream>
 #include <thread>  //sleep until
 
-
-#include "./internal/utils.hpp"
+#define OLC_PGEX_SOUND
+#include "Extensions/olcPGEX_Sound.h"
 
 #define LOG_ERROR(msg) std::cerr << msg << std::endl;
 #define LOG_INFO(msg) std::cout << msg << std::endl;
@@ -460,8 +460,8 @@ void TetrisClone::RenderGameState(const GameState<>& state) {
 // TODO:: This can be broken into two functions:
 //          -Apply clear line animation to state (free float)
 //          -Render grid                         (class)
-void TetrisClone::RenderLineClearAnimation(GameState<>& state,
-    LineClearAnimationInfo& line_clear_info_) {
+void TetrisClone::RenderLineClearAnimation(
+    GameState<>& state, LineClearAnimationInfo& line_clear_info_) {
   auto& frame = line_clear_info_.animation_frame;
   if (frame == 0) {
     return;
@@ -541,7 +541,11 @@ TetrisClone::TetrisClone(const int start_level)
       random_generator_(0, 6),
       key_states_{},
       key_bindings_{getKeyBindings()},
-      debug_mode_{true} {
+      debug_mode_{true},
+      frame_end_{},
+      line_clear_info_{},
+      an_int_{}
+{
   sAppName = "TetrisClone";
   for (const auto& pair : key_bindings_) {
     key_states_[pair.first] = false;
@@ -557,6 +561,16 @@ bool TetrisClone::OnUserCreate() {
   DrawSprite(0, 0, bg_ptr_.get());
   frame_end_ = Clock::now() + single_frame;
 
+  if(!olc::SOUND::InitialiseAudio(44100, 1)) {
+    std::cerr << "Sound failed to initialize." << std::endl;
+    return false;
+  }
+  an_int_ = olc::SOUND::LoadAudioSample("assets/sounds/tetris.wav");
+  if(an_int_ == -1 ) {
+    std::cerr << "Failed to load sample." << std::endl;
+  }
+
+
   return true;
 }
 
@@ -566,6 +580,10 @@ bool TetrisClone::OnUserUpdate(float fElapsedTime) {
       spawnNewTetromino(state_);
     }
     const auto key_events = getKeyEvents(key_states_);
+    if(key_events.at(KeyAction::RotateLeft).pressed) {
+      olc::SOUND::PlaySample(an_int_);
+    }
+
     processKeyEvents(key_events, state_);
     if (didTetrominoLock(state_)) {
       auto lines_cleared = checkForLineClears(state_);
@@ -590,7 +608,6 @@ bool TetrisClone::OnUserUpdate(float fElapsedTime) {
     RenderGameState(state_);
     --state_.entry_delay_counter;
   }
-
 
   std::this_thread::sleep_until(frame_end_);
   frame_end_ += single_frame;

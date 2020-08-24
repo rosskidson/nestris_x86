@@ -134,6 +134,7 @@ class TetrisClone : public olc::PixelGameEngine {
   bool debug_mode_;
   std::chrono::time_point<std::chrono::high_resolution_clock> frame_end_;
   LineClearAnimationInfo line_clear_info_;
+  int an_int_;
 };
 
 }  // namespace tetris_clone

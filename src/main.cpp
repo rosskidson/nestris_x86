@@ -1,5 +1,4 @@
 #define OLC_PGE_APPLICATION
-#define OLC_PGE_GAMEPAD
 #include "tetris.hpp"
 
 int getStartLevel(const int argc, const char** argv){
