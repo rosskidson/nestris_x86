@@ -1,5 +1,7 @@
 #include "tetris.hpp"
 
+#include <SDL_mixer.h>  // TODO:: Light wrapper around sdl mixer
+
 #include <array>
 #include <chrono>
 #include <iomanip>
@@ -14,6 +16,8 @@
 #define LOG_INFO(msg) std::cout << msg << std::endl;
 
 namespace tetris_clone {
+
+std::map<std::string, Mix_Chunk*> _global_samples;
 
 using Clock = std::chrono::high_resolution_clock;
 using Duration_us = std::chrono::duration<int, std::nano>;
@@ -260,6 +264,8 @@ void processKeyEvents(const KeyEvents& key_events, GameState<>& state) {
     if (not updateStateOnNoCollision(state.grid, direction, 0, 0,
                                      state.active_tetromino)) {
       fullyChargeDas(state);
+    } else {
+      Mix_PlayChannel(-1, _global_samples.at("move"), 0);
     }
   };
 
@@ -296,9 +302,11 @@ void processKeyEvents(const KeyEvents& key_events, GameState<>& state) {
   }
   if (key_events.at(KeyAction::RotateLeft).pressed) {
     updateStateOnNoCollision(state.grid, 0, 0, 1, state.active_tetromino);
+    Mix_PlayChannel(-1, _global_samples.at("rotate"), 0);
   }
   if (key_events.at(KeyAction::RotateRight).pressed) {
     updateStateOnNoCollision(state.grid, 0, 0, -1, state.active_tetromino);
+    Mix_PlayChannel(-1, _global_samples.at("rotate"), 0);
   }
 }
 
@@ -352,6 +360,7 @@ bool didTetrominoLock(GameState<>& state) {
           getEntryDelayFromLockHeight(state.active_tetromino.y);
       state.spawn_new_tetromino = true;
       state.grid = addTetrominoToGrid(state.grid, state.active_tetromino);
+      Mix_PlayChannel(-1, _global_samples.at("lock"), 0);
       return true;
     }
   }
@@ -461,19 +470,26 @@ void TetrisClone::RenderGameState(const GameState<>& state) {
 //          -Apply clear line animation to state (free float)
 //          -Render grid                         (class)
 void TetrisClone::RenderLineClearAnimation(
-    GameState<>& state, LineClearAnimationInfo& line_clear_info_) {
-  auto& frame = line_clear_info_.animation_frame;
+    GameState<>& state, LineClearAnimationInfo& line_clear_info) {
+  auto& frame = line_clear_info.animation_frame;
   if (frame == 0) {
     return;
   }
   --frame;
-  if (frame > 21) {
+
+  if (frame == 23) {
+    if (line_clear_info.rows.size() == 4) {
+      Mix_PlayChannel(-1, _global_samples.at("tetris"), 0);
+    } else if (line_clear_info.rows.size() > 0) {
+      Mix_PlayChannel(-1, _global_samples.at("line_clear"), 0);
+    }
+  } else if (frame > 21) {
     // Still waiting for entry delay to end.
     return;
   } else if (frame >= 5) {
     // Line clear animation.
     const int blocks_to_remove = 6 - ((frame - 1) / 4);
-    for (const auto& row : line_clear_info_.rows) {
+    for (const auto& row : line_clear_info.rows) {
       for (int i = 4; i > 4 - blocks_to_remove; --i) {
         state.grid[i][row] = 0;
         state.grid[9 - i][row] = 0;
@@ -481,12 +497,12 @@ void TetrisClone::RenderLineClearAnimation(
     }
   } else if (frame == 3) {
     // Move lines down.
-    for (const auto& row : line_clear_info_.rows) {
+    for (const auto& row : line_clear_info.rows) {
       clearLine(row, state);
     }
   }
   // If it was a tetris, do the flash.
-  if ((line_clear_info_.rows.size() == 4) && ((frame - 1) % 4 == 0)) {
+  if ((line_clear_info.rows.size() == 4) && ((frame - 1) % 4 == 0)) {
     DrawSprite(0, 0, bg_flash_ptr_.get());
   } else {
     DrawSprite(0, 0, bg_ptr_.get());
@@ -544,14 +560,15 @@ TetrisClone::TetrisClone(const int start_level)
       debug_mode_{true},
       frame_end_{},
       line_clear_info_{},
-      an_int_{}
-{
+      an_int_{} {
   sAppName = "TetrisClone";
   for (const auto& pair : key_bindings_) {
     key_states_[pair.first] = false;
   }
   state_ = getNewState(start_level);
 }
+
+TetrisClone::~TetrisClone() { Mix_CloseAudio(); }
 
 bool TetrisClone::OnUserCreate() {
   if (ScreenWidth() != 256 || ScreenHeight() != 225) {
@@ -560,6 +577,19 @@ bool TetrisClone::OnUserCreate() {
   }
   DrawSprite(0, 0, bg_ptr_.get());
   frame_end_ = Clock::now() + single_frame;
+
+  int result = Mix_OpenAudio(44100, AUDIO_S16SYS, 2, 512);
+  if (result < 0) {
+    LOG_ERROR("Failed to initialize sound.");
+    return false;
+  }
+
+  _global_samples["move"] = Mix_LoadWAV("./assets/sounds/tetromino_move.wav");
+  _global_samples["tetris"] = Mix_LoadWAV("./assets/sounds/tetris.wav");
+  _global_samples["rotate"] =
+      Mix_LoadWAV("./assets/sounds/tetromino_rotate.wav");
+  _global_samples["lock"] = Mix_LoadWAV("./assets/sounds/tetromino_lock.wav");
+  _global_samples["line_clear"] = Mix_LoadWAV("./assets/sounds/line_clear.wav");
 
   return true;
 }
@@ -607,7 +637,13 @@ bool TetrisClone::OnUserUpdate(float fElapsedTime) {
 
 /**
  * TODO:
- * - Sound
+ * - Clean up sound implementation!
+ *      - Hide SDL behind an interface (it's ugly)
+ *      - Proper initialization/loading/playing of sounds
+ *      - Add remaining sounds (level up sample missing)
+ *      - No sound on blocked rotation
+ *      - Synchronize line clears properly (it's pretty close i think)
+ *
  * - Top out/game over
  * - Some kind of menu system
  * - Press down scoring

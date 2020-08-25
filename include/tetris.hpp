@@ -83,6 +83,7 @@ struct LineClearAnimationInfo {
 class TetrisClone : public olc::PixelGameEngine {
  public:
   TetrisClone(const int start_level = 0);
+  ~TetrisClone();
 
   bool OnUserCreate() override;
 
