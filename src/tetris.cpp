@@ -7,8 +7,8 @@
 #include <sstream>
 #include <thread>  //sleep until
 
-#define OLC_PGEX_SOUND
-#include "Extensions/olcPGEX_Sound.h"
+//#define OLC_PGEX_SOUND
+//#include "Extensions/olcPGEX_Sound.h"
 
 #define LOG_ERROR(msg) std::cerr << msg << std::endl;
 #define LOG_INFO(msg) std::cout << msg << std::endl;
@@ -561,16 +561,6 @@ bool TetrisClone::OnUserCreate() {
   DrawSprite(0, 0, bg_ptr_.get());
   frame_end_ = Clock::now() + single_frame;
 
-  if(!olc::SOUND::InitialiseAudio(44100, 1)) {
-    std::cerr << "Sound failed to initialize." << std::endl;
-    return false;
-  }
-  an_int_ = olc::SOUND::LoadAudioSample("assets/sounds/tetris.wav");
-  if(an_int_ == -1 ) {
-    std::cerr << "Failed to load sample." << std::endl;
-  }
-
-
   return true;
 }
 
@@ -580,9 +570,6 @@ bool TetrisClone::OnUserUpdate(float fElapsedTime) {
       spawnNewTetromino(state_);
     }
     const auto key_events = getKeyEvents(key_states_);
-    if(key_events.at(KeyAction::RotateLeft).pressed) {
-      olc::SOUND::PlaySample(an_int_);
-    }
 
     processKeyEvents(key_events, state_);
     if (didTetrominoLock(state_)) {
