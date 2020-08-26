@@ -6,6 +6,7 @@
 #include <random>
 #include <vector>
 
+#include "sound.hpp"
 #include "olcPixelGameEngine.h"
 
 namespace tetris_clone {
@@ -83,7 +84,6 @@ struct LineClearAnimationInfo {
 class TetrisClone : public olc::PixelGameEngine {
  public:
   TetrisClone(const int start_level = 0);
-  ~TetrisClone();
 
   bool OnUserCreate() override;
 
@@ -135,7 +135,7 @@ class TetrisClone : public olc::PixelGameEngine {
   bool debug_mode_;
   std::chrono::time_point<std::chrono::high_resolution_clock> frame_end_;
   LineClearAnimationInfo line_clear_info_;
-  int an_int_;
+  sound::SoundPlayer sample_player_;
 };
 
 }  // namespace tetris_clone

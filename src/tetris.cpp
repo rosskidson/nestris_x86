@@ -1,13 +1,16 @@
 #include "tetris.hpp"
 
-#include <SDL_mixer.h>  // TODO:: Light wrapper around sdl mixer
+#include <SDL_mixer.h> // TODO:: Light wrapper around sdl mixer
 
 #include <array>
 #include <chrono>
 #include <iomanip>
 #include <iostream>
 #include <sstream>
-#include <thread>  //sleep until
+#include <string>
+#include <thread> //sleep until
+
+#include "sound.hpp"
 
 //#define OLC_PGEX_SOUND
 //#include "Extensions/olcPGEX_Sound.h"
@@ -17,8 +20,6 @@
 
 namespace tetris_clone {
 
-std::map<std::string, Mix_Chunk*> _global_samples;
-
 using Clock = std::chrono::high_resolution_clock;
 using Duration_us = std::chrono::duration<int, std::nano>;
 using Duration_ms = std::chrono::duration<int, std::milli>;
@@ -26,29 +27,26 @@ using TetrominoGrid = std::vector<std::vector<int>>;
 constexpr Duration_us single_frame(16666667);
 // constexpr Duration_ms single_frame(500);
 
-const std::vector<TetrominoGrid> T_TETROMINO{
-    {{{0, 1, 0}, {0, 1, 1}, {0, 1, 0}}},
-    {{{0, 1, 0}, {1, 1, 1}, {0, 0, 0}}},
-    {{{0, 1, 0}, {1, 1, 0}, {0, 1, 0}}},
-    {{{0, 0, 0}, {1, 1, 1}, {0, 1, 0}}}};
+const std::vector<TetrominoGrid> T_TETROMINO{{{{0, 1, 0}, {0, 1, 1}, {0, 1, 0}}},
+                                             {{{0, 1, 0}, {1, 1, 1}, {0, 0, 0}}},
+                                             {{{0, 1, 0}, {1, 1, 0}, {0, 1, 0}}},
+                                             {{{0, 0, 0}, {1, 1, 1}, {0, 1, 0}}}};
 
-const std::vector<TetrominoGrid> J_TETROMINO{
-    {{{0, 1, 0}, {0, 1, 0}, {0, 1, 1}}},
-    {{{0, 0, 1}, {1, 1, 1}, {0, 0, 0}}},
-    {{{1, 1, 0}, {0, 1, 0}, {0, 1, 0}}},
-    {{{0, 0, 0}, {1, 1, 1}, {1, 0, 0}}}};
+const std::vector<TetrominoGrid> J_TETROMINO{{{{0, 1, 0}, {0, 1, 0}, {0, 1, 1}}},
+                                             {{{0, 0, 1}, {1, 1, 1}, {0, 0, 0}}},
+                                             {{{1, 1, 0}, {0, 1, 0}, {0, 1, 0}}},
+                                             {{{0, 0, 0}, {1, 1, 1}, {1, 0, 0}}}};
 
-const std::vector<TetrominoGrid> L_TETROMINO{
-    {{{0, 1, 1}, {0, 1, 0}, {0, 1, 0}}},
-    {{{1, 0, 0}, {1, 1, 1}, {0, 0, 0}}},
-    {{{0, 1, 0}, {0, 1, 0}, {1, 1, 0}}},
-    {{{0, 0, 0}, {1, 1, 1}, {0, 0, 1}}}};
+const std::vector<TetrominoGrid> L_TETROMINO{{{{0, 1, 1}, {0, 1, 0}, {0, 1, 0}}},
+                                             {{{1, 0, 0}, {1, 1, 1}, {0, 0, 0}}},
+                                             {{{0, 1, 0}, {0, 1, 0}, {1, 1, 0}}},
+                                             {{{0, 0, 0}, {1, 1, 1}, {0, 0, 1}}}};
 
-const std::vector<TetrominoGrid> S_TETROMINO{
-    {{{0, 0, 1}, {0, 1, 1}, {0, 1, 0}}}, {{{0, 0, 0}, {1, 1, 0}, {0, 1, 1}}}};
+const std::vector<TetrominoGrid> S_TETROMINO{{{{0, 0, 1}, {0, 1, 1}, {0, 1, 0}}},
+                                             {{{0, 0, 0}, {1, 1, 0}, {0, 1, 1}}}};
 
-const std::vector<TetrominoGrid> Z_TETROMINO{
-    {{{0, 1, 0}, {0, 1, 1}, {0, 0, 1}}}, {{{0, 0, 0}, {0, 1, 1}, {1, 1, 0}}}};
+const std::vector<TetrominoGrid> Z_TETROMINO{{{{0, 1, 0}, {0, 1, 1}, {0, 0, 1}}},
+                                             {{{0, 0, 0}, {0, 1, 1}, {1, 1, 0}}}};
 
 const std::vector<TetrominoGrid> I_TETROMINO{
     {{{0, 0, 1, 0}, {0, 0, 1, 0}, {0, 0, 1, 0}, {0, 0, 1, 0}}},
@@ -72,11 +70,9 @@ int getGravity(const int level) {
   }
 }
 
-bool entryDelay(const GameState<>& state) {
-  return state.entry_delay_counter > 0;
-}
+bool entryDelay(const GameState<> &state) { return state.entry_delay_counter > 0; }
 
-TetrominoGrid getTetrominoGrid(const Tetromino& tetromino, const int rotation) {
+TetrominoGrid getTetrominoGrid(const Tetromino &tetromino, const int rotation) {
   if (tetromino == Tetromino::T) {
     return T_TETROMINO[rotation];
   } else if (tetromino == Tetromino::J) {
@@ -94,12 +90,11 @@ TetrominoGrid getTetrominoGrid(const Tetromino& tetromino, const int rotation) {
   }
 }
 
-TetrominoGrid getTetrominoGrid(const TetrominoState& tetromino) {
+TetrominoGrid getTetrominoGrid(const TetrominoState &tetromino) {
   return getTetrominoGrid(tetromino.tetromino, tetromino.rotation);
 }
 
-std::vector<std::vector<std::unique_ptr<olc::Sprite>>> loadSprites(
-    const std::string& path) {
+std::vector<std::vector<std::unique_ptr<olc::Sprite>>> loadSprites(const std::string &path) {
   std::vector<std::vector<std::unique_ptr<olc::Sprite>>> block_sprites;
   block_sprites.resize(10);
   for (int level = 0; level < 10; ++level) {
@@ -107,15 +102,13 @@ std::vector<std::vector<std::unique_ptr<olc::Sprite>>> loadSprites(
     for (int color = 0; color < 3; ++color) {
       std::stringstream ss;
       ss << "/l" << level << "-c" << color << ".png";
-      block_sprites[level].emplace_back(
-          std::make_unique<olc::Sprite>(path + ss.str()));
+      block_sprites[level].emplace_back(std::make_unique<olc::Sprite>(path + ss.str()));
     }
   }
   return block_sprites;
 }
 
-std::vector<std::unique_ptr<olc::Sprite>> loadCounterSprites(
-    const std::string& path) {
+std::vector<std::unique_ptr<olc::Sprite>> loadCounterSprites(const std::string &path) {
   std::vector<std::unique_ptr<olc::Sprite>> counter_sprites;
   counter_sprites.resize(10);
   for (int level = 0; level < 10; ++level) {
@@ -126,9 +119,8 @@ std::vector<std::unique_ptr<olc::Sprite>> loadCounterSprites(
   return counter_sprites;
 }
 
-int getColor(const Tetromino& tetromino) {
-  if (tetromino == Tetromino::T || tetromino == Tetromino::Square ||
-      tetromino == Tetromino::Line) {
+int getColor(const Tetromino &tetromino) {
+  if (tetromino == Tetromino::T || tetromino == Tetromino::Square || tetromino == Tetromino::Line) {
     return 1;
   } else if (tetromino == Tetromino::J || tetromino == Tetromino::S) {
     return 2;
@@ -137,10 +129,9 @@ int getColor(const Tetromino& tetromino) {
   }
 }
 
-std::tuple<int, int> getStartOffsets(const Tetromino& tetromino) {
-  if (tetromino == Tetromino::T || tetromino == Tetromino::J ||
-      tetromino == Tetromino::L || tetromino == Tetromino::S ||
-      tetromino == Tetromino::Z) {
+std::tuple<int, int> getStartOffsets(const Tetromino &tetromino) {
+  if (tetromino == Tetromino::T || tetromino == Tetromino::J || tetromino == Tetromino::L ||
+      tetromino == Tetromino::S || tetromino == Tetromino::Z) {
     return {1, 1};
   } else if (tetromino == Tetromino::Line) {
     return {2, 2};
@@ -149,26 +140,24 @@ std::tuple<int, int> getStartOffsets(const Tetromino& tetromino) {
   }
 }
 
-template <typename Container>
-bool outOfBounds(const Container& container, int x, int y) {
+template <typename Container> bool outOfBounds(const Container &container, int x, int y) {
   if (x < 0 || y < 0 || x >= container.size() || y >= container[x].size()) {
     return true;
   } else
     return false;
 }
 
-GameState<>::Grid addTetrominoToGrid(const GameState<>::Grid& grid,
-                                     const TetrominoState& tetromino) {
+GameState<>::Grid addTetrominoToGrid(const GameState<>::Grid &grid,
+                                     const TetrominoState &tetromino) {
   GameState<>::Grid grid_copy(grid);
-  const auto& tetromino_grid = getTetrominoGrid(tetromino);
+  const auto &tetromino_grid = getTetrominoGrid(tetromino);
   const auto [x_offset, y_offset] = getStartOffsets(tetromino.tetromino);
   const int x_start = tetromino.x - x_offset;
   const int y_start = tetromino.y - y_offset;
   const int color = getColor(tetromino.tetromino);
   for (int i = 0; i < tetromino_grid.size(); ++i) {
     for (int j = 0; j < tetromino_grid[i].size(); ++j) {
-      if (outOfBounds(grid_copy, x_start + i, y_start + j) ||
-          not tetromino_grid[i][j]) {
+      if (outOfBounds(grid_copy, x_start + i, y_start + j) || not tetromino_grid[i][j]) {
         continue;
       }
       grid_copy[x_start + i][y_start + j] = tetromino_grid[i][j] * color;
@@ -177,9 +166,8 @@ GameState<>::Grid addTetrominoToGrid(const GameState<>::Grid& grid,
   return grid_copy;
 }
 
-bool tetrominoCollision(const GameState<>::Grid& grid,
-                        const TetrominoState& tetromino) {
-  const auto& tetromino_grid = getTetrominoGrid(tetromino);
+bool tetrominoCollision(const GameState<>::Grid &grid, const TetrominoState &tetromino) {
+  const auto &tetromino_grid = getTetrominoGrid(tetromino);
   const auto [x_offset, y_offset] = getStartOffsets(tetromino.tetromino);
   const int x_start = tetromino.x - x_offset;
   const int y_start = tetromino.y - y_offset;
@@ -190,12 +178,10 @@ bool tetrominoCollision(const GameState<>::Grid& grid,
       }
       // Special case: If out of bounds above the play field, this is not a
       // collision (providing it is still within x bounds).
-      if ((y_start + j < 0) && (x_start + i >= 0) &&
-          (x_start + i < grid.size())) {
+      if ((y_start + j < 0) && (x_start + i >= 0) && (x_start + i < grid.size())) {
         continue;
       }
-      if (outOfBounds(grid, x_start + i, y_start + j) ||
-          grid[x_start + i][y_start + j]) {
+      if (outOfBounds(grid, x_start + i, y_start + j) || grid[x_start + i][y_start + j]) {
         return true;
       }
     }
@@ -203,15 +189,13 @@ bool tetrominoCollision(const GameState<>::Grid& grid,
   return false;
 }
 
-bool updateStateOnNoCollision(const GameState<>::Grid& grid,
-                              const int tetromino_x_offset,
-                              const int tetromino_y_offset,
-                              const int tetromino_rotation_offset,
-                              TetrominoState& tetromino) {
+bool updateStateOnNoCollision(const GameState<>::Grid &grid, const int tetromino_x_offset,
+                              const int tetromino_y_offset, const int tetromino_rotation_offset,
+                              TetrominoState &tetromino) {
   TetrominoState test_tetromino{tetromino};
   test_tetromino.x += tetromino_x_offset;
   test_tetromino.y += tetromino_y_offset;
-  auto& r = test_tetromino.rotation;
+  auto &r = test_tetromino.rotation;
   r += tetromino_rotation_offset;
   r = r < 0 ? 3 : r;
   r = r > 3 ? 0 : r;
@@ -235,8 +219,7 @@ KeyBindings getKeyBindings() {
   return key_bindings;
 }
 
-KeyEvent getButtonState(const bool button_old_state,
-                        const bool button_new_state) {
+KeyEvent getButtonState(const bool button_old_state, const bool button_new_state) {
   KeyEvent event;
   event.pressed = not button_old_state && button_new_state;
   event.released = button_old_state && not button_new_state;
@@ -244,10 +227,10 @@ KeyEvent getButtonState(const bool button_old_state,
   return event;
 }
 
-KeyEvents TetrisClone::getKeyEvents(KeyStates& last_key_states) {
+KeyEvents TetrisClone::getKeyEvents(KeyStates &last_key_states) {
   KeyEvents ret_val;
-  for (const auto& pair : key_bindings_) {
-    const auto& key = pair.first;
+  for (const auto &pair : key_bindings_) {
+    const auto &key = pair.first;
     auto new_key_state = GetKey(pair.second).bHeld;
     ret_val[key] = getButtonState(last_key_states.at(key), new_key_state);
     last_key_states[key] = new_key_state;
@@ -255,17 +238,17 @@ KeyEvents TetrisClone::getKeyEvents(KeyStates& last_key_states) {
   return ret_val;
 }
 
-void resetDas(GameState<>& state) { state.das_counter = 0; }
+void resetDas(GameState<> &state) { state.das_counter = 0; }
 
-void fullyChargeDas(GameState<>& state) { state.das_counter = 16; }
+void fullyChargeDas(GameState<> &state) { state.das_counter = 16; }
 
-void processKeyEvents(const KeyEvents& key_events, GameState<>& state) {
-  auto move_check_wall_charge = [](GameState<>& state, const int direction) {
-    if (not updateStateOnNoCollision(state.grid, direction, 0, 0,
-                                     state.active_tetromino)) {
-      fullyChargeDas(state);
+void processKeyEvents(const KeyEvents &key_events,
+                      const sound::SoundPlayer &sample_player, GameState<>& state ) {
+  auto move_check_wall_charge = [&sample_player](GameState<> &state, const int direction) {
+    if (updateStateOnNoCollision(state.grid, direction, 0, 0, state.active_tetromino)) {
+      sample_player.playSample("move");
     } else {
-      Mix_PlayChannel(-1, _global_samples.at("move"), 0);
+      fullyChargeDas(state);
     }
   };
 
@@ -277,7 +260,7 @@ void processKeyEvents(const KeyEvents& key_events, GameState<>& state) {
     resetDas(state);
     move_check_wall_charge(state, +1);
   }
-  auto das_trigger = [](int& das_counter) {
+  auto das_trigger = [](int &das_counter) {
     ++das_counter;
     if (das_counter >= 16) {
       das_counter = 10;
@@ -297,20 +280,22 @@ void processKeyEvents(const KeyEvents& key_events, GameState<>& state) {
   }
 
   if (key_events.at(KeyAction::Down).held) {
-    auto& gr = state.gravity_counter;
+    auto &gr = state.gravity_counter;
     gr = gr > 2 ? 2 : gr;
   }
   if (key_events.at(KeyAction::RotateLeft).pressed) {
-    updateStateOnNoCollision(state.grid, 0, 0, 1, state.active_tetromino);
-    Mix_PlayChannel(-1, _global_samples.at("rotate"), 0);
+    if (updateStateOnNoCollision(state.grid, 0, 0, 1, state.active_tetromino)) {
+      sample_player.playSample("rotate");
+    }
   }
   if (key_events.at(KeyAction::RotateRight).pressed) {
-    updateStateOnNoCollision(state.grid, 0, 0, -1, state.active_tetromino);
-    Mix_PlayChannel(-1, _global_samples.at("rotate"), 0);
+    if (updateStateOnNoCollision(state.grid, 0, 0, -1, state.active_tetromino)) {
+      sample_player.playSample("rotate");
+    }
   }
 }
 
-void clearLine(const int row, GameState<>& state) {
+void clearLine(const int row, GameState<> &state) {
   for (int y = row; y > 0; --y) {
     for (int x = 0; x < state.grid.size(); ++x) {
       state.grid[x][y] = state.grid[x][y - 1];
@@ -321,9 +306,9 @@ void clearLine(const int row, GameState<>& state) {
   }
 }
 
-std::vector<int> checkForLineClears(const GameState<>& state) {
+std::vector<int> checkForLineClears(const GameState<> &state) {
   std::vector<int> complete_lines{};
-  auto is_line_complete = [](const GameState<>::Grid& grid, const int row) {
+  auto is_line_complete = [](const GameState<>::Grid &grid, const int row) {
     for (int x = 0; x < grid.size(); ++x) {
       if (grid[x][row] == 0) {
         return false;
@@ -339,7 +324,7 @@ std::vector<int> checkForLineClears(const GameState<>& state) {
   return complete_lines;
 }
 
-void updateScore(const int line_clears, GameState<>& state) {
+void updateScore(const int line_clears, GameState<> &state) {
   state.score += state.level * line_scores[line_clears];
   state.lines += line_clears;
   state.lines_until_next_level -= line_clears;
@@ -351,26 +336,21 @@ void updateScore(const int line_clears, GameState<>& state) {
 
 int getEntryDelayFromLockHeight(const int height) { return height * -0.5 + 19; }
 
-bool didTetrominoLock(GameState<>& state) {
+bool didTetrominoLock(GameState<> &state) {
   if (--state.gravity_counter == 0) {
     state.gravity_counter = getGravity(state.level);
-    if (not updateStateOnNoCollision(state.grid, 0, 1, 0,
-                                     state.active_tetromino)) {
-      state.entry_delay_counter =
-          getEntryDelayFromLockHeight(state.active_tetromino.y);
+    if (not updateStateOnNoCollision(state.grid, 0, 1, 0, state.active_tetromino)) {
+      state.entry_delay_counter = getEntryDelayFromLockHeight(state.active_tetromino.y);
       state.spawn_new_tetromino = true;
       state.grid = addTetrominoToGrid(state.grid, state.active_tetromino);
-      Mix_PlayChannel(-1, _global_samples.at("lock"), 0);
       return true;
     }
   }
   return false;
 }
 
-void TetrisClone::RenderNextTetromino(const Tetromino& next_tetromino,
-                                      const int level) {
-  auto get_plotting_coords =
-      [](const Tetromino& next_tetromino) -> std::tuple<int, int> {
+void TetrisClone::RenderNextTetromino(const Tetromino &next_tetromino, const int level) {
+  auto get_plotting_coords = [](const Tetromino &next_tetromino) -> std::tuple<int, int> {
     constexpr int start_x = 196;
     constexpr int start_y = 104;
     int x, y;
@@ -391,15 +371,15 @@ void TetrisClone::RenderNextTetromino(const Tetromino& next_tetromino,
   RenderGrid(x, y, tetromino, level, 8, 8, getColor(next_tetromino));
 }
 
-void TetrisClone::DrawNumber(const int x, const int y, const int num,
-                             const int pad, const olc::Pixel color) {
+void TetrisClone::DrawNumber(const int x, const int y, const int num, const int pad,
+                             const olc::Pixel color) {
   FillRect(x, y, 8 * pad, 8, olc::BLACK);
   std::stringstream ss;
   ss << std::setw(pad) << std::setfill('0') << num;
   DrawString(x, y, ss.str(), color);
 }
 
-void TetrisClone::RenderText(const GameState<>& state) {
+void TetrisClone::RenderText(const GameState<> &state) {
   DrawNumber(152, 16, state.lines, 3);
   DrawNumber(192, 32, state.high_score, 6);
   DrawNumber(192, 56, state.score, 6);
@@ -409,8 +389,8 @@ void TetrisClone::RenderText(const GameState<>& state) {
   }
 }
 
-void TetrisClone::RenderDebug(const GameState<>& state) {
-  auto get_das_color = [](const int& das) {
+void TetrisClone::RenderDebug(const GameState<> &state) {
+  auto get_das_color = [](const int &das) {
     if (das >= 10) {
       return olc::GREEN;
     } else if (das >= 6) {
@@ -423,9 +403,8 @@ void TetrisClone::RenderDebug(const GameState<>& state) {
   FillRect(200, 180, 3 * 16, 6, olc::BLACK);
   FillRect(200, 180, 3 * state.das_counter, 6, color);
 
-  auto fill_circle = [&](const int x, const int y, const int radius,
-                         const bool signal, const olc::Pixel& on_color,
-                         const olc::Pixel& off_color) {
+  auto fill_circle = [&](const int x, const int y, const int radius, const bool signal,
+                         const olc::Pixel &on_color, const olc::Pixel &off_color) {
     auto color = signal ? on_color : off_color;
     FillCircle(x, y, radius, color);
   };
@@ -436,19 +415,15 @@ void TetrisClone::RenderDebug(const GameState<>& state) {
   fill_circle(226, 192, 3, entryDelay(state), olc::GREEN, olc::RED);
 
   DrawString(204, 199, "<  >", olc::WHITE);
-  fill_circle(196, 202, 4, key_states_[KeyAction::Left], olc::GREEN,
-              olc::BLACK);
-  fill_circle(242, 201, 4, key_states_[KeyAction::Right], olc::GREEN,
-              olc::BLACK);
+  fill_circle(196, 202, 4, key_states_[KeyAction::Left], olc::GREEN, olc::BLACK);
+  fill_circle(242, 201, 4, key_states_[KeyAction::Right], olc::GREEN, olc::BLACK);
   DrawString(204, 207, "A  B", olc::WHITE);
-  fill_circle(196, 216, 8, key_states_[KeyAction::RotateRight], olc::GREEN,
-              olc::BLACK);
-  fill_circle(242, 216, 8, key_states_[KeyAction::RotateLeft], olc::GREEN,
-              olc::BLACK);
+  fill_circle(196, 216, 8, key_states_[KeyAction::RotateRight], olc::GREEN, olc::BLACK);
+  fill_circle(242, 216, 8, key_states_[KeyAction::RotateLeft], olc::GREEN, olc::BLACK);
 }
 
-void TetrisClone::RenderGameState(const GameState<>& state) {
-  auto get_grid_for_render = [](const GameState<>& state) {
+void TetrisClone::RenderGameState(const GameState<> &state) {
+  auto get_grid_for_render = [](const GameState<> &state) {
     if (entryDelay(state)) {
       return state.grid;
     } else {
@@ -469,9 +444,9 @@ void TetrisClone::RenderGameState(const GameState<>& state) {
 // TODO:: This can be broken into two functions:
 //          -Apply clear line animation to state (free float)
 //          -Render grid                         (class)
-void TetrisClone::RenderLineClearAnimation(
-    GameState<>& state, LineClearAnimationInfo& line_clear_info) {
-  auto& frame = line_clear_info.animation_frame;
+void TetrisClone::RenderLineClearAnimation(GameState<> &state,
+                                           LineClearAnimationInfo &line_clear_info) {
+  auto &frame = line_clear_info.animation_frame;
   if (frame == 0) {
     return;
   }
@@ -479,9 +454,9 @@ void TetrisClone::RenderLineClearAnimation(
 
   if (frame == 23) {
     if (line_clear_info.rows.size() == 4) {
-      Mix_PlayChannel(-1, _global_samples.at("tetris"), 0);
+      sample_player_.playSample("tetris");
     } else if (line_clear_info.rows.size() > 0) {
-      Mix_PlayChannel(-1, _global_samples.at("line_clear"), 0);
+      sample_player_.playSample("line_clear");
     }
   } else if (frame > 21) {
     // Still waiting for entry delay to end.
@@ -489,7 +464,7 @@ void TetrisClone::RenderLineClearAnimation(
   } else if (frame >= 5) {
     // Line clear animation.
     const int blocks_to_remove = 6 - ((frame - 1) / 4);
-    for (const auto& row : line_clear_info.rows) {
+    for (const auto &row : line_clear_info.rows) {
       for (int i = 4; i > 4 - blocks_to_remove; --i) {
         state.grid[i][row] = 0;
         state.grid[9 - i][row] = 0;
@@ -497,7 +472,7 @@ void TetrisClone::RenderLineClearAnimation(
     }
   } else if (frame == 3) {
     // Move lines down.
-    for (const auto& row : line_clear_info.rows) {
+    for (const auto &row : line_clear_info.rows) {
       clearLine(row, state);
     }
   }
@@ -509,17 +484,14 @@ void TetrisClone::RenderLineClearAnimation(
   }
 }
 
-Tetromino TetrisClone::getRandomTetromino() {
-  return Tetromino(random_generator_(real_rng_));
-}
+Tetromino TetrisClone::getRandomTetromino() { return Tetromino(random_generator_(real_rng_)); }
 
-void TetrisClone::spawnNewTetromino(GameState<>& state) {
+void TetrisClone::spawnNewTetromino(GameState<> &state) {
   state.active_tetromino = {state.next_tetromino, 5, 0, 0};
   if (tetrominoCollision(state.grid, state.active_tetromino)) {
     state.game_over = true;
   }
-  state_
-      .tetromino_counts[static_cast<int>(state_.active_tetromino.tetromino)]++;
+  state_.tetromino_counts[static_cast<int>(state_.active_tetromino.tetromino)]++;
   state.next_tetromino = getRandomTetromino();
   state.spawn_new_tetromino = false;
 }
@@ -547,28 +519,17 @@ GameState<> TetrisClone::getNewState(const int level) {
 // handling.
 TetrisClone::TetrisClone(const int start_level)
     : bg_ptr_{std::make_unique<olc::Sprite>("assets/basic_field_empty.png")},
-      bg_flash_ptr_{
-          std::make_unique<olc::Sprite>("assets/basic_field_flash.png")},
+      bg_flash_ptr_{std::make_unique<olc::Sprite>("assets/basic_field_flash.png")},
       block_sprites_{loadSprites("assets")},
-      counter_sprites_{loadCounterSprites("assets")},
-      state_{},
-      real_rng_{},
-      fake_rng_{},
-      random_generator_(0, 6),
-      key_states_{},
-      key_bindings_{getKeyBindings()},
-      debug_mode_{true},
-      frame_end_{},
-      line_clear_info_{},
-      an_int_{} {
+      counter_sprites_{loadCounterSprites("assets")}, state_{}, real_rng_{}, fake_rng_{},
+      random_generator_(0, 6), key_states_{}, key_bindings_{getKeyBindings()}, debug_mode_{true},
+      frame_end_{}, line_clear_info_{}, sample_player_{} {
   sAppName = "TetrisClone";
-  for (const auto& pair : key_bindings_) {
+  for (const auto &pair : key_bindings_) {
     key_states_[pair.first] = false;
   }
   state_ = getNewState(start_level);
 }
-
-TetrisClone::~TetrisClone() { Mix_CloseAudio(); }
 
 bool TetrisClone::OnUserCreate() {
   if (ScreenWidth() != 256 || ScreenHeight() != 225) {
@@ -578,20 +539,20 @@ bool TetrisClone::OnUserCreate() {
   DrawSprite(0, 0, bg_ptr_.get());
   frame_end_ = Clock::now() + single_frame;
 
-  int result = Mix_OpenAudio(44100, AUDIO_S16SYS, 2, 512);
-  if (result < 0) {
-    LOG_ERROR("Failed to initialize sound.");
-    return false;
-  }
+  const std::string path{"./assets/sounds/"};
+  bool ret = true;
+  ret = ret && sample_player_.loadWavFromFilesystem(path + "tetromino_move.wav", "move");
+  ret = ret && sample_player_.loadWavFromFilesystem(path + "tetromino_lock.wav", "lock");
+  ret = ret && sample_player_.loadWavFromFilesystem(path + "tetromino_rotate.wav", "rotate");
+  ret = ret && sample_player_.loadWavFromFilesystem(path + "tetris.wav", "tetris");
+  ret = ret && sample_player_.loadWavFromFilesystem(path + "line_clear.wav", "line_clear");
+  ret = ret && sample_player_.loadWavFromFilesystem(path + "menu_blip.wav", "menu_blip");
+  ret = ret && sample_player_.loadWavFromFilesystem(path + "menu_select_01.wav", "menu_select_01");
+  ret = ret && sample_player_.loadWavFromFilesystem(path + "menu_select_02.wav", "menu_select_02");
+  ret = ret && sample_player_.loadWavFromFilesystem(path + "pause.wav", "pause");
+  ret = ret && sample_player_.loadWavFromFilesystem(path + "top_out.wav", "top_out");
 
-  _global_samples["move"] = Mix_LoadWAV("./assets/sounds/tetromino_move.wav");
-  _global_samples["tetris"] = Mix_LoadWAV("./assets/sounds/tetris.wav");
-  _global_samples["rotate"] =
-      Mix_LoadWAV("./assets/sounds/tetromino_rotate.wav");
-  _global_samples["lock"] = Mix_LoadWAV("./assets/sounds/tetromino_lock.wav");
-  _global_samples["line_clear"] = Mix_LoadWAV("./assets/sounds/line_clear.wav");
-
-  return true;
+  return ret;
 }
 
 bool TetrisClone::OnUserUpdate(float fElapsedTime) {
@@ -601,8 +562,9 @@ bool TetrisClone::OnUserUpdate(float fElapsedTime) {
     }
     const auto key_events = getKeyEvents(key_states_);
 
-    processKeyEvents(key_events, state_);
+    processKeyEvents(key_events, sample_player_, state_);
     if (didTetrominoLock(state_)) {
+      sample_player_.playSample("lock");
       auto lines_cleared = checkForLineClears(state_);
       if (not lines_cleared.empty()) {
         // Emulate a quirk in the nes implementation: The animation would only
@@ -610,8 +572,7 @@ bool TetrisClone::OnUserUpdate(float fElapsedTime) {
         // TODO:: -use modern c++ random and hold the random seed in class state
         //        -also put it in a function
         state_.entry_delay_counter += (17 + (rand() % 5));
-        line_clear_info_ =
-            LineClearAnimationInfo{lines_cleared, state_.entry_delay_counter};
+        line_clear_info_ = LineClearAnimationInfo{lines_cleared, state_.entry_delay_counter};
       }
     }
     RenderGameState(state_);
@@ -646,6 +607,7 @@ bool TetrisClone::OnUserUpdate(float fElapsedTime) {
  *
  * - Top out/game over
  * - Some kind of menu system
+ * - Asset loading from binary
  * - Press down scoring
  * - Check rotation consistency/tetromino entry state is correct
  *
@@ -661,4 +623,4 @@ bool TetrisClone::OnUserUpdate(float fElapsedTime) {
  * - Move all tetromino defs and helper functions into their own hpp/cpp
  */
 
-}  // namespace tetris_clone
+} // namespace tetris_clone

@@ -40,10 +40,6 @@ SET(OLC_LIBS GLUT::GLUT PNG::PNG ${OPENGL_LIBRARIES} ${SDL_MIXER_LIBRARY} ${SDL_
 
 # end of OS specific
 
-add_executable(tetris src/tetris.cpp src/main.cpp)
+add_executable(tetris src/sound.cpp src/tetris.cpp src/main.cpp)
 target_link_libraries(tetris ${OLC_LIBS})
 
-
-add_executable(sound_test src/sound_test.cpp)
-#target_link_libraries(sound_test ${SDL2_MIXER_LIBRARY} SDL2::SDL2)
-target_link_libraries(sound_test ${SDL_MIXER_LIBRARY} ${SDL_LIBRARY})
