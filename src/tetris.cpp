@@ -518,10 +518,10 @@ GameState<> TetrisClone::getNewState(const int level) {
 // TODO:: Add asset loading to constructor/OnUserCreate and add error
 // handling.
 TetrisClone::TetrisClone(const int start_level)
-    : bg_ptr_{std::make_unique<olc::Sprite>("assets/basic_field_empty.png")},
-      bg_flash_ptr_{std::make_unique<olc::Sprite>("assets/basic_field_flash.png")},
-      block_sprites_{loadSprites("assets")},
-      counter_sprites_{loadCounterSprites("assets")}, state_{}, real_rng_{}, fake_rng_{},
+    : bg_ptr_{std::make_unique<olc::Sprite>("assets/images/basic_field_empty.png")},
+      bg_flash_ptr_{std::make_unique<olc::Sprite>("assets/images/basic_field_flash.png")},
+      block_sprites_{loadSprites("assets/images")},
+      counter_sprites_{loadCounterSprites("assets/images")}, state_{}, real_rng_{}, fake_rng_{},
       random_generator_(0, 6), key_states_{}, key_bindings_{getKeyBindings()}, debug_mode_{true},
       frame_end_{}, line_clear_info_{}, sample_player_{} {
   sAppName = "TetrisClone";
