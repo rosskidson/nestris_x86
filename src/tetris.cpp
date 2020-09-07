@@ -623,8 +623,8 @@ bool TetrisClone::OnUserUpdate(float fElapsedTime) {
 /**
  * TODO:
  *
- * - Top out/game over
- * - Pause
+ * - game over animation
+ * - refactor
  * - Some kind of menu system
  * - Asset loading from binary
  * - Press down scoring
