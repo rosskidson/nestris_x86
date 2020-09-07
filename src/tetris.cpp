@@ -27,6 +27,19 @@ using TetrominoGrid = std::vector<std::vector<int>>;
 constexpr Duration_us single_frame(16666667);
 // constexpr Duration_ms single_frame(500);
 
+const std::vector<std::pair<std::string, std::string>> SAMPLES{
+    {"tetromino_move.wav", "move"},
+    {"tetromino_lock.wav", "lock"},
+    {"tetromino_rotate.wav", "rotate"},
+    {"tetris.wav", "tetris"},
+    {"line_clear.wav", "line_clear"},
+    {"menu_blip.wav", "menu_blip"},
+    {"menu_select_01.wav", "menu_select_01"},
+    {"menu_select_02.wav", "menu_select_02"},
+    {"pause.wav", "pause"},
+    {"level_up.wav", "level_up"},
+    {"top_out.wav", "top_out"}};
+
 const std::vector<TetrominoGrid> T_TETROMINO{{{{0, 1, 0}, {0, 1, 1}, {0, 1, 0}}},
                                              {{{0, 1, 0}, {1, 1, 1}, {0, 0, 0}}},
                                              {{{0, 1, 0}, {1, 1, 0}, {0, 1, 0}}},
@@ -242,8 +255,8 @@ void resetDas(GameState<> &state) { state.das_counter = 0; }
 
 void fullyChargeDas(GameState<> &state) { state.das_counter = 16; }
 
-void processKeyEvents(const KeyEvents &key_events,
-                      const sound::SoundPlayer &sample_player, GameState<>& state ) {
+void processKeyEvents(const KeyEvents &key_events, const sound::SoundPlayer &sample_player,
+                      GameState<> &state) {
   auto move_check_wall_charge = [&sample_player](GameState<> &state, const int direction) {
     if (updateStateOnNoCollision(state.grid, direction, 0, 0, state.active_tetromino)) {
       sample_player.playSample("move");
@@ -293,6 +306,10 @@ void processKeyEvents(const KeyEvents &key_events,
       sample_player.playSample("rotate");
     }
   }
+  if (key_events.at(KeyAction::Start).pressed) {
+    state.paused = true;
+    sample_player.playSample("pause");
+  }
 }
 
 void clearLine(const int row, GameState<> &state) {
@@ -324,12 +341,21 @@ std::vector<int> checkForLineClears(const GameState<> &state) {
   return complete_lines;
 }
 
-void updateScore(const int line_clears, GameState<> &state) {
+void updateEntryDelayForLineClear(int &delay_counter) {
+  // Emulate a quirk in the nes implementation: The animation would only
+  // start on certain frames, randomly increasing/decreasing the ARE.
+  // TODO:: -use modern c++ random and hold the random seed in class state
+  delay_counter += (17 + (rand() % 5));
+}
+
+void updateScoreAndLevel(const int line_clears, const sound::SoundPlayer &sound_player,
+                         GameState<> &state) {
   state.score += state.level * line_scores[line_clears];
   state.lines += line_clears;
   state.lines_until_next_level -= line_clears;
   if (state.lines_until_next_level <= 0) {
     ++state.level;
+    sound_player.playSample("level_up");
     state.lines_until_next_level += 10;
   }
 }
@@ -484,16 +510,16 @@ void TetrisClone::RenderLineClearAnimation(GameState<> &state,
   }
 }
 
+void TetrisClone::RenderPaused() { DrawString(110, 116, "PAUSED", olc::WHITE); }
+
 Tetromino TetrisClone::getRandomTetromino() { return Tetromino(random_generator_(real_rng_)); }
 
-void TetrisClone::spawnNewTetromino(GameState<> &state) {
+bool TetrisClone::spawnNewTetromino(GameState<> &state) {
   state.active_tetromino = {state.next_tetromino, 5, 0, 0};
-  if (tetrominoCollision(state.grid, state.active_tetromino)) {
-    state.game_over = true;
-  }
   state_.tetromino_counts[static_cast<int>(state_.active_tetromino.tetromino)]++;
   state.next_tetromino = getRandomTetromino();
   state.spawn_new_tetromino = false;
+  return not tetrominoCollision(state.grid, state.active_tetromino);
 }
 
 int linesToClearFromStartingLevel(const int level) {
@@ -541,24 +567,26 @@ bool TetrisClone::OnUserCreate() {
 
   const std::string path{"./assets/sounds/"};
   bool ret = true;
-  ret = ret && sample_player_.loadWavFromFilesystem(path + "tetromino_move.wav", "move");
-  ret = ret && sample_player_.loadWavFromFilesystem(path + "tetromino_lock.wav", "lock");
-  ret = ret && sample_player_.loadWavFromFilesystem(path + "tetromino_rotate.wav", "rotate");
-  ret = ret && sample_player_.loadWavFromFilesystem(path + "tetris.wav", "tetris");
-  ret = ret && sample_player_.loadWavFromFilesystem(path + "line_clear.wav", "line_clear");
-  ret = ret && sample_player_.loadWavFromFilesystem(path + "menu_blip.wav", "menu_blip");
-  ret = ret && sample_player_.loadWavFromFilesystem(path + "menu_select_01.wav", "menu_select_01");
-  ret = ret && sample_player_.loadWavFromFilesystem(path + "menu_select_02.wav", "menu_select_02");
-  ret = ret && sample_player_.loadWavFromFilesystem(path + "pause.wav", "pause");
-  ret = ret && sample_player_.loadWavFromFilesystem(path + "top_out.wav", "top_out");
+  for (const auto &[filename, name] : SAMPLES) {
+    ret = ret && sample_player_.loadWavFromFilesystem(path + filename, name);
+  }
 
   return ret;
 }
 
 bool TetrisClone::OnUserUpdate(float fElapsedTime) {
-  if (not entryDelay(state_)) {
-    if (state_.spawn_new_tetromino && not state_.game_over) {
-      spawnNewTetromino(state_);
+  if (state_.topped_out) {
+    RenderGameState(state_);
+  } else if (state_.paused) {
+    RenderPaused();
+    const auto key_events = getKeyEvents(key_states_);
+    if (key_events.at(KeyAction::Start).pressed) {
+      state_.paused = false;
+    }
+  } else if (not entryDelay(state_)) {
+    if (state_.spawn_new_tetromino and not spawnNewTetromino(state_)) {
+      state_.topped_out = true;
+      sample_player_.playSample("top_out");
     }
     const auto key_events = getKeyEvents(key_states_);
 
@@ -567,11 +595,7 @@ bool TetrisClone::OnUserUpdate(float fElapsedTime) {
       sample_player_.playSample("lock");
       auto lines_cleared = checkForLineClears(state_);
       if (not lines_cleared.empty()) {
-        // Emulate a quirk in the nes implementation: The animation would only
-        // start on certain frames, randomly increasing/decreasing the ARE.
-        // TODO:: -use modern c++ random and hold the random seed in class state
-        //        -also put it in a function
-        state_.entry_delay_counter += (17 + (rand() % 5));
+        updateEntryDelayForLineClear(state_.entry_delay_counter);
         line_clear_info_ = LineClearAnimationInfo{lines_cleared, state_.entry_delay_counter};
       }
     }
@@ -580,7 +604,7 @@ bool TetrisClone::OnUserUpdate(float fElapsedTime) {
     RenderLineClearAnimation(state_, line_clear_info_);
     // When the animation is almost over, update the score.
     if (line_clear_info_.animation_frame == 4) {
-      updateScore(line_clear_info_.rows.size(), state_);
+      updateScoreAndLevel(line_clear_info_.rows.size(), sample_player_, state_);
     }
     getKeyEvents(key_states_);
     RenderGameState(state_);
@@ -598,14 +622,9 @@ bool TetrisClone::OnUserUpdate(float fElapsedTime) {
 
 /**
  * TODO:
- * - Clean up sound implementation!
- *      - Hide SDL behind an interface (it's ugly)
- *      - Proper initialization/loading/playing of sounds
- *      - Add remaining sounds (level up sample missing)
- *      - No sound on blocked rotation
- *      - Synchronize line clears properly (it's pretty close i think)
  *
  * - Top out/game over
+ * - Pause
  * - Some kind of menu system
  * - Asset loading from binary
  * - Press down scoring
