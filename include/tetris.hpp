@@ -87,6 +87,13 @@ public:
   // void setStartLevel(const int level);
 
 private:
+  inline olc::Sprite *getSprite(const std::string &sprite_name) {
+    return sprite_map_.at(sprite_name).get();
+  }
+  inline olc::Sprite *getBlockSprite(const int level, const int color) {
+    return block_sprites_.at(level % 10).at(color).get();
+  }
+
   void RenderGameState(const GameState<> &state);
   void RenderNextTetromino(const Tetromino &next_tetromino, const int level);
   void DrawNumber(const int x, const int y, const int num, const int pad,
@@ -105,7 +112,7 @@ private:
           continue;
         }
         DrawSprite(x_start + i * x_spacing, y_start + j * y_spacing,
-                   block_sprites_[level % 10][grid[i][j] * color].get());
+                   getBlockSprite(level, grid[i][j] * color));
       }
     }
   }
@@ -115,10 +122,8 @@ private:
   KeyEvents getKeyEvents(KeyStates &current_key_state);
   GameState<> getNewState(const int level);
 
-  std::unique_ptr<olc::Sprite> bg_ptr_;
-  std::unique_ptr<olc::Sprite> bg_flash_ptr_;
   std::vector<std::vector<std::unique_ptr<olc::Sprite>>> block_sprites_;
-  std::vector<std::unique_ptr<olc::Sprite>> counter_sprites_;
+  std::map<std::string, std::unique_ptr<olc::Sprite>> sprite_map_;
   GameState<> state_;
   std::random_device real_rng_;
   std::default_random_engine fake_rng_;
@@ -128,6 +133,7 @@ private:
   bool debug_mode_;
   std::chrono::time_point<std::chrono::high_resolution_clock> frame_end_;
   LineClearAnimationInfo line_clear_info_;
+  int top_out_frame_counter_;
   sound::SoundPlayer sample_player_;
 };
 

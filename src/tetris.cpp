@@ -6,6 +6,7 @@
 #include <chrono>
 #include <iomanip>
 #include <iostream>
+#include <memory>
 #include <sstream>
 #include <string>
 #include <thread> //sleep until
@@ -107,12 +108,12 @@ TetrominoGrid getTetrominoGrid(const TetrominoState &tetromino) {
   return getTetrominoGrid(tetromino.tetromino, tetromino.rotation);
 }
 
-std::vector<std::vector<std::unique_ptr<olc::Sprite>>> loadSprites(const std::string &path) {
+std::vector<std::vector<std::unique_ptr<olc::Sprite>>> loadBlockSprites(const std::string &path) {
   std::vector<std::vector<std::unique_ptr<olc::Sprite>>> block_sprites;
   block_sprites.resize(10);
   for (int level = 0; level < 10; ++level) {
     block_sprites[level].emplace_back(std::make_unique<olc::Sprite>(8, 8));
-    for (int color = 0; color < 3; ++color) {
+    for (int color = 0; color < 4; ++color) {
       std::stringstream ss;
       ss << "/l" << level << "-c" << color << ".png";
       block_sprites[level].emplace_back(std::make_unique<olc::Sprite>(path + ss.str()));
@@ -121,15 +122,22 @@ std::vector<std::vector<std::unique_ptr<olc::Sprite>>> loadSprites(const std::st
   return block_sprites;
 }
 
-std::vector<std::unique_ptr<olc::Sprite>> loadCounterSprites(const std::string &path) {
-  std::vector<std::unique_ptr<olc::Sprite>> counter_sprites;
-  counter_sprites.resize(10);
+void loadCounterSprites(const std::string &path,
+                        std::map<std::string, std::unique_ptr<olc::Sprite>> &sprite_map) {
   for (int level = 0; level < 10; ++level) {
     std::stringstream ss;
-    ss << "/l" << level << "-counts.png";
-    counter_sprites[level] = std::make_unique<olc::Sprite>(path + ss.str());
+    ss << "l" << level << "-counts";
+    sprite_map[ss.str()] = std::make_unique<olc::Sprite>(path + "/" + ss.str() + ".png");
   }
-  return counter_sprites;
+}
+
+std::map<std::string, std::unique_ptr<olc::Sprite>> loadSprites(const std::string &path) {
+  std::map<std::string, std::unique_ptr<olc::Sprite>> sprite_map;
+  sprite_map["background"] = std::make_unique<olc::Sprite>(path + "/images/basic_field_empty.png");
+  sprite_map["background_flash"] =
+      std::make_unique<olc::Sprite>(path + "/images/basic_field_flash.png");
+  loadCounterSprites("assets/images", sprite_map);
+  return sprite_map;
 }
 
 int getColor(const Tetromino &tetromino) {
@@ -458,7 +466,7 @@ void TetrisClone::RenderGameState(const GameState<> &state) {
   };
   // Clear the field.
   FillRect(96, 40, 80, 160, olc::BLACK);
-  DrawSprite(13, 61, counter_sprites_[state.level % 10].get());
+  DrawSprite(13, 61, getSprite("l" + std::to_string(state.level % 10) + "-counts"));
   RenderGrid(96, 40, get_grid_for_render(state), state.level);
   RenderNextTetromino(state.next_tetromino, state.level);
   RenderText(state);
@@ -504,10 +512,40 @@ void TetrisClone::RenderLineClearAnimation(GameState<> &state,
   }
   // If it was a tetris, do the flash.
   if ((line_clear_info.rows.size() == 4) && ((frame - 1) % 4 == 0)) {
-    DrawSprite(0, 0, bg_flash_ptr_.get());
+    DrawSprite(0, 0, getSprite("background_flash"));
   } else {
-    DrawSprite(0, 0, bg_ptr_.get());
+    DrawSprite(0, 0, getSprite("background"));
   }
+}
+
+bool UpdateTopOutState(const KeyEvents &key_events, int &top_out_frame_counter,
+                       GameState<> &state) {
+  top_out_frame_counter++;
+  constexpr int start_frame = 60;
+  constexpr int animation_step = 4;
+  constexpr int end_frame = start_frame + (20 * animation_step);
+  if (key_events.at(KeyAction::Start).pressed) {
+    if (top_out_frame_counter >= end_frame) {
+      return true;
+    } else {
+      top_out_frame_counter = end_frame;
+    }
+  }
+  if (top_out_frame_counter < start_frame || top_out_frame_counter > end_frame ||
+      (top_out_frame_counter - start_frame) % animation_step) {
+    return false;
+  }
+  /// TODO::ULTIMATE HAX. PLEASE FIX THIS!
+  state.entry_delay_counter = 1; // Use the entry delay to stop the active piece being rendered
+                                 // on top of the end animation
+
+  const int top_out_step = (top_out_frame_counter - start_frame) / animation_step;
+  for (int i = 0; i < 10; ++i) {
+    for (int j = 0; j < top_out_step; ++j) {
+      state.grid[i][j] = 4;
+    }
+  }
+  return false;
 }
 
 void TetrisClone::RenderPaused() { DrawString(110, 116, "PAUSED", olc::WHITE); }
@@ -535,7 +573,7 @@ GameState<> TetrisClone::getNewState(const int level) {
   state.level = level;
   state.active_tetromino = {getRandomTetromino(), 5, 0, 0};
   state.next_tetromino = getRandomTetromino();
-  state.tetromino_counts[static_cast<int>(state_.active_tetromino.tetromino)]++;
+  state.tetromino_counts[static_cast<int>(state.active_tetromino.tetromino)]++;
   state.gravity_counter = GRAVITY_FIRST_FRAME;
   state.lines_until_next_level = linesToClearFromStartingLevel(state.level);
   return state;
@@ -544,13 +582,12 @@ GameState<> TetrisClone::getNewState(const int level) {
 // TODO:: Add asset loading to constructor/OnUserCreate and add error
 // handling.
 TetrisClone::TetrisClone(const int start_level)
-    : bg_ptr_{std::make_unique<olc::Sprite>("assets/images/basic_field_empty.png")},
-      bg_flash_ptr_{std::make_unique<olc::Sprite>("assets/images/basic_field_flash.png")},
-      block_sprites_{loadSprites("assets/images")},
-      counter_sprites_{loadCounterSprites("assets/images")}, state_{}, real_rng_{}, fake_rng_{},
+    : block_sprites_{loadBlockSprites("assets/images")},
+      sprite_map_{loadSprites("assets")}, state_{}, real_rng_{}, fake_rng_{},
       random_generator_(0, 6), key_states_{}, key_bindings_{getKeyBindings()}, debug_mode_{true},
-      frame_end_{}, line_clear_info_{}, sample_player_{} {
+      frame_end_{}, line_clear_info_{}, top_out_frame_counter_{}, sample_player_{} {
   sAppName = "TetrisClone";
+  // Initialize key states from key bindings.
   for (const auto &pair : key_bindings_) {
     key_states_[pair.first] = false;
   }
@@ -562,7 +599,7 @@ bool TetrisClone::OnUserCreate() {
     LOG_ERROR("Screen size must be set to 256x240 for this application.");
     return false;
   }
-  DrawSprite(0, 0, bg_ptr_.get());
+  DrawSprite(0, 0, getSprite("background"));
   frame_end_ = Clock::now() + single_frame;
 
   const std::string path{"./assets/sounds/"};
@@ -576,6 +613,11 @@ bool TetrisClone::OnUserCreate() {
 
 bool TetrisClone::OnUserUpdate(float fElapsedTime) {
   if (state_.topped_out) {
+    const auto key_events = getKeyEvents(key_states_);
+    const bool end_game = UpdateTopOutState(key_events, top_out_frame_counter_, state_);
+    if (end_game) {
+      return false;
+    }
     RenderGameState(state_);
   } else if (state_.paused) {
     RenderPaused();
@@ -584,13 +626,16 @@ bool TetrisClone::OnUserUpdate(float fElapsedTime) {
       state_.paused = false;
     }
   } else if (not entryDelay(state_)) {
-    if (state_.spawn_new_tetromino and not spawnNewTetromino(state_)) {
-      state_.topped_out = true;
-      sample_player_.playSample("top_out");
+    if (state_.spawn_new_tetromino) {
+      const bool topped_out = not spawnNewTetromino(state_);
+      if (topped_out) {
+        state_.topped_out = true;
+        sample_player_.playSample("top_out");
+      }
     }
     const auto key_events = getKeyEvents(key_states_);
-
     processKeyEvents(key_events, sample_player_, state_);
+
     if (didTetrominoLock(state_)) {
       sample_player_.playSample("lock");
       auto lines_cleared = checkForLineClears(state_);
@@ -623,12 +668,16 @@ bool TetrisClone::OnUserUpdate(float fElapsedTime) {
 /**
  * TODO:
  *
- * - game over animation
  * - refactor
  * - Some kind of menu system
  * - Asset loading from binary
  * - Press down scoring
  * - Check rotation consistency/tetromino entry state is correct
+ * - precise timing checks:
+ *    - line clear sfx
+ *    - delay between death and death sound
+ *    - delay between death and end animation
+ *    - end animation speed
  *
  * IDEAS::
  * - Wall charge animation/signal
