@@ -9,13 +9,12 @@
 #include <memory>
 #include <sstream>
 #include <string>
-#include <tuple>
 #include <thread> //sleep until
+#include <tuple>
 
+#include "assets.hpp"
+#include "logging.hpp"
 #include "sound.hpp"
-
-#define LOG_ERROR(msg) std::cerr << msg << std::endl;
-#define LOG_INFO(msg) std::cout << msg << std::endl;
 
 namespace tetris_clone {
 
@@ -24,20 +23,6 @@ using Duration_us = std::chrono::duration<int, std::nano>;
 using Duration_ms = std::chrono::duration<int, std::milli>;
 constexpr Duration_us single_frame(16666667);
 // constexpr Duration_ms single_frame(500);
-
-const std::vector<std::pair<std::string, std::string>> SAMPLES{
-    {"tetromino_move.wav", "move"},
-    {"tetromino_lock.wav", "lock"},
-    {"tetromino_rotate.wav", "rotate"},
-    {"tetris.wav", "tetris"},
-    {"line_clear.wav", "line_clear"},
-    {"menu_blip.wav", "menu_blip"},
-    {"menu_select_01.wav", "menu_select_01"},
-    {"menu_select_02.wav", "menu_select_02"},
-    {"pause.wav", "pause"},
-    {"level_up.wav", "level_up"},
-    {"top_out.wav", "top_out"}};
-
 
 const int GRAVITY_FIRST_FRAME = 100;
 const std::vector<int> LEVEL_GRAVITY{48, 43, 38, 33, 28, 23, 18, 13, 8, 6,
@@ -56,38 +41,6 @@ int getGravity(const int level) {
 }
 
 bool entryDelay(const GameState<> &state) { return state.entry_delay_counter > 0; }
-
-std::vector<std::vector<std::unique_ptr<olc::Sprite>>> loadBlockSprites(const std::string &path) {
-  std::vector<std::vector<std::unique_ptr<olc::Sprite>>> block_sprites;
-  block_sprites.resize(10);
-  for (int level = 0; level < 10; ++level) {
-    block_sprites[level].emplace_back(std::make_unique<olc::Sprite>(8, 8));
-    for (int color = 0; color < 4; ++color) {
-      std::stringstream ss;
-      ss << "/l" << level << "-c" << color << ".png";
-      block_sprites[level].emplace_back(std::make_unique<olc::Sprite>(path + ss.str()));
-    }
-  }
-  return block_sprites;
-}
-
-void loadCounterSprites(const std::string &path,
-                        std::map<std::string, std::unique_ptr<olc::Sprite>> &sprite_map) {
-  for (int level = 0; level < 10; ++level) {
-    std::stringstream ss;
-    ss << "l" << level << "-counts";
-    sprite_map[ss.str()] = std::make_unique<olc::Sprite>(path + "/" + ss.str() + ".png");
-  }
-}
-
-std::map<std::string, std::unique_ptr<olc::Sprite>> loadSprites(const std::string &path) {
-  std::map<std::string, std::unique_ptr<olc::Sprite>> sprite_map;
-  sprite_map["background"] = std::make_unique<olc::Sprite>(path + "/images/basic_field_empty.png");
-  sprite_map["background_flash"] =
-      std::make_unique<olc::Sprite>(path + "/images/basic_field_flash.png");
-  loadCounterSprites("assets/images", sprite_map);
-  return sprite_map;
-}
 
 template <typename Container> bool outOfBounds(const Container &container, int x, int y) {
   if (x < 0 || y < 0 || x >= container.size() || y >= container[x].size()) {
@@ -506,8 +459,7 @@ GameState<> TetrisClone::getNewState(const int level) {
 // TODO:: Add asset loading to constructor/OnUserCreate and add error
 // handling.
 TetrisClone::TetrisClone(const int start_level)
-    : block_sprites_{loadBlockSprites("assets/images")},
-      sprite_map_{loadSprites("assets")}, state_{}, real_rng_{}, fake_rng_{},
+    : block_sprites_{}, sprite_map_{}, state_{}, real_rng_{}, fake_rng_{},
       random_generator_(0, 6), key_states_{}, key_bindings_{getKeyBindings()}, debug_mode_{true},
       frame_end_{}, line_clear_info_{}, top_out_frame_counter_{}, sample_player_{} {
   sAppName = "TetrisClone";
@@ -523,16 +475,21 @@ bool TetrisClone::OnUserCreate() {
     LOG_ERROR("Screen size must be set to 256x240 for this application.");
     return false;
   }
+
+  if (not loadSoundAssets("./assets/sounds/", sample_player_)) {
+    return false;
+  }
+  if (not loadSprites("./assets/images", sprite_map_)) {
+    return false;
+  }
+  if (not loadBlockSprites("./assets/images", block_sprites_)) {
+    return false;
+  }
+
   DrawSprite(0, 0, getSprite("background"));
   frame_end_ = Clock::now() + single_frame;
 
-  const std::string path{"./assets/sounds/"};
-  bool ret = true;
-  for (const auto &[filename, name] : SAMPLES) {
-    ret = ret && sample_player_.loadWavFromFilesystem(path + filename, name);
-  }
-
-  return ret;
+  return true;
 }
 
 bool TetrisClone::OnUserUpdate(float fElapsedTime) {
@@ -553,7 +510,7 @@ bool TetrisClone::OnUserUpdate(float fElapsedTime) {
     if (state_.spawn_new_tetromino) {
       const bool topped_out = not spawnNewTetromino(state_);
       if (topped_out) {
-        // Lock the active tetromino and move it off the grid. This is to stop the active 
+        // Lock the active tetromino and move it off the grid. This is to stop the active
         // tetromino interfering with the 'curtain' animation.
         state_.grid = addTetrominoToGrid(state_.grid, state_.active_tetromino);
         state_.active_tetromino.y = -10;
