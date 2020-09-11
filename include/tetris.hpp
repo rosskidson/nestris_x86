@@ -8,17 +8,9 @@
 
 #include "olcPixelGameEngine.h"
 #include "sound.hpp"
+#include "tetromino.hpp"
 
 namespace tetris_clone {
-
-enum class Tetromino { T, J, Z, Square, S, L, Line };
-
-struct TetrominoState {
-  Tetromino tetromino;
-  int x;
-  int y;
-  int rotation;
-};
 
 template <int W = 10, int H = 20>
 // clang-format off
@@ -83,8 +75,6 @@ public:
   bool OnUserCreate() override;
 
   bool OnUserUpdate(float fElapsedTime) override;
-
-  // void setStartLevel(const int level);
 
 private:
   inline olc::Sprite *getSprite(const std::string &sprite_name) {

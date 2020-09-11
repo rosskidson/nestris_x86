@@ -9,12 +9,10 @@
 #include <memory>
 #include <sstream>
 #include <string>
+#include <tuple>
 #include <thread> //sleep until
 
 #include "sound.hpp"
-
-//#define OLC_PGEX_SOUND
-//#include "Extensions/olcPGEX_Sound.h"
 
 #define LOG_ERROR(msg) std::cerr << msg << std::endl;
 #define LOG_INFO(msg) std::cout << msg << std::endl;
@@ -24,7 +22,6 @@ namespace tetris_clone {
 using Clock = std::chrono::high_resolution_clock;
 using Duration_us = std::chrono::duration<int, std::nano>;
 using Duration_ms = std::chrono::duration<int, std::milli>;
-using TetrominoGrid = std::vector<std::vector<int>>;
 constexpr Duration_us single_frame(16666667);
 // constexpr Duration_ms single_frame(500);
 
@@ -41,32 +38,6 @@ const std::vector<std::pair<std::string, std::string>> SAMPLES{
     {"level_up.wav", "level_up"},
     {"top_out.wav", "top_out"}};
 
-const std::vector<TetrominoGrid> T_TETROMINO{{{{0, 1, 0}, {0, 1, 1}, {0, 1, 0}}},
-                                             {{{0, 1, 0}, {1, 1, 1}, {0, 0, 0}}},
-                                             {{{0, 1, 0}, {1, 1, 0}, {0, 1, 0}}},
-                                             {{{0, 0, 0}, {1, 1, 1}, {0, 1, 0}}}};
-
-const std::vector<TetrominoGrid> J_TETROMINO{{{{0, 1, 0}, {0, 1, 0}, {0, 1, 1}}},
-                                             {{{0, 0, 1}, {1, 1, 1}, {0, 0, 0}}},
-                                             {{{1, 1, 0}, {0, 1, 0}, {0, 1, 0}}},
-                                             {{{0, 0, 0}, {1, 1, 1}, {1, 0, 0}}}};
-
-const std::vector<TetrominoGrid> L_TETROMINO{{{{0, 1, 1}, {0, 1, 0}, {0, 1, 0}}},
-                                             {{{1, 0, 0}, {1, 1, 1}, {0, 0, 0}}},
-                                             {{{0, 1, 0}, {0, 1, 0}, {1, 1, 0}}},
-                                             {{{0, 0, 0}, {1, 1, 1}, {0, 0, 1}}}};
-
-const std::vector<TetrominoGrid> S_TETROMINO{{{{0, 0, 1}, {0, 1, 1}, {0, 1, 0}}},
-                                             {{{0, 0, 0}, {1, 1, 0}, {0, 1, 1}}}};
-
-const std::vector<TetrominoGrid> Z_TETROMINO{{{{0, 1, 0}, {0, 1, 1}, {0, 0, 1}}},
-                                             {{{0, 0, 0}, {0, 1, 1}, {1, 1, 0}}}};
-
-const std::vector<TetrominoGrid> I_TETROMINO{
-    {{{0, 0, 1, 0}, {0, 0, 1, 0}, {0, 0, 1, 0}, {0, 0, 1, 0}}},
-    {{{0, 0, 0, 0}, {0, 0, 0, 0}, {1, 1, 1, 1}, {0, 0, 0, 0}}}};
-
-const TetrominoGrid SQUARE_TETROMINO{{{1, 1}, {1, 1}}};
 
 const int GRAVITY_FIRST_FRAME = 100;
 const std::vector<int> LEVEL_GRAVITY{48, 43, 38, 33, 28, 23, 18, 13, 8, 6,
@@ -85,28 +56,6 @@ int getGravity(const int level) {
 }
 
 bool entryDelay(const GameState<> &state) { return state.entry_delay_counter > 0; }
-
-TetrominoGrid getTetrominoGrid(const Tetromino &tetromino, const int rotation) {
-  if (tetromino == Tetromino::T) {
-    return T_TETROMINO[rotation];
-  } else if (tetromino == Tetromino::J) {
-    return J_TETROMINO[rotation];
-  } else if (tetromino == Tetromino::Z) {
-    return Z_TETROMINO[rotation % 2];
-  } else if (tetromino == Tetromino::S) {
-    return S_TETROMINO[rotation % 2];
-  } else if (tetromino == Tetromino::L) {
-    return L_TETROMINO[rotation];
-  } else if (tetromino == Tetromino::Line) {
-    return I_TETROMINO[rotation % 2];
-  } else {
-    return SQUARE_TETROMINO;
-  }
-}
-
-TetrominoGrid getTetrominoGrid(const TetrominoState &tetromino) {
-  return getTetrominoGrid(tetromino.tetromino, tetromino.rotation);
-}
 
 std::vector<std::vector<std::unique_ptr<olc::Sprite>>> loadBlockSprites(const std::string &path) {
   std::vector<std::vector<std::unique_ptr<olc::Sprite>>> block_sprites;
@@ -138,27 +87,6 @@ std::map<std::string, std::unique_ptr<olc::Sprite>> loadSprites(const std::strin
       std::make_unique<olc::Sprite>(path + "/images/basic_field_flash.png");
   loadCounterSprites("assets/images", sprite_map);
   return sprite_map;
-}
-
-int getColor(const Tetromino &tetromino) {
-  if (tetromino == Tetromino::T || tetromino == Tetromino::Square || tetromino == Tetromino::Line) {
-    return 1;
-  } else if (tetromino == Tetromino::J || tetromino == Tetromino::S) {
-    return 2;
-  } else {
-    return 3;
-  }
-}
-
-std::tuple<int, int> getStartOffsets(const Tetromino &tetromino) {
-  if (tetromino == Tetromino::T || tetromino == Tetromino::J || tetromino == Tetromino::L ||
-      tetromino == Tetromino::S || tetromino == Tetromino::Z) {
-    return {1, 1};
-  } else if (tetromino == Tetromino::Line) {
-    return {2, 2};
-  } else {
-    return {1, 0};
-  }
 }
 
 template <typename Container> bool outOfBounds(const Container &container, int x, int y) {
@@ -535,10 +463,6 @@ bool UpdateTopOutState(const KeyEvents &key_events, int &top_out_frame_counter,
       (top_out_frame_counter - start_frame) % animation_step) {
     return false;
   }
-  /// TODO::ULTIMATE HAX. PLEASE FIX THIS!
-  state.entry_delay_counter = 1; // Use the entry delay to stop the active piece being rendered
-                                 // on top of the end animation
-
   const int top_out_step = (top_out_frame_counter - start_frame) / animation_step;
   for (int i = 0; i < 10; ++i) {
     for (int j = 0; j < top_out_step; ++j) {
@@ -629,6 +553,10 @@ bool TetrisClone::OnUserUpdate(float fElapsedTime) {
     if (state_.spawn_new_tetromino) {
       const bool topped_out = not spawnNewTetromino(state_);
       if (topped_out) {
+        // Lock the active tetromino and move it off the grid. This is to stop the active 
+        // tetromino interfering with the 'curtain' animation.
+        state_.grid = addTetrominoToGrid(state_.grid, state_.active_tetromino);
+        state_.active_tetromino.y = -10;
         state_.topped_out = true;
         sample_player_.playSample("top_out");
       }
