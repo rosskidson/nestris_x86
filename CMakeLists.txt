@@ -52,6 +52,13 @@ endif()
 
 # end of OS specific
 
-add_executable(tetris src/sound.cpp src/tetris.cpp src/main.cpp src/assets.cpp)
+add_executable(tetris
+        src/assets.cpp
+        src/game_logic.cpp
+        src/main.cpp
+        src/rendering.cpp
+        src/sound.cpp
+        src/tetris.cpp)
+
 target_link_libraries(tetris ${OLC_LIBS})
 
