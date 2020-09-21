@@ -198,6 +198,7 @@ bool applyGravity(GameState<> &state) {
       state.entry_delay_counter = getEntryDelayFromLockHeight(state.active_tetromino.y);
       state.spawn_new_tetromino = true;
       state.grid = addTetrominoToGrid(state.grid, state.active_tetromino);
+      state.active_tetromino.y = -10;
       return true;
     }
   }

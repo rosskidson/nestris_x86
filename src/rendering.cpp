@@ -139,6 +139,9 @@ void Renderer::renderGameState(const GameState<> &state, const bool debug_mode,
   if (debug_mode) {
     renderDebug(state, key_events);
   }
+  if(state.paused) {
+    renderPaused();
+  }
 }
 
 void Renderer::renderMenu(const MenuState &menu_state) {

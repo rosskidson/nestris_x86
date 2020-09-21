@@ -25,6 +25,9 @@ class GameProcessor : public FrameProcessorInterface {
   Tetromino getRandomTetromino();
   GameState<> getNewState(const int level);
 
+  void doGravityStep(const KeyEvents& key_events);
+  void doEntryDelayStep(const KeyEvents& key_events);
+
   std::shared_ptr<Renderer> renderer_;
   sound::SoundPlayer sample_player_;
   GameState<> state_;
