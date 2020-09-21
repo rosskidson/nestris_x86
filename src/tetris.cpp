@@ -1,22 +1,14 @@
 #include "tetris.hpp"
 
-#include <array>
 #include <chrono>
 #include <iomanip>
-#include <iostream>
 #include <memory>
-#include <sstream>
-#include <string>
 #include <thread>  //sleep until
-#include <tuple>
 
 #include "assets.hpp"
-#include "frame_processor_interface.hpp"
-#include "game_logic.hpp"
 #include "game_processor.hpp"
-#include "game_states.hpp"
+#include "level_screen_processor.hpp"
 #include "logging.hpp"
-#include "sound.hpp"
 
 namespace tetris_clone {
 
@@ -24,7 +16,6 @@ using Clock = std::chrono::high_resolution_clock;
 using Duration_us = std::chrono::duration<int, std::nano>;
 using Duration_ms = std::chrono::duration<int, std::milli>;
 constexpr Duration_us single_frame(16666667);
-// constexpr Duration_ms single_frame(500);
 
 KeyBindings getKeyBindings() {
   KeyBindings key_bindings;
@@ -57,15 +48,6 @@ KeyEvents TetrisClone::getKeyEvents(KeyStates &last_key_states) {
   return ret_val;
 }
 
-ProgramFlowSignal TetrisClone::runMenuSingleFrame(const KeyEvents &key_events) {
-  renderer_->renderMenu(menu_state_);
-  if (key_events.at(KeyAction::Start).pressed) {
-    return ProgramFlowSignal::StartGame;
-  }
-
-  return ProgramFlowSignal::FrameSuccess;
-}
-
 void TetrisClone::sleepUntilNextFrame() {
   if (Clock::now() > frame_end_) {
     LOG_ERROR(
@@ -76,22 +58,28 @@ void TetrisClone::sleepUntilNextFrame() {
   frame_end_ += single_frame;
 }
 
-// TODO:: Add asset loading to constructor/OnUserCreate and add error
-// handling.
 TetrisClone::TetrisClone(const int start_level)
     : renderer_{std::make_shared<Renderer>(*this, "./assets/images")},
-      game_frame_processor_{std::make_unique<GameProcessor>(
-          GameOptions{start_level, {}, {}, {}, {true}, {}}, renderer_)},
-      menu_state_{},
+      sample_player_{std::make_shared<sound::SoundPlayer>()},
+      game_frame_processor_{std::make_shared<GameProcessor>(
+          GameOptions{start_level, {}, {}, {}, true, {}}, renderer_, sample_player_)},
+      level_menu_processor_{std::make_shared<LevelScreenProcessor>(renderer_, sample_player_)},
       menu_{true},
       key_states_{},
       key_bindings_{getKeyBindings()},
       frame_end_{} {
   sAppName = "TetrisClone";
+
   // Initialize key states from key bindings.
   for (const auto &pair : key_bindings_) {
     key_states_[pair.first] = false;
   }
+
+  if (not loadSoundAssets("./assets/sounds/", *sample_player_)) {
+    throw std::runtime_error("Failed loading sound samples.");
+  }
+
+  active_processor_ = level_menu_processor_;
 }
 
 bool TetrisClone::OnUserCreate() {
@@ -106,16 +94,16 @@ bool TetrisClone::OnUserCreate() {
 
 bool TetrisClone::OnUserUpdate(float fElapsedTime) {
   const auto key_events = getKeyEvents(key_states_);
+  const auto signal = active_processor_->processFrame(key_events);
 
-  ProgramFlowSignal return_code;
-  if (menu_) {
-    return_code = runMenuSingleFrame(key_events);
-  } else {
-    return_code = game_frame_processor_->processFrame(key_events);
-  }
-
-  if (return_code == ProgramFlowSignal::StartGame) {
-    menu_ = false;
+  if (signal == ProgramFlowSignal::StartGame) {
+    game_frame_processor_ = std::make_shared<GameProcessor>(GameOptions{15, {}, {}, {}, true, {}},
+                                                            renderer_, sample_player_);
+    active_processor_ = game_frame_processor_;
+  } else if (signal == ProgramFlowSignal::EndProgram) {
+    return false;
+  } else if (signal == ProgramFlowSignal::FrameProcessorEnded) {
+    active_processor_ = level_menu_processor_;
   }
 
   sleepUntilNextFrame();
@@ -143,7 +131,6 @@ bool TetrisClone::OnUserUpdate(float fElapsedTime) {
  * - Record all inputs, implement a replay functionality
  *
  * REFACTOR:
- * - Split main loop into functions
  * - Move rendering functions behind an interface
  *      - Render class hold an interface pointer
  */

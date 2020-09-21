@@ -1,5 +1,6 @@
 #include <vector>
 
+#include "game_processor.hpp"
 #include "game_states.hpp"
 #include "key_defines.hpp"
 #include "sound.hpp"

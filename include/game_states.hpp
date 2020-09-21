@@ -45,11 +45,11 @@ struct GameState {
   bool paused;
 };
 
-inline bool entryDelay(const GameState<> &state) { return state.entry_delay_counter > 0; }
-
 struct MenuState {
   int level;
 };
+
+inline bool entryDelay(const GameState<> &state) { return state.entry_delay_counter > 0; }
 
 enum class StatisticsMode {
   classic,
@@ -63,12 +63,6 @@ struct GameOptions {
   int game_frequency;
   bool show_controls;
   StatisticsMode statistics_mode;
-};
-
-// TODO:: Move into game frame processor
-struct LineClearAnimationInfo {
-  std::vector<int> rows;
-  int animation_frame{};
 };
 
 } // namespace tetris_clone

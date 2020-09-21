@@ -9,14 +9,15 @@
 
 namespace tetris_clone {
 
-// struct LineClearAnimationInfo {
-//  std::vector<int> rows;
-//  int animation_frame{};
-//};
+struct LineClearAnimationInfo {
+  std::vector<int> rows;
+  int animation_frame{};
+};
 
 class GameProcessor : public FrameProcessorInterface {
  public:
-  GameProcessor(const GameOptions& options, const std::shared_ptr<Renderer>& renderer);
+  GameProcessor(const GameOptions& options, const std::shared_ptr<Renderer>& renderer,
+                const std::shared_ptr<sound::SoundPlayer>& sample_player_);
 
   ProgramFlowSignal processFrame(const KeyEvents& key_events);
 
@@ -29,7 +30,7 @@ class GameProcessor : public FrameProcessorInterface {
   void doEntryDelayStep(const KeyEvents& key_events);
 
   std::shared_ptr<Renderer> renderer_;
-  sound::SoundPlayer sample_player_;
+  std::shared_ptr<sound::SoundPlayer> sample_player_;
   GameState<> state_;
   std::random_device real_rng_;
   std::uniform_int_distribution<int> random_generator_;

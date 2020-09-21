@@ -7,23 +7,22 @@
 #include "game_logic.hpp"
 #include "key_defines.hpp"
 #include "logging.hpp"
+#include "sound.hpp"
 
 namespace tetris_clone {
 
 constexpr int GRAVITY_FIRST_FRAME = 100;
 
-GameProcessor::GameProcessor(const GameOptions& options, const std::shared_ptr<Renderer>& renderer)
+GameProcessor::GameProcessor(const GameOptions& options, const std::shared_ptr<Renderer>& renderer,
+                             const std::shared_ptr<sound::SoundPlayer>& sample_player)
     : renderer_(renderer),
-      sample_player_{},
+      sample_player_(sample_player),
       state_{},
       real_rng_{},
       random_generator_{0, 6},
       show_controls_{options.show_controls},
       line_clear_info_{},
       top_out_frame_counter_{} {
-  if (not loadSoundAssets("./assets/sounds/", sample_player_)) {
-    throw std::runtime_error("Failed loading sound samples.");
-  }
   state_ = getNewState(options.level);
 }
 
@@ -59,15 +58,15 @@ void GameProcessor::doGravityStep(const KeyEvents& key_events) {
       state_.grid = addTetrominoToGrid(state_.grid, state_.active_tetromino);
       state_.active_tetromino.y = -10;
       state_.topped_out = true;
-      sample_player_.playSample("top_out");
+      sample_player_->playSample("top_out");
     }
   }
 
-  processKeyEvents(key_events, sample_player_, state_);
+  processKeyEvents(key_events, *sample_player_, state_);
 
   const bool tetromino_locked = applyGravity(state_);
   if (tetromino_locked) {
-    sample_player_.playSample("lock");
+    sample_player_->playSample("lock");
     auto lines_cleared = checkForLineClears(state_);
     if (not lines_cleared.empty()) {
       updateEntryDelayForLineClear(state_.entry_delay_counter);
@@ -77,13 +76,13 @@ void GameProcessor::doGravityStep(const KeyEvents& key_events) {
 }
 
 void GameProcessor::doEntryDelayStep(const KeyEvents& key_events) {
-  animateLineClear(sample_player_, state_, line_clear_info_);
+  animateLineClear(*sample_player_, state_, line_clear_info_);
   if (line_clear_info_.rows.size() == 4) {
     renderer_->doTetrisFlash(line_clear_info_.animation_frame);
   }
   // When the animation is almost over, update the score.
   if (line_clear_info_.animation_frame == 4) {
-    updateScoreAndLevel(line_clear_info_.rows.size(), sample_player_, state_);
+    updateScoreAndLevel(line_clear_info_.rows.size(), *sample_player_, state_);
   }
   --state_.entry_delay_counter;
 }
@@ -92,7 +91,7 @@ ProgramFlowSignal GameProcessor::processFrame(const KeyEvents& key_events) {
   if (state_.topped_out) {
     const bool end_game = updateTopOutState(key_events, top_out_frame_counter_, state_);
     if (end_game) {
-      return ProgramFlowSignal::EndProgram;
+      return ProgramFlowSignal::FrameProcessorEnded;
     }
   } else if (state_.paused) {
     if (key_events.at(KeyAction::Start).pressed) {
