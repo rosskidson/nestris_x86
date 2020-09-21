@@ -6,7 +6,7 @@
 #include <random>
 #include <vector>
 
-#include "game_state.hpp"
+#include "game_states.hpp"
 #include "key_defines.hpp"
 #include "olcPixelGameEngine.h"
 #include "rendering.hpp"

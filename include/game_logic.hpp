@@ -1,5 +1,5 @@
 #include "tetris.hpp"
-#include "game_state.hpp"
+#include "game_states.hpp"
 
 #include <vector>
 

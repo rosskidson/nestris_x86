@@ -51,4 +51,18 @@ struct MenuState {
   int level;
 };
 
+enum class StatisticsMode {
+  classic,
+  ctwc
+};
+
+struct GameOptions {
+  int level;
+  int das_full_charge;
+  int das_min_charge;
+  int game_frequency;
+  bool show_controls;
+  StatisticsMode statistics_mode;
+};
+
 } // namespace tetris_clone
