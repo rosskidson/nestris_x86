@@ -28,6 +28,7 @@ const std::vector<std::pair<std::string, std::string>> SAMPLES{
 const std::vector<std::pair<std::string, std::string>> SPRITES{
     {"basic_field_empty.png", "background"},
     {"basic_field_flash.png", "background_flash"},
+    {"level-screen.png", "menu"},
     {"l0-counts.png", "l0-counts"},
     {"l1-counts.png", "l1-counts"},
     {"l2-counts.png", "l2-counts"},

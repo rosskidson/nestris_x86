@@ -6,12 +6,12 @@
 #include <random>
 #include <vector>
 
-#include "olcPixelGameEngine.h"
-#include "sound.hpp"
-#include "tetromino.hpp"
-#include "rendering.hpp"
 #include "game_state.hpp"
 #include "key_defines.hpp"
+#include "olcPixelGameEngine.h"
+#include "rendering.hpp"
+#include "sound.hpp"
+#include "tetromino.hpp"
 
 namespace tetris_clone {
 
@@ -21,26 +21,27 @@ struct LineClearAnimationInfo {
 };
 
 class TetrisClone : public olc::PixelGameEngine {
-public:
+ public:
   TetrisClone(const int start_level = 0);
 
   bool OnUserCreate() override;
 
   bool OnUserUpdate(float fElapsedTime) override;
 
-private:
-  bool runMenuSingleFrame();
-  bool runGameSingleFrame();
+ private:
+  bool runMenuSingleFrame(const KeyEvents& key_events);
+  bool runGameSingleFrame(const KeyEvents& key_events);
   void sleepUntilNextFrame();
 
-  bool spawnNewTetromino(GameState<> &state);
+  bool spawnNewTetromino(GameState<>& state);
   Tetromino getRandomTetromino();
-  KeyEvents getKeyEvents(KeyStates &current_key_state);
+  KeyEvents getKeyEvents(KeyStates& current_key_state);
   GameState<> getNewState(const int level);
 
   Renderer renderer_;
   sound::SoundPlayer sample_player_;
   GameState<> state_;
+  MenuState menu_state_;
   bool menu_;
   std::random_device real_rng_;
   std::uniform_int_distribution<int> random_generator_;
@@ -52,4 +53,4 @@ private:
   int top_out_frame_counter_;
 };
 
-} // namespace tetris_clone
+}  // namespace tetris_clone

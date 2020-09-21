@@ -79,9 +79,9 @@ GameState<> TetrisClone::getNewState(const int level) {
   return state;
 }
 
-bool TetrisClone::runGameSingleFrame() {
+bool TetrisClone::runGameSingleFrame(const KeyEvents& key_events) {
+
   if (state_.topped_out) {
-    const auto key_events = getKeyEvents(key_states_);
     const bool end_game = updateTopOutState(key_events, top_out_frame_counter_, state_);
     if (end_game) {
       return false;
@@ -89,7 +89,6 @@ bool TetrisClone::runGameSingleFrame() {
     renderer_.renderGameState(state_, debug_mode_, key_states_);
   } else if (state_.paused) {
     renderer_.renderPaused();
-    const auto key_events = getKeyEvents(key_states_);
     if (key_events.at(KeyAction::Start).pressed) {
       state_.paused = false;
     }
@@ -106,7 +105,6 @@ bool TetrisClone::runGameSingleFrame() {
       }
     }
 
-    const auto key_events = getKeyEvents(key_states_);
     processKeyEvents(key_events, sample_player_, state_);
 
     const bool tetromino_locked = applyGravity(state_);
@@ -128,20 +126,28 @@ bool TetrisClone::runGameSingleFrame() {
     if (line_clear_info_.animation_frame == 4) {
       updateScoreAndLevel(line_clear_info_.rows.size(), sample_player_, state_);
     }
-    getKeyEvents(key_states_);
     renderer_.renderGameState(state_, debug_mode_, key_states_);
     --state_.entry_delay_counter;
   }
   return true;
 }
 
-bool TetrisClone::runMenuSingleFrame() {
-  menu_ = false;
+bool TetrisClone::runMenuSingleFrame(const KeyEvents& key_events) {
+  renderer_.renderMenu(menu_state_);
+  if(key_events.at(KeyAction::Start).pressed) {
+    menu_ = false;
+    state_ = getNewState(15);
+  }
 
   return true;
 }
 
 void TetrisClone::sleepUntilNextFrame() {
+  if (Clock::now() > frame_end_) {
+    LOG_ERROR(
+        "Runtime error: Game code is not finishing in time. The game will not run at the intended "
+        "frequency.");
+  }
   std::this_thread::sleep_until(frame_end_);
   frame_end_ += single_frame;
 }
@@ -152,6 +158,7 @@ TetrisClone::TetrisClone(const int start_level)
     : renderer_{*this, "./assets/images"},
       sample_player_{},
       state_{},
+      menu_state_{},
       menu_{true},
       real_rng_{},
       random_generator_(0, 6),
@@ -178,7 +185,6 @@ bool TetrisClone::OnUserCreate() {
   if (not loadSoundAssets("./assets/sounds/", sample_player_)) {
     return false;
   }
-  renderer_.init();
 
   frame_end_ = Clock::now() + single_frame;
 
@@ -186,16 +192,21 @@ bool TetrisClone::OnUserCreate() {
 }
 
 bool TetrisClone::OnUserUpdate(float fElapsedTime) {
+  const auto key_events = getKeyEvents(key_states_);
+
   bool frame_success{};
-  if(menu_) {
-    frame_success = runMenuSingleFrame();
+  if (menu_) {
+    frame_success = runMenuSingleFrame(key_events);
   } else {
-    frame_success = runGameSingleFrame();
+    frame_success = runGameSingleFrame(key_events);
+  }
+
+  if(not frame_success && not menu_) {
+    menu_ = true;
   }
 
   sleepUntilNextFrame();
-  frame_success = frame_success && not GetKey(olc::Key::Q).bHeld;
-  return frame_success;
+  return not GetKey(olc::Key::Q).bHeld;
 }
 
 /**
@@ -219,6 +230,7 @@ bool TetrisClone::OnUserUpdate(float fElapsedTime) {
  * - Record all inputs, implement a replay functionality
  *
  * REFACTOR:
+ * - Split main loop into functions
  * - Move rendering functions behind an interface
  *      - Render class hold an interface pointer
  */

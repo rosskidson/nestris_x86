@@ -47,4 +47,8 @@ struct GameState {
 
 inline bool entryDelay(const GameState<> &state) { return state.entry_delay_counter > 0; }
 
+struct MenuState {
+  int level;
+};
+
 } // namespace tetris_clone

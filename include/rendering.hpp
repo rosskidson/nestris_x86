@@ -1,5 +1,6 @@
 #pragma once
 
+#include "logging.hpp"
 #include "game_state.hpp"
 #include "key_defines.hpp"
 #include "olcPixelGameEngine.h"
@@ -7,26 +8,31 @@
 
 namespace tetris_clone {
 class Renderer {
-public:
+ public:
   Renderer(olc::PixelGameEngine &render_engine, const std::string &sprites_path);
-
-  void init();
 
   void renderGameState(const GameState<> &state, const bool debug_mode,
                        const KeyStates &key_states);
+
+  void renderMenu(const MenuState &menu_state);
 
   void renderPaused();
 
   void doTetrisFlash(const int &line_clear_frame_number);
 
-private:
-
-  inline olc::Sprite *getBlockSprite(const int level, const int color) {
+ private:
+  inline olc::Sprite *getBlockSprite(const int level, const int color) try {
     return block_sprites_.at(level % 10).at(color).get();
+  } catch (const std::out_of_range &e) {
+    LOG_ERROR("Block sprite not loaded. Level[" << level << "] Color[" << color << "]");
+    throw;
   }
 
-  inline olc::Sprite *getSprite(const std::string &sprite_name) {
+  inline olc::Sprite *getSprite(const std::string &sprite_name) try {
     return sprite_map_.at(sprite_name).get();
+  } catch (const std::out_of_range &e) {
+    LOG_ERROR("Sprite not loaded. Sprite name: `" << sprite_name << "`");
+    throw;
   }
 
   template <typename GridContainer>
@@ -52,9 +58,12 @@ private:
 
   void renderDebug(const GameState<> &state, const KeyStates &key_states);
 
+  void renderBackground(const std::string background_sprite);
+
+  std::string background_rendered_;
   std::map<std::string, std::unique_ptr<olc::Sprite>> sprite_map_;
   std::vector<std::vector<std::unique_ptr<olc::Sprite>>> block_sprites_;
   olc::PixelGameEngine &render_engine_ref_;
-};
+};  // namespace tetris_clone
 
-} // namespace tetris_clone
+}  // namespace tetris_clone

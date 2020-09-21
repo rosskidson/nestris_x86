@@ -89,10 +89,15 @@ void Renderer::renderDebug(const GameState<> &state, const KeyStates &key_states
   fill_circle(242, 216, 8, key_states.at(KeyAction::RotateLeft), olc::GREEN, olc::BLACK);
 }
 
-void Renderer::init() {
-  render_engine_ref_.DrawSprite(0, 0, getSprite("background"));
+void Renderer::renderBackground(const std::string background_sprite) {
+  if(background_rendered_ != background_sprite) {
+    render_engine_ref_.DrawSprite(0, 0, getSprite(background_sprite));
+    background_rendered_ = background_sprite;
+  }
 }
 
+// This is a little hacky as it undermines the renderBackground function.
+// TODO:: Send line clear animation info to the renderGameState fn.
 void Renderer::doTetrisFlash(const int &line_clear_frame_number) {
   const auto &frame = line_clear_frame_number;
   if ((frame - 1) % 4 == 0) {
@@ -115,6 +120,7 @@ void Renderer::renderGameState(const GameState<> &state, const bool debug_mode,
       return addTetrominoToGrid(state.grid, state.active_tetromino);
     }
   };
+  renderBackground("background");
   // Clear the field.
   render_engine_ref_.FillRect(96, 40, 80, 160, olc::BLACK);
   render_engine_ref_.DrawSprite(13, 61,
@@ -125,5 +131,9 @@ void Renderer::renderGameState(const GameState<> &state, const bool debug_mode,
   if (debug_mode) {
     renderDebug(state, key_states);
   }
+}
+
+void Renderer::renderMenu(const MenuState& menu_state) {
+  renderBackground("menu");
 }
 };  // namespace tetris_clone
