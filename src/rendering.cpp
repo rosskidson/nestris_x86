@@ -1,7 +1,7 @@
 #include "rendering.hpp"
 
-#include "game_logic.hpp"
 #include "assets.hpp"
+#include "game_logic.hpp"
 #include "olcPixelGameEngine.h"
 
 namespace tetris_clone {
@@ -56,7 +56,7 @@ void Renderer::renderNextTetromino(const Tetromino &next_tetromino, const int le
   renderGrid(x, y, tetromino, level, 8, 8, getColor(next_tetromino));
 }
 
-void Renderer::renderDebug(const GameState<> &state, const KeyStates &key_states) {
+void Renderer::renderDebug(const GameState<> &state, const KeyEvents &key_events) {
   auto get_das_color = [](const int &das) {
     if (das >= 10) {
       return olc::GREEN;
@@ -70,6 +70,10 @@ void Renderer::renderDebug(const GameState<> &state, const KeyStates &key_states
   render_engine_ref_.FillRect(200, 180, 3 * 16, 6, olc::BLACK);
   render_engine_ref_.FillRect(200, 180, 3 * state.das_counter, 6, color);
 
+  auto key_action_to_bool = [](const KeyEvent &key_event) {
+    return key_event.held || key_event.pressed;
+  };
+
   auto fill_circle = [&](const int x, const int y, const int radius, const bool signal,
                          const olc::Pixel &on_color, const olc::Pixel &off_color) {
     auto color = signal ? on_color : off_color;
@@ -82,15 +86,19 @@ void Renderer::renderDebug(const GameState<> &state, const KeyStates &key_states
   fill_circle(226, 192, 3, entryDelay(state), olc::GREEN, olc::RED);
 
   render_engine_ref_.DrawString(204, 199, "<  >", olc::WHITE);
-  fill_circle(196, 202, 4, key_states.at(KeyAction::Left), olc::GREEN, olc::BLACK);
-  fill_circle(242, 201, 4, key_states.at(KeyAction::Right), olc::GREEN, olc::BLACK);
+  fill_circle(196, 202, 4, key_action_to_bool(key_events.at(KeyAction::Left)), olc::GREEN,
+              olc::BLACK);
+  fill_circle(242, 201, 4, key_action_to_bool(key_events.at(KeyAction::Right)), olc::GREEN,
+              olc::BLACK);
   render_engine_ref_.DrawString(204, 207, "A  B", olc::WHITE);
-  fill_circle(196, 216, 8, key_states.at(KeyAction::RotateRight), olc::GREEN, olc::BLACK);
-  fill_circle(242, 216, 8, key_states.at(KeyAction::RotateLeft), olc::GREEN, olc::BLACK);
+  fill_circle(196, 216, 8, key_action_to_bool(key_events.at(KeyAction::RotateRight)), olc::GREEN,
+              olc::BLACK);
+  fill_circle(242, 216, 8, key_action_to_bool(key_events.at(KeyAction::RotateLeft)), olc::GREEN,
+              olc::BLACK);
 }
 
 void Renderer::renderBackground(const std::string background_sprite) {
-  if(background_rendered_ != background_sprite) {
+  if (background_rendered_ != background_sprite) {
     render_engine_ref_.DrawSprite(0, 0, getSprite(background_sprite));
     background_rendered_ = background_sprite;
   }
@@ -112,7 +120,7 @@ void Renderer::renderPaused() {
 }
 
 void Renderer::renderGameState(const GameState<> &state, const bool debug_mode,
-                               const KeyStates &key_states) {
+                               const KeyEvents &key_events) {
   auto get_grid_for_render = [](const GameState<> &state) {
     if (entryDelay(state)) {
       return state.grid;
@@ -129,11 +137,11 @@ void Renderer::renderGameState(const GameState<> &state, const bool debug_mode,
   renderNextTetromino(state.next_tetromino, state.level);
   renderText(state);
   if (debug_mode) {
-    renderDebug(state, key_states);
+    renderDebug(state, key_events);
   }
 }
 
-void Renderer::renderMenu(const MenuState& menu_state) {
+void Renderer::renderMenu(const MenuState &menu_state) {
   renderBackground("menu");
 }
 };  // namespace tetris_clone

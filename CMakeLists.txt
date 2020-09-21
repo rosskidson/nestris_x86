@@ -57,6 +57,7 @@ add_executable(tetris
         src/game_logic.cpp
         src/main.cpp
         src/rendering.cpp
+        src/frame_processors/game_processor.cpp
         src/sound.cpp
         src/tetris.cpp)
 

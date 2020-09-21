@@ -22,7 +22,7 @@ class FrameProcessorInterface {
   public:
     virtual ProgramFlowSignal processFrame(const KeyEvents& key_events) = 0;
 
-    virtual ~FrameProcessorInterface();
+    virtual ~FrameProcessorInterface() {}
 
 };
 }

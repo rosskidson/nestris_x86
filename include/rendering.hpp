@@ -12,7 +12,7 @@ class Renderer {
   Renderer(olc::PixelGameEngine &render_engine, const std::string &sprites_path);
 
   void renderGameState(const GameState<> &state, const bool debug_mode,
-                       const KeyStates &key_states);
+                       const KeyEvents& key_events);
 
   void renderMenu(const MenuState &menu_state);
 
@@ -56,7 +56,7 @@ class Renderer {
 
   void renderNextTetromino(const Tetromino &next_tetromino, const int level);
 
-  void renderDebug(const GameState<> &state, const KeyStates &key_states);
+  void renderDebug(const GameState<> &state, const KeyEvents& key_events);
 
   void renderBackground(const std::string background_sprite);
 

@@ -11,13 +11,14 @@
 #include <tuple>
 
 #include "assets.hpp"
+#include "frame_processor_interface.hpp"
 #include "game_logic.hpp"
+#include "game_processor.hpp"
+#include "game_states.hpp"
 #include "logging.hpp"
 #include "sound.hpp"
 
 namespace tetris_clone {
-
-constexpr int GRAVITY_FIRST_FRAME = 100;
 
 using Clock = std::chrono::high_resolution_clock;
 using Duration_us = std::chrono::duration<int, std::nano>;
@@ -56,90 +57,13 @@ KeyEvents TetrisClone::getKeyEvents(KeyStates &last_key_states) {
   return ret_val;
 }
 
-Tetromino TetrisClone::getRandomTetromino() {
-  return Tetromino(random_generator_(real_rng_));
-}
-
-bool TetrisClone::spawnNewTetromino(GameState<> &state) {
-  state.active_tetromino = {state.next_tetromino, 5, 0, 0};
-  state_.tetromino_counts[static_cast<int>(state_.active_tetromino.tetromino)]++;
-  state.next_tetromino = getRandomTetromino();
-  state.spawn_new_tetromino = false;
-  return not tetrominoCollision(state.grid, state.active_tetromino);
-}
-
-GameState<> TetrisClone::getNewState(const int level) {
-  auto state = GameState<>{};
-  state.level = level;
-  state.active_tetromino = {getRandomTetromino(), 5, 0, 0};
-  state.next_tetromino = getRandomTetromino();
-  state.tetromino_counts[static_cast<int>(state.active_tetromino.tetromino)]++;
-  state.gravity_counter = GRAVITY_FIRST_FRAME;
-  state.lines_until_next_level = linesToClearFromStartingLevel(state.level);
-  return state;
-}
-
-bool TetrisClone::runGameSingleFrame(const KeyEvents& key_events) {
-
-  if (state_.topped_out) {
-    const bool end_game = updateTopOutState(key_events, top_out_frame_counter_, state_);
-    if (end_game) {
-      return false;
-    }
-    renderer_.renderGameState(state_, debug_mode_, key_states_);
-  } else if (state_.paused) {
-    renderer_.renderPaused();
-    if (key_events.at(KeyAction::Start).pressed) {
-      state_.paused = false;
-    }
-  } else if (not entryDelay(state_)) {
-    if (state_.spawn_new_tetromino) {
-      const bool topped_out = not spawnNewTetromino(state_);
-      if (topped_out) {
-        // Lock the active tetromino and move it off the grid. This is to stop the active
-        // tetromino interfering with the 'curtain' animation.
-        state_.grid = addTetrominoToGrid(state_.grid, state_.active_tetromino);
-        state_.active_tetromino.y = -10;
-        state_.topped_out = true;
-        sample_player_.playSample("top_out");
-      }
-    }
-
-    processKeyEvents(key_events, sample_player_, state_);
-
-    const bool tetromino_locked = applyGravity(state_);
-    if (tetromino_locked) {
-      sample_player_.playSample("lock");
-      auto lines_cleared = checkForLineClears(state_);
-      if (not lines_cleared.empty()) {
-        updateEntryDelayForLineClear(state_.entry_delay_counter);
-        line_clear_info_ = LineClearAnimationInfo{lines_cleared, state_.entry_delay_counter};
-      }
-    }
-    renderer_.renderGameState(state_, debug_mode_, key_states_);
-  } else {
-    animateLineClear(sample_player_, state_, line_clear_info_);
-    if (line_clear_info_.rows.size() == 4) {
-      renderer_.doTetrisFlash(line_clear_info_.animation_frame);
-    }
-    // When the animation is almost over, update the score.
-    if (line_clear_info_.animation_frame == 4) {
-      updateScoreAndLevel(line_clear_info_.rows.size(), sample_player_, state_);
-    }
-    renderer_.renderGameState(state_, debug_mode_, key_states_);
-    --state_.entry_delay_counter;
-  }
-  return true;
-}
-
-bool TetrisClone::runMenuSingleFrame(const KeyEvents& key_events) {
-  renderer_.renderMenu(menu_state_);
-  if(key_events.at(KeyAction::Start).pressed) {
-    menu_ = false;
-    state_ = getNewState(15);
+ProgramFlowSignal TetrisClone::runMenuSingleFrame(const KeyEvents &key_events) {
+  renderer_->renderMenu(menu_state_);
+  if (key_events.at(KeyAction::Start).pressed) {
+    return ProgramFlowSignal::StartGame;
   }
 
-  return true;
+  return ProgramFlowSignal::FrameSuccess;
 }
 
 void TetrisClone::sleepUntilNextFrame() {
@@ -155,25 +79,19 @@ void TetrisClone::sleepUntilNextFrame() {
 // TODO:: Add asset loading to constructor/OnUserCreate and add error
 // handling.
 TetrisClone::TetrisClone(const int start_level)
-    : renderer_{*this, "./assets/images"},
-      sample_player_{},
-      state_{},
+    : renderer_{std::make_shared<Renderer>(*this, "./assets/images")},
+      game_frame_processor_{std::make_unique<GameProcessor>(
+          GameOptions{start_level, {}, {}, {}, {true}, {}}, renderer_)},
       menu_state_{},
       menu_{true},
-      real_rng_{},
-      random_generator_(0, 6),
       key_states_{},
       key_bindings_{getKeyBindings()},
-      debug_mode_{true},
-      frame_end_{},
-      line_clear_info_{},
-      top_out_frame_counter_{} {
+      frame_end_{} {
   sAppName = "TetrisClone";
   // Initialize key states from key bindings.
   for (const auto &pair : key_bindings_) {
     key_states_[pair.first] = false;
   }
-  state_ = getNewState(start_level);
 }
 
 bool TetrisClone::OnUserCreate() {
@@ -181,11 +99,6 @@ bool TetrisClone::OnUserCreate() {
     LOG_ERROR("Screen size must be set to 256x240 for this application.");
     return false;
   }
-
-  if (not loadSoundAssets("./assets/sounds/", sample_player_)) {
-    return false;
-  }
-
   frame_end_ = Clock::now() + single_frame;
 
   return true;
@@ -194,15 +107,15 @@ bool TetrisClone::OnUserCreate() {
 bool TetrisClone::OnUserUpdate(float fElapsedTime) {
   const auto key_events = getKeyEvents(key_states_);
 
-  bool frame_success{};
+  ProgramFlowSignal return_code;
   if (menu_) {
-    frame_success = runMenuSingleFrame(key_events);
+    return_code = runMenuSingleFrame(key_events);
   } else {
-    frame_success = runGameSingleFrame(key_events);
+    return_code = game_frame_processor_->processFrame(key_events);
   }
 
-  if(not frame_success && not menu_) {
-    menu_ = true;
+  if (return_code == ProgramFlowSignal::StartGame) {
+    menu_ = false;
   }
 
   sleepUntilNextFrame();

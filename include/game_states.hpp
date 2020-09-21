@@ -65,4 +65,10 @@ struct GameOptions {
   StatisticsMode statistics_mode;
 };
 
+// TODO:: Move into game frame processor
+struct LineClearAnimationInfo {
+  std::vector<int> rows;
+  int animation_frame{};
+};
+
 } // namespace tetris_clone

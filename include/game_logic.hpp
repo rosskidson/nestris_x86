@@ -1,7 +1,8 @@
-#include "tetris.hpp"
-#include "game_states.hpp"
-
 #include <vector>
+
+#include "game_states.hpp"
+#include "key_defines.hpp"
+#include "sound.hpp"
 
 namespace tetris_clone {
 
@@ -9,7 +10,8 @@ int getGravity(const int level);
 
 bool entryDelay(const GameState<> &state);
 
-template <typename Container> bool outOfBounds(const Container &container, int x, int y) {
+template <typename Container>
+bool outOfBounds(const Container &container, int x, int y) {
   if (x < 0 || y < 0 || x >= container.size() || y >= container[x].size()) {
     return true;
   } else
@@ -52,4 +54,4 @@ int linesToClearFromStartingLevel(const int level);
 void animateLineClear(const sound::SoundPlayer &sample_player, GameState<> &state,
                       LineClearAnimationInfo &line_clear_info);
 
-} // namespace tetris_clone
+}  // namespace tetris_clone
