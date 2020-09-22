@@ -25,8 +25,8 @@ KeyBindings getKeyBindings() {
   key_bindings[KeyAction::Down] = olc::Key::DOWN;
   key_bindings[KeyAction::Left] = olc::Key::LEFT;
   key_bindings[KeyAction::Right] = olc::Key::RIGHT;
-  key_bindings[KeyAction::RotateLeft] = olc::Key::X;
-  key_bindings[KeyAction::RotateRight] = olc::Key::Z;
+  key_bindings[KeyAction::RotateClockwise] = olc::Key::X;      // NES gamepad A
+  key_bindings[KeyAction::RotateAntiClockwise] = olc::Key::Z;  // NES gamepad B
   key_bindings[KeyAction::Start] = olc::Key::ENTER;
   return key_bindings;
 }
@@ -36,7 +36,7 @@ KeyStates initializeKeyStatesFromBindings(const KeyBindings& key_bindings) {
   for (const auto &pair : key_bindings) {
     key_states[pair.first] = false;
   }
-  return key_states; 
+  return key_states;
 }
 
 KeyEvent getButtonState(const bool button_old_state, const bool button_new_state) {
@@ -54,7 +54,7 @@ TetrisClone::TetrisClone()
       game_frame_processor_{
           std::make_shared<GameProcessor>(GameOptions{}, renderer_, sample_player_)},
       level_menu_processor_{
-          std::make_shared<LevelScreenProcessor>(renderer_, sample_player_, game_options_)},
+          std::make_shared<LevelScreenProcessor>(renderer_, sample_player_)},
       active_processor_{level_menu_processor_},
       key_bindings_{getKeyBindings()},
       key_states_{initializeKeyStatesFromBindings(key_bindings_)},
@@ -98,8 +98,10 @@ KeyEvents TetrisClone::getKeyEvents(KeyStates &last_key_states) {
 
 void TetrisClone::processProgramFlowSignal(const ProgramFlowSignal &signal) {
   if (signal == ProgramFlowSignal::StartGame) {
+    GameOptions options{};
+    options.level = level_menu_processor_->getSelectedLevel();
     game_frame_processor_ =
-        std::make_shared<GameProcessor>(*game_options_, renderer_, sample_player_);
+        std::make_shared<GameProcessor>(options, renderer_, sample_player_);
     active_processor_ = game_frame_processor_;
   } else if (signal == ProgramFlowSignal::FrameProcessorEnded) {
     active_processor_ = level_menu_processor_;
@@ -120,18 +122,19 @@ void TetrisClone::sleepUntilNextFrame() {
  * TODO:
  *
  * - Options screen
- * - Change rotate left and rotate right to A and B
- * - Visualize controls as a controller
- * - Visualize DAS a bit nicer, add visualize das param
+ * - High score functionality
  * - Asset loading from binary
  * - Press down scoring
+ * - Remove magic numbers in game_logic (entry delay, line clear frame numbers)
+ * - BUG: pause doesn't work during entry delay
+ * - BUG: pausing for a long time messes up sleep until frame end
  * - Press down hold between blocks?
- * - Check rotation consistency/tetromino entry state is correct
  * - precise timing checks:
  *    - line clear sfx
  *    - delay between death and death sound
  *    - delay between death and end animation
  *    - end animation speed
+ * - Remove full path from logging
  *
  * IDEAS::
  * - Wall charge animation/signal

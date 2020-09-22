@@ -64,6 +64,8 @@ struct GameOptions {
   int das_min_charge{10};
   int game_frequency{60};
   bool show_controls{true};
+  bool show_das_bar{true};
+  bool show_entry_delay{true};
   StatisticsMode statistics_mode{};
 };
 

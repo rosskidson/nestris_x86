@@ -35,6 +35,8 @@ class GameProcessor : public FrameProcessorInterface {
   std::random_device real_rng_;
   std::uniform_int_distribution<int> random_generator_;
   bool show_controls_;
+  bool show_das_bar_;
+  bool show_entry_delay_;
   LineClearAnimationInfo line_clear_info_;
   int top_out_frame_counter_;
 };

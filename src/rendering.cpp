@@ -2,6 +2,7 @@
 
 #include "assets.hpp"
 #include "game_logic.hpp"
+#include "key_defines.hpp"
 #include "logging.hpp"
 #include "olcPixelGameEngine.h"
 
@@ -75,7 +76,18 @@ void Renderer::renderNextTetromino(const Tetromino &next_tetromino, const int le
   renderGrid(x, y, tetromino, level, 8, 8, getColor(next_tetromino));
 }
 
-void Renderer::renderDebug(const GameState<> &state, const KeyEvents &key_events) {
+void Renderer::renderEntryDelay(const bool delay_entry, const int x, const int y) {
+  const auto delay_sprite = delay_entry ? "are-on" : "are-off";
+  render_engine_ref_.DrawSprite(x, y, getSprite(delay_sprite));
+}
+
+void Renderer::renderDasBar(const int das_counter, const int x, const int y) {
+  const Coords das_box_pos{x, y};
+  const Coords das_bar_pos{das_box_pos.x + 31, das_box_pos.y + 7};
+  const int das_bar_length_pixels = 32;
+  const int das_bar_width_pixels = 8;
+  render_engine_ref_.DrawSprite(das_box_pos.x, das_box_pos.y, getSprite("das_meter"));
+
   auto get_das_color = [](const int &das) {
     if (das >= DAS_MIN_CHARGE) {
       return olc::GREEN;
@@ -85,35 +97,53 @@ void Renderer::renderDebug(const GameState<> &state, const KeyEvents &key_events
       return olc::RED;
     };
   };
-  const auto color = get_das_color(state.das_counter);
-  render_engine_ref_.FillRect(200, 180, 3 * 16, 6, olc::BLACK);
-  render_engine_ref_.FillRect(200, 180, 3 * state.das_counter, 6, color);
+  const auto color = get_das_color(das_counter);
+  const int das_bar_pixels = das_counter * (das_bar_length_pixels / DAS_FULL_CHARGE);
+  render_engine_ref_.FillRect(das_bar_pos.x, das_bar_pos.y, das_bar_pixels, das_bar_width_pixels,
+                              color);
+}
 
+void Renderer::renderControls(const GameState<> &state, const KeyEvents &key_events, const int x,
+                              const int y) {
+  const Coords controller_box_pos{x, y};
+  const Coords arrow_left{controller_box_pos.x + 7, controller_box_pos.y + 13};
+  const Coords arrow_right{controller_box_pos.x + 16, controller_box_pos.y + 13};
+  const Coords arrow_up{controller_box_pos.x + 11, controller_box_pos.y + 9};
+  const Coords arrow_down{controller_box_pos.x + 11, controller_box_pos.y + 17};
+  const Coords a_button{controller_box_pos.x + 55, controller_box_pos.y + 15};
+  const Coords b_button{controller_box_pos.x + 46, controller_box_pos.y + 15};
+  const Coords start_button{controller_box_pos.x + 34, controller_box_pos.y + 17};
+
+  render_engine_ref_.DrawSprite(controller_box_pos.x, controller_box_pos.y,
+                                getSprite("controller"));
   auto key_action_to_bool = [](const KeyEvent &key_event) {
     return key_event.held || key_event.pressed;
   };
 
-  auto fill_circle = [&](const int x, const int y, const int radius, const bool signal,
-                         const olc::Pixel &on_color, const olc::Pixel &off_color) {
-    auto color = signal ? on_color : off_color;
-    render_engine_ref_.FillCircle(x, y, radius, color);
-  };
-
-  // fill_circle(194, 183, 3, state.das_reset_signal, olc::RED, olc::GREEN);
-
-  render_engine_ref_.DrawString(190, 189, "ARE:", olc::WHITE);
-  fill_circle(226, 192, 3, entryDelay(state), olc::GREEN, olc::RED);
-
-  render_engine_ref_.DrawString(204, 199, "<  >", olc::WHITE);
-  fill_circle(196, 202, 4, key_action_to_bool(key_events.at(KeyAction::Left)), olc::GREEN,
-              olc::BLACK);
-  fill_circle(242, 201, 4, key_action_to_bool(key_events.at(KeyAction::Right)), olc::GREEN,
-              olc::BLACK);
-  render_engine_ref_.DrawString(204, 207, "A  B", olc::WHITE);
-  fill_circle(196, 216, 8, key_action_to_bool(key_events.at(KeyAction::RotateRight)), olc::GREEN,
-              olc::BLACK);
-  fill_circle(242, 216, 8, key_action_to_bool(key_events.at(KeyAction::RotateLeft)), olc::GREEN,
-              olc::BLACK);
+  if (key_action_to_bool(key_events.at(KeyAction::Left))) {
+    render_engine_ref_.FillRect(arrow_left.x, arrow_left.y, 4, 4, olc::GREEN);
+  }
+  if (key_action_to_bool(key_events.at(KeyAction::Right))) {
+    render_engine_ref_.FillRect(arrow_right.x, arrow_right.y, 4, 4, olc::GREEN);
+  }
+  if (key_action_to_bool(key_events.at(KeyAction::Up))) {
+    render_engine_ref_.FillRect(arrow_up.x, arrow_up.y, 5, 4, olc::GREEN);
+  }
+  if (key_action_to_bool(key_events.at(KeyAction::Down))) {
+    render_engine_ref_.FillRect(arrow_down.x, arrow_down.y, 5, 4, olc::GREEN);
+  }
+  if (key_action_to_bool(key_events.at(KeyAction::RotateClockwise))) {
+    render_engine_ref_.FillRect(a_button.x + 1, a_button.y, 4, 6, olc::GREEN);
+    render_engine_ref_.FillRect(a_button.x, a_button.y + 1, 6, 4, olc::GREEN);
+  }
+  if (key_action_to_bool(key_events.at(KeyAction::RotateAntiClockwise))) {
+    render_engine_ref_.FillRect(b_button.x + 1, b_button.y, 4, 6, olc::GREEN);
+    render_engine_ref_.FillRect(b_button.x, b_button.y + 1, 6, 4, olc::GREEN);
+  }
+  if (key_action_to_bool(key_events.at(KeyAction::Start))) {
+    render_engine_ref_.FillRect(start_button.x + 1, start_button.y, 4, 3, olc::GREEN);
+    render_engine_ref_.FillRect(start_button.x, start_button.y + 1, 6, 1, olc::GREEN);
+  }
 }
 
 void Renderer::renderBackground(const std::string background_sprite) {
@@ -139,11 +169,15 @@ void Renderer::renderPaused() {
   render_engine_ref_.DrawString(paused_pos.x, paused_pos.y, "PAUSED", olc::WHITE);
 }
 
-void Renderer::renderGameState(const GameState<> &state, const bool debug_mode,
+void Renderer::renderGameState(const GameState<> &state, const bool render_controls,
+                               const bool render_das_bar, const bool render_entry_delay,
                                const KeyEvents &key_events) {
   constexpr Coords grid_top_left{96, 40};
   constexpr Rect grid_size{80, 160};
   constexpr Coords counter_sprite_pos{13, 61};
+  constexpr Coords das_box_pos{184, 175};
+  constexpr Coords controller_box_pos{184, 196};
+  constexpr Coords entry_delay_pos{193, 129};
 
   auto get_grid_for_render = [](const GameState<> &state) {
     if (entryDelay(state)) {
@@ -162,8 +196,14 @@ void Renderer::renderGameState(const GameState<> &state, const bool debug_mode,
   renderGrid(grid_top_left.x, grid_top_left.y, get_grid_for_render(state), state.level);
   renderNextTetromino(state.next_tetromino, state.level);
   renderText(state);
-  if (debug_mode) {
-    renderDebug(state, key_events);
+  if (render_controls) {
+    renderControls(state, key_events, controller_box_pos.x, controller_box_pos.y);
+  }
+  if (render_das_bar) {
+    renderDasBar(state.das_counter, das_box_pos.x, das_box_pos.y);
+  }
+  if (render_entry_delay) {
+    renderEntryDelay(entryDelay(state), entry_delay_pos.x, entry_delay_pos.y);
   }
   if (state.paused) {
     renderPaused();

@@ -123,12 +123,12 @@ void processKeyEvents(const KeyEvents &key_events, const sound::SoundPlayer &sam
     auto &gr = state.gravity_counter;
     gr = gr > 2 ? 2 : gr;
   }
-  if (key_events.at(KeyAction::RotateLeft).pressed) {
+  if (key_events.at(KeyAction::RotateClockwise).pressed) {
     if (updateStateOnNoCollision(state.grid, 0, 0, 1, state.active_tetromino)) {
       sample_player.playSample("rotate");
     }
   }
-  if (key_events.at(KeyAction::RotateRight).pressed) {
+  if (key_events.at(KeyAction::RotateAntiClockwise).pressed) {
     if (updateStateOnNoCollision(state.grid, 0, 0, -1, state.active_tetromino)) {
       sample_player.playSample("rotate");
     }

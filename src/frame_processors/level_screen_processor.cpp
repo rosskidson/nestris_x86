@@ -7,11 +7,6 @@
 
 namespace tetris_clone {
 
-GameOptions getGameOptions(const MenuState& menu_state) {
-  const int level = menu_state.plus_ten_levels ? menu_state.level + 10 : menu_state.level;
-  return GameOptions{level, 16, 10, 60, true, StatisticsMode::classic};
-}
-
 void processKeyEvents(const KeyEvents& key_events, const sound::SoundPlayer& sample_player_,
                       MenuState& menu_state) {
   auto& level = menu_state.level;
@@ -34,15 +29,14 @@ void processKeyEvents(const KeyEvents& key_events, const sound::SoundPlayer& sam
 
   if (key_events.at(KeyAction::Start).pressed) {
     sample_player_.playSample("menu_select_01");
-    menu_state.plus_ten_levels = (key_events.at(KeyAction::RotateLeft).held);
+    menu_state.plus_ten_levels = (key_events.at(KeyAction::RotateClockwise).held);
     menu_state.start_game = true;
   }
 }
 
 LevelScreenProcessor::LevelScreenProcessor(const std::shared_ptr<Renderer>& renderer,
-                                           const std::shared_ptr<sound::SoundPlayer>& sample_player,
-                                           const std::shared_ptr<GameOptions>& options)
-    : renderer_(renderer), sample_player_(sample_player), options_{options}, state_{} {}
+                                           const std::shared_ptr<sound::SoundPlayer>& sample_player)
+    : renderer_(renderer), sample_player_(sample_player), state_{} {}
 
 ProgramFlowSignal LevelScreenProcessor::processFrame(const KeyEvents& key_events) {
   processKeyEvents(key_events, *sample_player_, state_);
@@ -51,11 +45,14 @@ ProgramFlowSignal LevelScreenProcessor::processFrame(const KeyEvents& key_events
 
   if (state_.start_game) {
     state_.start_game = false;
-    *options_ = getGameOptions(state_);
     return ProgramFlowSignal::StartGame;
   } else {
     return ProgramFlowSignal::FrameSuccess;
   }
+}
+
+int LevelScreenProcessor::getSelectedLevel(){
+  return state_.level + (state_.plus_ten_levels ? 10 : 0);
 }
 
 }  // namespace tetris_clone

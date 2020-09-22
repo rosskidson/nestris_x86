@@ -11,7 +11,8 @@ class Renderer {
  public:
   Renderer(olc::PixelGameEngine &render_engine, const std::string &sprites_path);
 
-  void renderGameState(const GameState<> &state, const bool debug_mode,
+  void renderGameState(const GameState<> &state, const bool render_controls,
+                       const bool render_das_bar, const bool render_entry_delay,
                        const KeyEvents &key_events);
 
   void renderMenu(const MenuState &menu_state);
@@ -56,7 +57,10 @@ class Renderer {
 
   void renderNextTetromino(const Tetromino &next_tetromino, const int level);
 
-  void renderDebug(const GameState<> &state, const KeyEvents &key_events);
+  void renderDasBar(const int das_counter, const int x, const int y);
+  void renderControls(const GameState<> &state, const KeyEvents &key_events, const int x,
+                      const int y);
+  void renderEntryDelay(const bool delay_entry, const int x, const int y);
 
   void renderBackground(const std::string background_sprite);
 

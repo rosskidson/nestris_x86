@@ -21,6 +21,8 @@ GameProcessor::GameProcessor(const GameOptions& options, const std::shared_ptr<R
       real_rng_{},
       random_generator_{0, 6},
       show_controls_{options.show_controls},
+      show_das_bar_{options.show_das_bar},
+      show_entry_delay_{options.show_entry_delay},
       line_clear_info_{},
       top_out_frame_counter_{} {
   state_ = getNewState(options.level);
@@ -102,7 +104,7 @@ ProgramFlowSignal GameProcessor::processFrame(const KeyEvents& key_events) {
   } else {
     doGravityStep(key_events);
   }
-  renderer_->renderGameState(state_, show_controls_, key_events);
+  renderer_->renderGameState(state_, show_controls_, show_das_bar_, show_entry_delay_, key_events);
   return ProgramFlowSignal::FrameSuccess;
 }
 

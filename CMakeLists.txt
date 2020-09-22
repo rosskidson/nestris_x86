@@ -35,7 +35,7 @@ endif()
 if(APPLE)
     MESSAGE("Building for MacOS...")
 
-    # TODO:: This probably needs to go BEFORE FIND_PACKAGE(SDL...)
+    # I would have thought that this needs to go BEFORE FIND_PACKAGE(SDL...)
     list(INSERT CMAKE_FRAMEWORK_PATH 0 /System/Library/Frameworks)
 
     FIND_PACKAGE(OpenGL REQUIRED)

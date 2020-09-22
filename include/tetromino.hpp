@@ -1,7 +1,7 @@
 #pragma once
 
-#include <vector>
 #include <tuple>
+#include <vector>
 
 namespace tetris_clone {
 
@@ -15,6 +15,11 @@ struct TetrominoState {
 };
 
 using TetrominoGrid = std::vector<std::vector<int>>;
+
+// Tetrominos defines below. The matrices are column-major, resulting in access as matrix[x][y].
+// The default rotation for nes tetris is defined first, followed by clockwise rotation order. This
+// results in moving +1 through the vector results in a clockwise rotation, and likewise -1 results
+// in a anticlockwise rotation.
 
 const std::vector<TetrominoGrid> T_TETROMINO{{{{0, 1, 0}, {0, 1, 1}, {0, 1, 0}}},
                                              {{{0, 1, 0}, {1, 1, 1}, {0, 0, 0}}},
@@ -86,4 +91,4 @@ inline std::tuple<int, int> getStartOffsets(const Tetromino &tetromino) {
   }
 }
 
-} // namespace tetris_clone
+}  // namespace tetris_clone
