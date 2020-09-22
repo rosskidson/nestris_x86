@@ -7,6 +7,9 @@
 
 namespace tetris_clone {
 
+constexpr int DAS_FULL_CHARGE = 16;
+constexpr int DAS_MIN_CHARGE = 10;
+
 int getGravity(const int level);
 
 bool entryDelay(const GameState<> &state);

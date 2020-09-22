@@ -2,8 +2,6 @@
 
 namespace tetris_clone {
 
-constexpr int DAS_FULL_CHARGE = 16;
-constexpr int DAS_MIN_CHARGE = 10;
 constexpr int LINES_PER_LEVEL = 10;
 const std::vector<int> LEVEL_GRAVITY{48, 43, 38, 33, 28, 23, 18, 13, 8, 6,
                                      5,  5,  5,  4,  4,  4,  3,  3,  3};

@@ -1,8 +1,8 @@
 #pragma once
 
-#include "logging.hpp"
 #include "game_states.hpp"
 #include "key_defines.hpp"
+#include "logging.hpp"
 #include "olcPixelGameEngine.h"
 #include "tetromino.hpp"
 
@@ -12,7 +12,7 @@ class Renderer {
   Renderer(olc::PixelGameEngine &render_engine, const std::string &sprites_path);
 
   void renderGameState(const GameState<> &state, const bool debug_mode,
-                       const KeyEvents& key_events);
+                       const KeyEvents &key_events);
 
   void renderMenu(const MenuState &menu_state);
 
@@ -56,14 +56,17 @@ class Renderer {
 
   void renderNextTetromino(const Tetromino &next_tetromino, const int level);
 
-  void renderDebug(const GameState<> &state, const KeyEvents& key_events);
+  void renderDebug(const GameState<> &state, const KeyEvents &key_events);
 
   void renderBackground(const std::string background_sprite);
+
+  void renderLevelSelector(const int level);
 
   std::string background_rendered_;
   std::map<std::string, std::unique_ptr<olc::Sprite>> sprite_map_;
   std::vector<std::vector<std::unique_ptr<olc::Sprite>>> block_sprites_;
   olc::PixelGameEngine &render_engine_ref_;
+  int frame_counter_;
 };  // namespace tetris_clone
 
 }  // namespace tetris_clone

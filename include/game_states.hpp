@@ -46,7 +46,9 @@ struct GameState {
 };
 
 struct MenuState {
-  int level;
+  int level{0};
+  bool plus_ten_levels{false};
+  bool start_game{false};
 };
 
 inline bool entryDelay(const GameState<> &state) { return state.entry_delay_counter > 0; }
@@ -57,12 +59,12 @@ enum class StatisticsMode {
 };
 
 struct GameOptions {
-  int level;
-  int das_full_charge;
-  int das_min_charge;
-  int game_frequency;
-  bool show_controls;
-  StatisticsMode statistics_mode;
+  int level{};
+  int das_full_charge{16};
+  int das_min_charge{10};
+  int game_frequency{60};
+  bool show_controls{true};
+  StatisticsMode statistics_mode{};
 };
 
 } // namespace tetris_clone
