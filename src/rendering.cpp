@@ -2,6 +2,7 @@
 
 #include "assets.hpp"
 #include "game_logic.hpp"
+#include "game_processor.hpp"
 #include "key_defines.hpp"
 #include "logging.hpp"
 #include "olcPixelGameEngine.h"
@@ -81,24 +82,27 @@ void Renderer::renderEntryDelay(const bool delay_entry, const int x, const int y
   render_engine_ref_.DrawSprite(x, y, getSprite(delay_sprite));
 }
 
-void Renderer::renderDasBar(const int das_counter, const int x, const int y) {
+void Renderer::renderDasBar(const int das_counter, const Das &das_processor, const int x,
+                            const int y) {
   const Coords das_box_pos{x, y};
   const Coords das_bar_pos{das_box_pos.x + 31, das_box_pos.y + 7};
   const int das_bar_length_pixels = 32;
   const int das_bar_width_pixels = 8;
   render_engine_ref_.DrawSprite(das_box_pos.x, das_box_pos.y, getSprite("das_meter"));
 
-  auto get_das_color = [](const int &das) {
-    if (das >= DAS_MIN_CHARGE) {
+  auto get_das_color = [&das_processor](const int &das) {
+    const int das_min_charge = das_processor.getMinDasChargeCount();
+    if (das >= das_min_charge) {
       return olc::GREEN;
-    } else if (das >= DAS_MIN_CHARGE / 2) {
+    } else if (das >= das_min_charge / 2) {
       return olc::YELLOW;
     } else {
       return olc::RED;
     };
   };
   const auto color = get_das_color(das_counter);
-  const int das_bar_pixels = das_counter * (das_bar_length_pixels / DAS_FULL_CHARGE);
+  const int das_bar_pixels =
+      das_counter * (das_bar_length_pixels / das_processor.getFullDasChargeCount());
   render_engine_ref_.FillRect(das_bar_pos.x, das_bar_pos.y, das_bar_pixels, das_bar_width_pixels,
                               color);
 }
@@ -171,7 +175,7 @@ void Renderer::renderPaused() {
 
 void Renderer::renderGameState(const GameState<> &state, const bool render_controls,
                                const bool render_das_bar, const bool render_entry_delay,
-                               const KeyEvents &key_events) {
+                               const KeyEvents &key_events, const Das &das_processor) {
   constexpr Coords grid_top_left{96, 40};
   constexpr Rect grid_size{80, 160};
   constexpr Coords counter_sprite_pos{13, 61};
@@ -200,7 +204,7 @@ void Renderer::renderGameState(const GameState<> &state, const bool render_contr
     renderControls(state, key_events, controller_box_pos.x, controller_box_pos.y);
   }
   if (render_das_bar) {
-    renderDasBar(state.das_counter, das_box_pos.x, das_box_pos.y);
+    renderDasBar(state.das_counter, das_processor, das_box_pos.x, das_box_pos.y);
   }
   if (render_entry_delay) {
     renderEntryDelay(entryDelay(state), entry_delay_pos.x, entry_delay_pos.y);

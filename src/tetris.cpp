@@ -14,10 +14,7 @@
 
 namespace tetris_clone {
 
-using Clock = std::chrono::high_resolution_clock;
-using Duration_us = std::chrono::duration<int, std::nano>;
-using Duration_ms = std::chrono::duration<int, std::milli>;
-constexpr Duration_us single_frame(16666667);
+constexpr int NTSC_frame_ns = (1.0 / 60.0) * 1e9;
 
 KeyBindings getKeyBindings() {
   KeyBindings key_bindings;
@@ -58,7 +55,8 @@ TetrisClone::TetrisClone()
       active_processor_{level_menu_processor_},
       key_bindings_{getKeyBindings()},
       key_states_{initializeKeyStatesFromBindings(key_bindings_)},
-      frame_end_{} {
+      frame_end_{},
+      single_frame_{NTSC_frame_ns} {
   sAppName = "TetrisClone";
 
   if (not loadSoundAssets("./assets/sounds/", *sample_player_)) {
@@ -72,7 +70,7 @@ bool TetrisClone::OnUserCreate() {
     return false;
   }
   this->SetPixelMode(olc::Pixel::MASK);
-  frame_end_ = Clock::now() + single_frame;
+  frame_end_ = Clock::now() + single_frame_;
 
   return true;
 }
@@ -99,7 +97,11 @@ KeyEvents TetrisClone::getKeyEvents(KeyStates &last_key_states) {
 void TetrisClone::processProgramFlowSignal(const ProgramFlowSignal &signal) {
   if (signal == ProgramFlowSignal::StartGame) {
     GameOptions options{};
+    //options.game_frequency = 50;
+    single_frame_ = Duration_ns{static_cast<int>((1.0 / options.game_frequency) * 1e9)};
     options.level = level_menu_processor_->getSelectedLevel();
+    //options.das_full_charge = 12;
+    //options.das_min_charge = 8;
     game_frame_processor_ =
         std::make_shared<GameProcessor>(options, renderer_, sample_player_);
     active_processor_ = game_frame_processor_;
@@ -115,12 +117,13 @@ void TetrisClone::sleepUntilNextFrame() {
         "frequency.");
   }
   std::this_thread::sleep_until(frame_end_);
-  frame_end_ += single_frame;
+  frame_end_ += single_frame_;
 }
 
 /**
  * TODO:
  *
+ * - Offer PAL level speeds
  * - Options screen
  * - High score functionality
  * - Asset loading from binary

@@ -14,6 +14,9 @@
 
 namespace tetris_clone {
 
+using Clock = std::chrono::high_resolution_clock;
+using Duration_ns = std::chrono::duration<int, std::nano>;
+
 class TetrisClone : public olc::PixelGameEngine {
  public:
   TetrisClone();
@@ -39,6 +42,7 @@ class TetrisClone : public olc::PixelGameEngine {
   KeyBindings key_bindings_;
   KeyStates key_states_;
   std::chrono::time_point<std::chrono::high_resolution_clock> frame_end_;
+  Duration_ns single_frame_;
 };
 
 }  // namespace tetris_clone

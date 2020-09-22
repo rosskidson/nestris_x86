@@ -1,4 +1,5 @@
 #include "game_logic.hpp"
+#include "game_states.hpp"
 
 namespace tetris_clone {
 
@@ -78,32 +79,29 @@ bool updateStateOnNoCollision(const GameState<>::Grid &grid, const int tetromino
   }
 }
 
-void resetDas(GameState<> &state) { state.das_counter = 0; }
-
-void fullyChargeDas(GameState<> &state) { state.das_counter = DAS_FULL_CHARGE; }
-
 void processKeyEvents(const KeyEvents &key_events, const sound::SoundPlayer &sample_player,
-                      GameState<> &state) {
-  auto move_check_wall_charge = [&sample_player](GameState<> &state, const int direction) {
+                      const Das &das_processor, GameState<> &state) {
+  auto move_check_wall_charge = [&sample_player, &das_processor](GameState<> &state,
+                                                                 const int direction) {
     if (updateStateOnNoCollision(state.grid, direction, 0, 0, state.active_tetromino)) {
       sample_player.playSample("move");
     } else {
-      fullyChargeDas(state);
+      das_processor.fullyChargeDas(state.das_counter);
     }
   };
 
   if (key_events.at(KeyAction::Left).pressed) {
-    resetDas(state);
+    das_processor.hardResetDas(state.das_counter);
     move_check_wall_charge(state, -1);
   }
   if (key_events.at(KeyAction::Right).pressed) {
-    resetDas(state);
+    das_processor.hardResetDas(state.das_counter);
     move_check_wall_charge(state, +1);
   }
-  auto das_trigger = [](int &das_counter) {
+  auto das_trigger = [&das_processor](int& das_counter) {
     ++das_counter;
-    if (das_counter >= DAS_FULL_CHARGE) {
-      das_counter = DAS_MIN_CHARGE;
+    if (das_processor.dasFullyCharged(das_counter)) {
+      das_processor.softResetDas(das_counter);
       return true;
     }
     return false;
@@ -187,7 +185,9 @@ void updateScoreAndLevel(const int line_clears, const sound::SoundPlayer &sound_
   }
 }
 
-int getEntryDelayFromLockHeight(const int height) { return height * -0.5 + 19; }
+int getEntryDelayFromLockHeight(const int height) {
+  return height * -0.5 + 19;
+}
 
 bool applyGravity(GameState<> &state) {
   if (--state.gravity_counter == 0) {
@@ -271,4 +271,4 @@ void animateLineClear(const sound::SoundPlayer &sample_player, GameState<> &stat
   }
 }
 
-} // namespace tetris_clone
+}  // namespace tetris_clone

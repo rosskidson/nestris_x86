@@ -20,6 +20,7 @@ GameProcessor::GameProcessor(const GameOptions& options, const std::shared_ptr<R
       state_{},
       real_rng_{},
       random_generator_{0, 6},
+      das_processor_{options.das_full_charge, options.das_min_charge},
       show_controls_{options.show_controls},
       show_das_bar_{options.show_das_bar},
       show_entry_delay_{options.show_entry_delay},
@@ -64,7 +65,7 @@ void GameProcessor::doGravityStep(const KeyEvents& key_events) {
     }
   }
 
-  processKeyEvents(key_events, *sample_player_, state_);
+  processKeyEvents(key_events, *sample_player_, das_processor_, state_);
 
   const bool tetromino_locked = applyGravity(state_);
   if (tetromino_locked) {
@@ -104,7 +105,8 @@ ProgramFlowSignal GameProcessor::processFrame(const KeyEvents& key_events) {
   } else {
     doGravityStep(key_events);
   }
-  renderer_->renderGameState(state_, show_controls_, show_das_bar_, show_entry_delay_, key_events);
+  renderer_->renderGameState(state_, show_controls_, show_das_bar_, show_entry_delay_, key_events,
+                             das_processor_);
   return ProgramFlowSignal::FrameSuccess;
 }
 

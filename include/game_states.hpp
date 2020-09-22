@@ -6,6 +6,10 @@
 
 namespace tetris_clone {
 
+constexpr int DAS_FULL_CHARGE_DEFAULT = 16;
+constexpr int DAS_MIN_CHARGE_DEFAULT = 10;
+constexpr int NTSC_FREQUENCY = 60;
+
 template <int W = 10, int H = 20>
 // clang-format off
 struct GameState {
@@ -60,9 +64,9 @@ enum class StatisticsMode {
 
 struct GameOptions {
   int level{};
-  int das_full_charge{16};
-  int das_min_charge{10};
-  int game_frequency{60};
+  int das_full_charge{DAS_FULL_CHARGE_DEFAULT};
+  int das_min_charge{DAS_MIN_CHARGE_DEFAULT};
+  int game_frequency{NTSC_FREQUENCY};
   bool show_controls{true};
   bool show_das_bar{true};
   bool show_entry_delay{true};

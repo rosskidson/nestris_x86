@@ -1,14 +1,12 @@
 #include <vector>
 
+#include "das.hpp"
 #include "game_processor.hpp"
 #include "game_states.hpp"
 #include "key_defines.hpp"
 #include "sound.hpp"
 
 namespace tetris_clone {
-
-constexpr int DAS_FULL_CHARGE = 16;
-constexpr int DAS_MIN_CHARGE = 10;
 
 int getGravity(const int level);
 
@@ -31,12 +29,8 @@ bool updateStateOnNoCollision(const GameState<>::Grid &grid, const int tetromino
                               const int tetromino_y_offset, const int tetromino_rotation_offset,
                               TetrominoState &tetromino);
 
-void resetDas(GameState<> &state);
-
-void fullyChargeDas(GameState<> &state);
-
 void processKeyEvents(const KeyEvents &key_events, const sound::SoundPlayer &sample_player,
-                      GameState<> &state);
+                      const Das &das_processor, GameState<> &state);
 
 void clearLine(const int row, GameState<> &state);
 

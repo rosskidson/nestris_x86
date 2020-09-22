@@ -1,5 +1,6 @@
 #pragma once
 
+#include "das.hpp"
 #include "game_states.hpp"
 #include "key_defines.hpp"
 #include "logging.hpp"
@@ -13,7 +14,7 @@ class Renderer {
 
   void renderGameState(const GameState<> &state, const bool render_controls,
                        const bool render_das_bar, const bool render_entry_delay,
-                       const KeyEvents &key_events);
+                       const KeyEvents &key_events, const Das &das_processor);
 
   void renderMenu(const MenuState &menu_state);
 
@@ -57,7 +58,7 @@ class Renderer {
 
   void renderNextTetromino(const Tetromino &next_tetromino, const int level);
 
-  void renderDasBar(const int das_counter, const int x, const int y);
+  void renderDasBar(const int das_counter, const Das &das_processor, const int x, const int y);
   void renderControls(const GameState<> &state, const KeyEvents &key_events, const int x,
                       const int y);
   void renderEntryDelay(const bool delay_entry, const int x, const int y);
