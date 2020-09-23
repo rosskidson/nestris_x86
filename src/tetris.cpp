@@ -102,6 +102,7 @@ void TetrisClone::processProgramFlowSignal(const ProgramFlowSignal &signal) {
     options.level = level_menu_processor_->getSelectedLevel();
     //options.das_full_charge = 12;
     //options.das_min_charge = 8;
+    //options.gravity_type = TetrisType::PAL;
     game_frame_processor_ =
         std::make_shared<GameProcessor>(options, renderer_, sample_player_);
     active_processor_ = game_frame_processor_;

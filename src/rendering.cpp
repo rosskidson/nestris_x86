@@ -100,9 +100,15 @@ void Renderer::renderDasBar(const int das_counter, const Das &das_processor, con
       return olc::RED;
     };
   };
+
+  auto get_das_bar_pixel_length = [&](const int das) {
+    return das_processor.dasFullyCharged(das)
+               ? das_bar_length_pixels
+               : das_counter * (das_bar_length_pixels / das_processor.getFullDasChargeCount());
+  };
+
   const auto color = get_das_color(das_counter);
-  const int das_bar_pixels =
-      das_counter * (das_bar_length_pixels / das_processor.getFullDasChargeCount());
+  const auto das_bar_pixels = get_das_bar_pixel_length(das_counter);
   render_engine_ref_.FillRect(das_bar_pos.x, das_bar_pos.y, das_bar_pixels, das_bar_width_pixels,
                               color);
 }

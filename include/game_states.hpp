@@ -1,14 +1,16 @@
 #pragma once
 
-#include "tetromino.hpp"
-
 #include <array>
+
+#include "tetromino.hpp"
 
 namespace tetris_clone {
 
 constexpr int DAS_FULL_CHARGE_DEFAULT = 16;
 constexpr int DAS_MIN_CHARGE_DEFAULT = 10;
 constexpr int NTSC_FREQUENCY = 60;
+
+enum class TetrisType { NTSC, PAL };
 
 template <int W = 10, int H = 20>
 // clang-format off
@@ -44,7 +46,7 @@ struct GameState {
   Tetromino next_tetromino;
   int score;
   int high_score;
-  std::array<int, 7> tetromino_counts; // Ordered according to enum.
+  std::array<int, 7> tetromino_counts;  // Ordered according to enum.
   bool topped_out;
   bool paused;
 };
@@ -55,22 +57,22 @@ struct MenuState {
   bool start_game{false};
 };
 
-inline bool entryDelay(const GameState<> &state) { return state.entry_delay_counter > 0; }
+inline bool entryDelay(const GameState<> &state) {
+  return state.entry_delay_counter > 0;
+}
 
-enum class StatisticsMode {
-  classic,
-  ctwc
-};
+enum class StatisticsMode { classic, ctwc };
 
 struct GameOptions {
   int level{};
   int das_full_charge{DAS_FULL_CHARGE_DEFAULT};
   int das_min_charge{DAS_MIN_CHARGE_DEFAULT};
   int game_frequency{NTSC_FREQUENCY};
+  TetrisType gravity_type{TetrisType::NTSC};
   bool show_controls{true};
   bool show_das_bar{true};
   bool show_entry_delay{true};
   StatisticsMode statistics_mode{};
 };
 
-} // namespace tetris_clone
+}  // namespace tetris_clone

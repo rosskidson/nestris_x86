@@ -2,9 +2,10 @@
 
 #include <random>
 
+#include "das.hpp"
 #include "frame_processor_interface.hpp"
 #include "game_states.hpp"
-#include "das.hpp"
+#include "gravity.hpp"
 #include "rendering.hpp"
 #include "sound.hpp"
 
@@ -27,9 +28,6 @@ class GameProcessor : public FrameProcessorInterface {
   Tetromino getRandomTetromino();
   GameState<> getNewState(const int level);
 
-  void resetDas(GameState<>& state);
-  void fullyChargeDas(GameState<>& state);
-
   void doGravityStep(const KeyEvents& key_events);
   void doEntryDelayStep(const KeyEvents& key_events);
 
@@ -39,6 +37,7 @@ class GameProcessor : public FrameProcessorInterface {
   std::random_device real_rng_;
   std::uniform_int_distribution<int> random_generator_;
   Das das_processor_;
+  Gravity gravity_provider_;
   bool show_controls_;
   bool show_das_bar_;
   bool show_entry_delay_;

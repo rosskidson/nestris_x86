@@ -1,23 +1,12 @@
 #include "game_logic.hpp"
+
 #include "game_states.hpp"
+#include "gravity.hpp"
 
 namespace tetris_clone {
 
 constexpr int LINES_PER_LEVEL = 10;
-const std::vector<int> LEVEL_GRAVITY{48, 43, 38, 33, 28, 23, 18, 13, 8, 6,
-                                     5,  5,  5,  4,  4,  4,  3,  3,  3};
-
 const std::vector<int> line_scores{0, 40, 100, 300, 1200};
-
-int getGravity(const int level) {
-  if (level > 28) {
-    return 1;
-  } else if (level > 18) {
-    return 2;
-  } else {
-    return LEVEL_GRAVITY.at(level);
-  }
-}
 
 GameState<>::Grid addTetrominoToGrid(const GameState<>::Grid &grid,
                                      const TetrominoState &tetromino) {
@@ -98,7 +87,7 @@ void processKeyEvents(const KeyEvents &key_events, const sound::SoundPlayer &sam
     das_processor.hardResetDas(state.das_counter);
     move_check_wall_charge(state, +1);
   }
-  auto das_trigger = [&das_processor](int& das_counter) {
+  auto das_trigger = [&das_processor](int &das_counter) {
     ++das_counter;
     if (das_processor.dasFullyCharged(das_counter)) {
       das_processor.softResetDas(das_counter);
@@ -189,9 +178,9 @@ int getEntryDelayFromLockHeight(const int height) {
   return height * -0.5 + 19;
 }
 
-bool applyGravity(GameState<> &state) {
+bool applyGravity(const Gravity &gravity_provider, GameState<> &state) {
   if (--state.gravity_counter == 0) {
-    state.gravity_counter = getGravity(state.level);
+    state.gravity_counter = gravity_provider.getGravity(state.level);
     if (not updateStateOnNoCollision(state.grid, 0, 1, 0, state.active_tetromino)) {
       state.entry_delay_counter = getEntryDelayFromLockHeight(state.active_tetromino.y);
       state.spawn_new_tetromino = true;

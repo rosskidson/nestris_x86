@@ -3,6 +3,7 @@
 #include "das.hpp"
 #include "game_processor.hpp"
 #include "game_states.hpp"
+#include "gravity.hpp"
 #include "key_defines.hpp"
 #include "sound.hpp"
 
@@ -43,7 +44,7 @@ void updateScoreAndLevel(const int line_clears, const sound::SoundPlayer &sound_
 
 int getEntryDelayFromLockHeight(const int height);
 
-bool applyGravity(GameState<> &state);
+bool applyGravity(const Gravity &gravity_provider, GameState<> &state);
 
 bool updateTopOutState(const KeyEvents &key_events, int &top_out_frame_counter, GameState<> &state);
 

@@ -5,6 +5,7 @@
 
 #include "assets.hpp"
 #include "game_logic.hpp"
+#include "gravity.hpp"
 #include "key_defines.hpp"
 #include "logging.hpp"
 #include "sound.hpp"
@@ -21,6 +22,7 @@ GameProcessor::GameProcessor(const GameOptions& options, const std::shared_ptr<R
       real_rng_{},
       random_generator_{0, 6},
       das_processor_{options.das_full_charge, options.das_min_charge},
+      gravity_provider_{options.gravity_type},
       show_controls_{options.show_controls},
       show_das_bar_{options.show_das_bar},
       show_entry_delay_{options.show_entry_delay},
@@ -67,7 +69,7 @@ void GameProcessor::doGravityStep(const KeyEvents& key_events) {
 
   processKeyEvents(key_events, *sample_player_, das_processor_, state_);
 
-  const bool tetromino_locked = applyGravity(state_);
+  const bool tetromino_locked = applyGravity(gravity_provider_, state_);
   if (tetromino_locked) {
     sample_player_->playSample("lock");
     auto lines_cleared = checkForLineClears(state_);
