@@ -51,10 +51,15 @@ struct GameState {
   bool paused;
 };
 
+struct OptionState {
+  bool hello;
+
+};
+
 struct MenuState {
   int level{0};
+  bool options_selected{false};
   bool plus_ten_levels{false};
-  bool start_game{false};
 };
 
 inline bool entryDelay(const GameState<> &state) {

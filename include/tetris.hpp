@@ -7,6 +7,7 @@
 #include "game_states.hpp"
 #include "key_defines.hpp"
 #include "level_screen_processor.hpp"
+#include "option_screen_processor.hpp"
 #include "olcPixelGameEngine.h"
 #include "rendering.hpp"
 #include "sound.hpp"
@@ -38,6 +39,7 @@ class TetrisClone : public olc::PixelGameEngine {
   std::shared_ptr<GameOptions> game_options_;
   std::shared_ptr<GameProcessor> game_frame_processor_;
   std::shared_ptr<LevelScreenProcessor> level_menu_processor_;
+  std::shared_ptr<OptionScreenProcessor> option_menu_processor_;
   std::shared_ptr<FrameProcessorInterface> active_processor_;
   KeyBindings key_bindings_;
   KeyStates key_states_;

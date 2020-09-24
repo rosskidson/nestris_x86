@@ -17,6 +17,7 @@ class Renderer {
                        const KeyEvents &key_events, const Das &das_processor);
 
   void renderMenu(const MenuState &menu_state);
+  void renderOptionScreen(const OptionState &option_state);
 
   void renderPaused();
 
@@ -50,6 +51,9 @@ class Renderer {
       }
     }
   }
+
+  void drawTriangleSelector(const int x, const int y, const int size, const olc::Pixel &color,
+                            const bool right);
 
   void drawNumber(const int x, const int y, const int num, const int pad,
                   const olc::Pixel color = olc::WHITE);

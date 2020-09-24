@@ -170,7 +170,7 @@ void Renderer::doTetrisFlash(const int &line_clear_frame_number) {
   if ((frame - 1) % 4 == 0) {
     render_engine_ref_.DrawSprite(0, 0, getSprite("background_flash"));
   } else {
-    render_engine_ref_.DrawSprite(0, 0, getSprite("background"));
+    render_engine_ref_.DrawSprite(0, 0, getSprite("background-black"));
   }
 }
 
@@ -196,7 +196,7 @@ void Renderer::renderGameState(const GameState<> &state, const bool render_contr
       return addTetrominoToGrid(state.grid, state.active_tetromino);
     }
   };
-  renderBackground("background");
+  renderBackground("background-black");
   // Clear the field.
   render_engine_ref_.FillRect(grid_top_left.x, grid_top_left.y, grid_size.width, grid_size.height,
                               olc::BLACK);
@@ -220,10 +220,42 @@ void Renderer::renderGameState(const GameState<> &state, const bool render_contr
   }
 }
 
+void Renderer::drawTriangleSelector(const int x, const int y, const int size,
+                                    const olc::Pixel &color, const bool right) {
+  for (int j = 0; j < size; ++j) {
+    const int j_max = j < size / 2 ? j + 1 : size - j;
+    if (right) {
+      for (int i = 0; i > -j_max; --i) {
+        render_engine_ref_.Draw(x + i, y + j, color);
+      }
+    } else {
+      for (int i = 0; i < j_max; ++i) {
+        render_engine_ref_.Draw(x + i, y + j, color);
+      }
+    }
+  }
+}
+
 void Renderer::renderMenu(const MenuState &menu_state) {
   renderBackground("a-type-background");
 
-  renderLevelSelector(menu_state.level);
+  // Clear the top area.
+  render_engine_ref_.FillRect(30, 72, 190, 50, olc::BLACK);
+
+  render_engine_ref_.DrawString(157, 80, "OPTIONS");
+
+  render_engine_ref_.DrawString(72, 153, "JDMFX  1357428 30");
+  render_engine_ref_.DrawString(72, 169, "KORYAN 1273120 29");
+  render_engine_ref_.DrawString(72, 185, "JONAS  1245200 29");
+
+  if (menu_state.options_selected) {
+    const auto color = frame_counter_ % 4 ? olc::WHITE : olc::BLACK;
+    drawTriangleSelector(148, 80, 7, color, false);
+    drawTriangleSelector(219, 80, 7, color, true);
+    renderLevelSelector(-1);
+  } else {
+    renderLevelSelector(menu_state.level);
+  }
 }
 
 void Renderer::renderLevelSelector(const int level) {
@@ -231,10 +263,6 @@ void Renderer::renderLevelSelector(const int level) {
   constexpr Rect level_selector_size{83, 35};
   constexpr Rect selector_size{16, 16};
   const olc::Pixel selector_color(252, 151, 56);
-
-  // Clear the selector.
-  render_engine_ref_.FillRect(level_selector.x, level_selector.y, level_selector_size.width,
-                              level_selector_size.height, olc::BLACK);
 
   auto get_selector_coords = [&](const int level) -> Coords {
     const int y = (level % 10 > 4) ? level_selector.y + selector_size.height : level_selector.y;
@@ -244,9 +272,41 @@ void Renderer::renderLevelSelector(const int level) {
   // Draw the flashing selector, and then draw the levels on top with transparency.
   const auto coords = get_selector_coords(level);
   const auto color = frame_counter_ % 4 ? selector_color : olc::BLACK;
-  render_engine_ref_.FillRect(coords.x, coords.y, selector_size.width, selector_size.height, color);
+  if (level >= 0) {
+    render_engine_ref_.FillRect(coords.x, coords.y, selector_size.width, selector_size.height,
+                                color);
+  }
   render_engine_ref_.DrawSprite(level_selector.x, level_selector.y, getSprite("levels"));
 
   ++frame_counter_;
 }
+
+void Renderer::renderOptionScreen(const OptionState &option_state) {
+  renderBackground("options-background");
+
+  render_engine_ref_.DrawString(100, 17, "OPTIONS");
+  render_engine_ref_.DrawString(32, 35, "DAS PROFILE        NTSC");
+  render_engine_ref_.DrawString(32, 45, "FREQUENCY (HZ)      60");
+  render_engine_ref_.DrawString(32, 55, "DAS INITAL DELAY    16");
+  render_engine_ref_.DrawString(32, 65, "DAS REPEAT DELAY     6");
+  render_engine_ref_.DrawString(32, 75, "LEVEL GRAVITY      NTSC");
+  render_engine_ref_.DrawString(32, 90, "HARD DROP          OFF");
+  render_engine_ref_.DrawString(32, 100, "HOLD               OFF");
+  render_engine_ref_.DrawString(32, 110, "WALL KICK          OFF");
+  render_engine_ref_.DrawString(32, 125, "SHOW DAS METER     OFF");
+  render_engine_ref_.DrawString(32, 135, "SHOW DAS CHAIN     OFF");
+  render_engine_ref_.DrawString(32, 145, "SHOW WALL CHARGES  OFF");
+  render_engine_ref_.DrawString(32, 155, "SHOW ENTRY DELAY   OFF");
+  render_engine_ref_.DrawString(32, 165, "SHOW CONTROLS      OFF");
+  render_engine_ref_.DrawString(32, 175, "STATSTICS MODE  CLASSIC");
+  render_engine_ref_.DrawString(32, 190, "  CONFIGURE KEYBOARD");
+  render_engine_ref_.DrawString(32, 200, "  CONFIGURE CONTROLLER");
+
+
+  //render_engine_ref_.DrawString(60, 80, "LEVEL GRAVITY:     NTSC");
+  //render_engine_ref_.DrawString(70, 80, "LEVEL GRAVITY:     NTSC");
+
+
+}
 };  // namespace tetris_clone
+

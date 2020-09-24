@@ -11,6 +11,7 @@
 #include "key_defines.hpp"
 #include "level_screen_processor.hpp"
 #include "logging.hpp"
+#include "option_screen_processor.hpp"
 
 namespace tetris_clone {
 
@@ -52,6 +53,8 @@ TetrisClone::TetrisClone()
           std::make_shared<GameProcessor>(GameOptions{}, renderer_, sample_player_)},
       level_menu_processor_{
           std::make_shared<LevelScreenProcessor>(renderer_, sample_player_)},
+      option_menu_processor_{
+          std::make_shared<OptionScreenProcessor>(renderer_, sample_player_)},
       active_processor_{level_menu_processor_},
       key_bindings_{getKeyBindings()},
       key_states_{initializeKeyStatesFromBindings(key_bindings_)},
@@ -106,8 +109,10 @@ void TetrisClone::processProgramFlowSignal(const ProgramFlowSignal &signal) {
     game_frame_processor_ =
         std::make_shared<GameProcessor>(options, renderer_, sample_player_);
     active_processor_ = game_frame_processor_;
-  } else if (signal == ProgramFlowSignal::FrameProcessorEnded) {
+  } else if (signal == ProgramFlowSignal::LevelSelectorScreen) {
     active_processor_ = level_menu_processor_;
+  } else if (signal == ProgramFlowSignal::OptionsScreen) {
+    active_processor_ = option_menu_processor_;
   }
 }
 
@@ -124,13 +129,19 @@ void TetrisClone::sleepUntilNextFrame() {
 /**
  * TODO:
  *
- * - Offer PAL level speeds
  * - Options screen
+ * - Black bkgrd, restructure layout for
+ *     -ARE box
+ *     -7 digit score
+ *     -tetromino hold
+ *     -wall charge signal
+ *     -DAS chain counter
  * - High score functionality
  * - Asset loading from binary
  * - Press down scoring
+ * - Hard drop
+ * - Hold
  * - Remove magic numbers in game_logic (entry delay, line clear frame numbers)
- * - BUG: pause doesn't work during entry delay
  * - BUG: pausing for a long time messes up sleep until frame end
  * - Press down hold between blocks?
  * - precise timing checks:

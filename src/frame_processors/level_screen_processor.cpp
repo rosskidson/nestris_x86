@@ -7,16 +7,32 @@
 
 namespace tetris_clone {
 
-void processKeyEvents(const KeyEvents& key_events, const sound::SoundPlayer& sample_player_,
+ProgramFlowSignal processKeyEvents(const KeyEvents& key_events, const sound::SoundPlayer& sample_player_,
                       MenuState& menu_state) {
   auto& level = menu_state.level;
+  if (menu_state.options_selected) {
+    if (key_events.at(KeyAction::Left).pressed) {
+      sample_player_.playSample("menu_blip");
+      menu_state.options_selected = false;
+      return ProgramFlowSignal::FrameSuccess;
+    }
+    if(key_events.at(KeyAction::Start).pressed) {
+      sample_player_.playSample("menu_select_02");
+      return ProgramFlowSignal::OptionsScreen;
+    }
+  }
+
   if (key_events.at(KeyAction::Left).pressed && level > 0) {
     sample_player_.playSample("menu_blip");
     --level;
   }
-  if (key_events.at(KeyAction::Right).pressed && level < 9) {
+  if (key_events.at(KeyAction::Right).pressed) {
+    if (level == 4 || level == 9) {
+      menu_state.options_selected = true;
+    } else {
+      ++level;
+    }
     sample_player_.playSample("menu_blip");
-    ++level;
   }
   if (key_events.at(KeyAction::Down).pressed && level < 5) {
     sample_player_.playSample("menu_blip");
@@ -30,8 +46,9 @@ void processKeyEvents(const KeyEvents& key_events, const sound::SoundPlayer& sam
   if (key_events.at(KeyAction::Start).pressed) {
     sample_player_.playSample("menu_select_01");
     menu_state.plus_ten_levels = (key_events.at(KeyAction::RotateClockwise).held);
-    menu_state.start_game = true;
+    return ProgramFlowSignal::StartGame;
   }
+  return ProgramFlowSignal::FrameSuccess;
 }
 
 LevelScreenProcessor::LevelScreenProcessor(const std::shared_ptr<Renderer>& renderer,
@@ -39,19 +56,14 @@ LevelScreenProcessor::LevelScreenProcessor(const std::shared_ptr<Renderer>& rend
     : renderer_(renderer), sample_player_(sample_player), state_{} {}
 
 ProgramFlowSignal LevelScreenProcessor::processFrame(const KeyEvents& key_events) {
-  processKeyEvents(key_events, *sample_player_, state_);
+  auto signal = processKeyEvents(key_events, *sample_player_, state_);
 
   renderer_->renderMenu(state_);
 
-  if (state_.start_game) {
-    state_.start_game = false;
-    return ProgramFlowSignal::StartGame;
-  } else {
-    return ProgramFlowSignal::FrameSuccess;
-  }
+  return signal;
 }
 
-int LevelScreenProcessor::getSelectedLevel(){
+int LevelScreenProcessor::getSelectedLevel() {
   return state_.level + (state_.plus_ten_levels ? 10 : 0);
 }
 

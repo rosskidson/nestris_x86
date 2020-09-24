@@ -81,6 +81,11 @@ void GameProcessor::doGravityStep(const KeyEvents& key_events) {
 }
 
 void GameProcessor::doEntryDelayStep(const KeyEvents& key_events) {
+  if (key_events.at(KeyAction::Start).pressed) {
+    state_.paused = true;
+    sample_player_->playSample("pause");
+  }
+
   animateLineClear(*sample_player_, state_, line_clear_info_);
   if (line_clear_info_.rows.size() == 4) {
     renderer_->doTetrisFlash(line_clear_info_.animation_frame);
@@ -96,7 +101,7 @@ ProgramFlowSignal GameProcessor::processFrame(const KeyEvents& key_events) {
   if (state_.topped_out) {
     const bool end_game = updateTopOutState(key_events, top_out_frame_counter_, state_);
     if (end_game) {
-      return ProgramFlowSignal::FrameProcessorEnded;
+      return ProgramFlowSignal::LevelSelectorScreen;
     }
   } else if (state_.paused) {
     if (key_events.at(KeyAction::Start).pressed) {

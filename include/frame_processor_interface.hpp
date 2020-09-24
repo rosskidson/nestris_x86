@@ -6,8 +6,9 @@ namespace tetris_clone {
 
 enum class ProgramFlowSignal {
   FrameSuccess,            // The frame processor intends to run again on the next frame.
-  FrameProcessorEnded,     // The frame processor has ended and intends another to take over.
   StartGame,               // A new game should be created and a game processor should start.
+  OptionsScreen,           // Open options screen.
+  LevelSelectorScreen,     // Open level selector screen.
   EndProgram               // End the program.
 };
 
