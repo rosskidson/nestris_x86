@@ -1,7 +1,10 @@
 #pragma once
 
 #include <array>
+#include <map>
+#include <memory>
 
+#include "option.hpp"
 #include "tetromino.hpp"
 
 namespace tetris_clone {
@@ -52,8 +55,8 @@ struct GameState {
 };
 
 struct OptionState {
-  bool hello;
-
+  std::map<std::string, std::unique_ptr<OptionInterface>> options;
+  std::vector<std::string> option_order;
 };
 
 struct MenuState {
@@ -62,7 +65,7 @@ struct MenuState {
   bool plus_ten_levels{false};
 };
 
-inline bool entryDelay(const GameState<> &state) {
+inline bool entryDelay(const GameState<>& state) {
   return state.entry_delay_counter > 0;
 }
 

@@ -1,5 +1,7 @@
 #include "rendering.hpp"
 
+#include <set>
+
 #include "assets.hpp"
 #include "game_logic.hpp"
 #include "game_processor.hpp"
@@ -285,28 +287,42 @@ void Renderer::renderOptionScreen(const OptionState &option_state) {
   renderBackground("options-background");
 
   render_engine_ref_.DrawString(100, 17, "OPTIONS");
-  render_engine_ref_.DrawString(32, 35, "DAS PROFILE        NTSC");
-  render_engine_ref_.DrawString(32, 45, "FREQUENCY (HZ)      60");
-  render_engine_ref_.DrawString(32, 55, "DAS INITAL DELAY    16");
-  render_engine_ref_.DrawString(32, 65, "DAS REPEAT DELAY     6");
-  render_engine_ref_.DrawString(32, 75, "LEVEL GRAVITY      NTSC");
-  render_engine_ref_.DrawString(32, 90, "HARD DROP          OFF");
-  render_engine_ref_.DrawString(32, 100, "HOLD               OFF");
-  render_engine_ref_.DrawString(32, 110, "WALL KICK          OFF");
-  render_engine_ref_.DrawString(32, 125, "SHOW DAS METER     OFF");
-  render_engine_ref_.DrawString(32, 135, "SHOW DAS CHAIN     OFF");
-  render_engine_ref_.DrawString(32, 145, "SHOW WALL CHARGES  OFF");
-  render_engine_ref_.DrawString(32, 155, "SHOW ENTRY DELAY   OFF");
-  render_engine_ref_.DrawString(32, 165, "SHOW CONTROLS      OFF");
-  render_engine_ref_.DrawString(32, 175, "STATSTICS MODE  CLASSIC");
-  render_engine_ref_.DrawString(32, 190, "  CONFIGURE KEYBOARD");
-  render_engine_ref_.DrawString(32, 200, "  CONFIGURE CONTROLLER");
+  // render_engine_ref_.DrawString(32, 35, "DAS PROFILE        NTSC");
+  // render_engine_ref_.DrawString(32, 45, "FREQUENCY (HZ)      60");
+  // render_engine_ref_.DrawString(32, 55, "DAS INITAL DELAY    16");
+  // render_engine_ref_.DrawString(32, 65, "DAS REPEAT DELAY     6");
+  // render_engine_ref_.DrawString(32, 75, "LEVEL GRAVITY      NTSC");
+  // render_engine_ref_.DrawString(32, 90, "HARD DROP          OFF");
+  // render_engine_ref_.DrawString(32, 100, "HOLD               OFF");
+  // render_engine_ref_.DrawString(32, 110, "WALL KICK          OFF");
+  // render_engine_ref_.DrawString(32, 125, "SHOW DAS METER     OFF");
+  // render_engine_ref_.DrawString(32, 135, "SHOW DAS CHAIN     OFF");
+  // render_engine_ref_.DrawString(32, 145, "SHOW WALL CHARGES  OFF");
+  // render_engine_ref_.DrawString(32, 155, "SHOW ENTRY DELAY   OFF");
+  // render_engine_ref_.DrawString(32, 165, "SHOW CONTROLS      OFF");
+  // render_engine_ref_.DrawString(32, 175, "STATSTICS MODE  CLASSIC");
+  // render_engine_ref_.DrawString(32, 190, "  CONFIGURE KEYBOARD");
+  // render_engine_ref_.DrawString(32, 200, "  CONFIGURE CONTROLLER");
 
+  std::set<int> spacers({4, 6});
+  std::vector<int> row_locations;
+  int x_left_column = 32;
+  int x_right_column = 185;
+  int y_row = 35;
+  int counter = 0;
+  for (const auto &name : option_state.option_order) {
+    row_locations.push_back(y_row);
+    const auto &option = option_state.options.at(name);
+    render_engine_ref_.DrawString(x_left_column, y_row, option->getDisplayName());
+    render_engine_ref_.DrawString(x_right_column, y_row, option->getSelectedOptionText());
+    y_row += 10;
+    if (spacers.count(counter++)) {
+      y_row += 5;
+    }
+  }
 
-  //render_engine_ref_.DrawString(60, 80, "LEVEL GRAVITY:     NTSC");
-  //render_engine_ref_.DrawString(70, 80, "LEVEL GRAVITY:     NTSC");
-
-
+  // render_engine_ref_.DrawString(60, 80, "LEVEL GRAVITY:     NTSC");
+  // render_engine_ref_.DrawString(70, 80, "LEVEL GRAVITY:     NTSC");
 }
 };  // namespace tetris_clone
 

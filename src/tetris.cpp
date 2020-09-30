@@ -1,6 +1,7 @@
 #include "tetris.hpp"
 
 #include <chrono>
+#include <ctime>
 #include <iomanip>
 #include <memory>
 #include <thread>  //sleep until
@@ -29,7 +30,7 @@ KeyBindings getKeyBindings() {
   return key_bindings;
 }
 
-KeyStates initializeKeyStatesFromBindings(const KeyBindings& key_bindings) {
+KeyStates initializeKeyStatesFromBindings(const KeyBindings &key_bindings) {
   KeyStates key_states{};
   for (const auto &pair : key_bindings) {
     key_states[pair.first] = false;
@@ -51,10 +52,8 @@ TetrisClone::TetrisClone()
       game_options_{std::make_shared<GameOptions>()},
       game_frame_processor_{
           std::make_shared<GameProcessor>(GameOptions{}, renderer_, sample_player_)},
-      level_menu_processor_{
-          std::make_shared<LevelScreenProcessor>(renderer_, sample_player_)},
-      option_menu_processor_{
-          std::make_shared<OptionScreenProcessor>(renderer_, sample_player_)},
+      level_menu_processor_{std::make_shared<LevelScreenProcessor>(renderer_, sample_player_)},
+      option_menu_processor_{std::make_shared<OptionScreenProcessor>(renderer_, sample_player_)},
       active_processor_{level_menu_processor_},
       key_bindings_{getKeyBindings()},
       key_states_{initializeKeyStatesFromBindings(key_bindings_)},
@@ -100,14 +99,13 @@ KeyEvents TetrisClone::getKeyEvents(KeyStates &last_key_states) {
 void TetrisClone::processProgramFlowSignal(const ProgramFlowSignal &signal) {
   if (signal == ProgramFlowSignal::StartGame) {
     GameOptions options{};
-    //options.game_frequency = 50;
+    // options.game_frequency = 50;
     single_frame_ = Duration_ns{static_cast<int>((1.0 / options.game_frequency) * 1e9)};
     options.level = level_menu_processor_->getSelectedLevel();
-    //options.das_full_charge = 12;
-    //options.das_min_charge = 8;
-    //options.gravity_type = TetrisType::PAL;
-    game_frame_processor_ =
-        std::make_shared<GameProcessor>(options, renderer_, sample_player_);
+    // options.das_full_charge = 12;
+    // options.das_min_charge = 8;
+    // options.gravity_type = TetrisType::PAL;
+    game_frame_processor_ = std::make_shared<GameProcessor>(options, renderer_, sample_player_);
     active_processor_ = game_frame_processor_;
   } else if (signal == ProgramFlowSignal::LevelSelectorScreen) {
     active_processor_ = level_menu_processor_;
@@ -117,6 +115,14 @@ void TetrisClone::processProgramFlowSignal(const ProgramFlowSignal &signal) {
 }
 
 void TetrisClone::sleepUntilNextFrame() {
+  const auto now =
+      std::chrono::duration_cast<std::chrono::microseconds>(Clock::now().time_since_epoch());
+  const auto end_of_frame =
+      std::chrono::duration_cast<std::chrono::microseconds>(frame_end_.time_since_epoch());
+  LOG_INFO("Now:          " << now.count());
+  LOG_INFO("End of frame: " << end_of_frame.count());
+  LOG_INFO("Time left:    " << end_of_frame.count() - now.count());
+
   if (Clock::now() > frame_end_) {
     LOG_ERROR(
         "Runtime error: Game code is not finishing in time. The game will not run at the intended "
