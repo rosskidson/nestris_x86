@@ -87,11 +87,10 @@ bool TetrisClone::OnUserUpdate(float fElapsedTime) {
 
 KeyEvents TetrisClone::getKeyEvents(KeyStates &last_key_states) {
   KeyEvents ret_val{};
-  for (const auto &pair : key_bindings_) {
-    const auto &key = pair.first;
-    auto new_key_state = GetKey(pair.second).bHeld;
-    ret_val[key] = getButtonState(last_key_states.at(key), new_key_state);
-    last_key_states[key] = new_key_state;
+  for (const auto &[action, key] : key_bindings_) {
+    const auto new_key_state = GetKey(key).bHeld;
+    ret_val[action] = getButtonState(last_key_states.at(action), new_key_state);
+    last_key_states[action] = new_key_state;
   }
   return ret_val;
 }
@@ -115,19 +114,30 @@ void TetrisClone::processProgramFlowSignal(const ProgramFlowSignal &signal) {
 }
 
 void TetrisClone::sleepUntilNextFrame() {
-  const auto now =
-      std::chrono::duration_cast<std::chrono::microseconds>(Clock::now().time_since_epoch());
-  const auto end_of_frame =
-      std::chrono::duration_cast<std::chrono::microseconds>(frame_end_.time_since_epoch());
-  LOG_INFO("Now:          " << now.count());
-  LOG_INFO("End of frame: " << end_of_frame.count());
-  LOG_INFO("Time left:    " << end_of_frame.count() - now.count());
-
   if (Clock::now() > frame_end_) {
     LOG_ERROR(
         "Runtime error: Game code is not finishing in time. The game will not run at the intended "
         "frequency.");
+    const auto now_us =
+        std::chrono::duration_cast<std::chrono::microseconds>(Clock::now().time_since_epoch());
+    const auto end_of_frame_us =
+        std::chrono::duration_cast<std::chrono::microseconds>(frame_end_.time_since_epoch());
+    const auto overrun_us = now_us.count() - end_of_frame_us.count();
+    LOG_INFO("Now (us):          " << now_us.count());
+    LOG_INFO("End of frame (us): " << end_of_frame_us.count());
+    LOG_INFO("Time overrun (us): " << overrun_us);
+
+    // If the computer goes into standby or hibernate, the frame_end can end up lagging
+    // Clock::now() by multiple hours. It takes many frames without sleep for frame_end to catch up.
+    // If the difference is over one second, reset frame_end.
+    if (overrun_us > 1e6) {
+      frame_end_ = Clock::now();
+      const auto reset_us =
+          std::chrono::duration_cast<std::chrono::microseconds>(frame_end_.time_since_epoch());
+      LOG_INFO("Frame reset to : " << reset_us.count());
+    }
   }
+
   std::this_thread::sleep_until(frame_end_);
   frame_end_ += single_frame_;
 }
@@ -148,7 +158,6 @@ void TetrisClone::sleepUntilNextFrame() {
  * - Hard drop
  * - Hold
  * - Remove magic numbers in game_logic (entry delay, line clear frame numbers)
- * - BUG: pausing for a long time messes up sleep until frame end
  * - Press down hold between blocks?
  * - precise timing checks:
  *    - line clear sfx

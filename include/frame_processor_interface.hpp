@@ -18,7 +18,7 @@ class FrameProcessorInterface {
    * @brief Process a single frame
    *
    * @param key_events  A data structure containing all the key events for this frame
-   * @return The desired frame processor to use for the next frame
+   * @return A signal pertaining to program flow.
    */
   public:
     virtual ProgramFlowSignal processFrame(const KeyEvents& key_events) = 0;

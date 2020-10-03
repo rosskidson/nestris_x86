@@ -3,15 +3,16 @@
 #include <chrono>
 #include <memory>
 
+#include "frame_processor_interface.hpp"
 #include "game_processor.hpp"
 #include "game_states.hpp"
 #include "key_defines.hpp"
 #include "level_screen_processor.hpp"
-#include "option_screen_processor.hpp"
+#include "logging.hpp"
 #include "olcPixelGameEngine.h"
+#include "option_screen_processor.hpp"
 #include "rendering.hpp"
 #include "sound.hpp"
-#include "frame_processor_interface.hpp"
 
 namespace tetris_clone {
 
@@ -32,7 +33,6 @@ class TetrisClone : public olc::PixelGameEngine {
   void sleepUntilNextFrame();
 
   KeyEvents getKeyEvents(KeyStates& current_key_state);
-
 
   std::shared_ptr<Renderer> renderer_;
   std::shared_ptr<sound::SoundPlayer> sample_player_;

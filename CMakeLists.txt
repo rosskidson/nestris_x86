@@ -63,5 +63,5 @@ add_executable(tetris
         src/sound.cpp
         src/tetris.cpp)
 
-target_link_libraries(tetris ${OLC_LIBS})
 
+target_link_libraries(tetris ${OLC_LIBS})
