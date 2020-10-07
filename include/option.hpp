@@ -8,6 +8,7 @@ namespace tetris_clone {
 class OptionInterface {
  public:
   OptionInterface(const std::string& display_name) : display_name_{display_name} {}
+  virtual ~OptionInterface() {}
   virtual bool nextOptionAvailable() const = 0;
   virtual bool prevOptionAvailable() const = 0;
   virtual void selectNextOption() = 0;
@@ -23,16 +24,19 @@ class BoolOption : public OptionInterface {
  public:
   BoolOption(const std::string& display_name, const bool default_value)
       : OptionInterface(display_name), option_value_(default_value) {}
-  bool nextOptionAvailable() const override { return option_value_; }
-  bool prevOptionAvailable() const override { return not option_value_; }
-  void selectNextOption() override { option_value_ = false; }
-  void selectPrevOption() override { option_value_ = true; }
+  bool nextOptionAvailable() const override { return not option_value_; }
+  bool prevOptionAvailable() const override { return option_value_; }
+  void selectNextOption() override { option_value_ = true; }
+  void selectPrevOption() override { option_value_ = false; }
   std::string getSelectedOptionText() const override { return option_value_ ? "ON" : "OFF"; }
   bool getSelectedOption() const { return option_value_; }
 
  private:
   bool option_value_;
 };
+inline bool getBoolOption(const OptionInterface& option) {
+    return dynamic_cast<const BoolOption&>(option).getSelectedOption();
+}
 
 class StringOption : public OptionInterface {
  public:
@@ -81,11 +85,15 @@ class IntOption : public OptionInterface {
     }
   }
   std::string getSelectedOptionText() const override { return std::to_string(value_); }
-  int getSelectedOption() { return value_; }
+  int getSelectedOption() const { return value_; }
 
  private:
   int min_value_;
   int max_value_;
   int value_;
 };
+
+inline int getIntOption(const OptionInterface& option) {
+    return dynamic_cast<const IntOption&>(option).getSelectedOption();
+}
 }  // namespace tetris_clone

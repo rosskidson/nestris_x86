@@ -12,6 +12,7 @@
 #include "key_defines.hpp"
 #include "level_screen_processor.hpp"
 #include "logging.hpp"
+#include "option.hpp"
 #include "option_screen_processor.hpp"
 
 namespace tetris_clone {
@@ -95,15 +96,36 @@ KeyEvents TetrisClone::getKeyEvents(KeyStates &last_key_states) {
   return ret_val;
 }
 
+TetrisType getGravityOption(const OptionInterface &option) {
+  return option.getSelectedOptionText() == "NTSC" ? TetrisType::NTSC : TetrisType::PAL;
+}
+
+void dasDelaysToCharges(const int das_initial_delay, const int das_repeat_delay,
+                        int &das_full_charge, int &das_min_charge) {
+  if (das_repeat_delay > das_initial_delay) {
+    das_full_charge = das_repeat_delay;
+    das_min_charge = 0;
+  } else {
+    das_full_charge = das_initial_delay;
+    das_min_charge = das_initial_delay - das_repeat_delay;
+  }
+}
+
 void TetrisClone::processProgramFlowSignal(const ProgramFlowSignal &signal) {
   if (signal == ProgramFlowSignal::StartGame) {
+    const auto &option_map = option_menu_processor_->getOptions();
     GameOptions options{};
-    // options.game_frequency = 50;
-    single_frame_ = Duration_ns{static_cast<int>((1.0 / options.game_frequency) * 1e9)};
     options.level = level_menu_processor_->getSelectedLevel();
-    // options.das_full_charge = 12;
-    // options.das_min_charge = 8;
-    // options.gravity_type = TetrisType::PAL;
+    options.game_frequency = getIntOption(*option_map.at("refresh_frequency"));
+    single_frame_ = Duration_ns{static_cast<int>((1.0 / options.game_frequency) * 1e9)};
+    const int das_repeat_delay = getIntOption(*option_map.at("das_repeat_delay_frames"));
+    const int das_initial_delay = getIntOption(*option_map.at("das_initial_delay_frames"));
+    dasDelaysToCharges(das_initial_delay, das_repeat_delay, options.das_full_charge,
+                       options.das_min_charge);
+    options.gravity_type = getGravityOption(*option_map.at("gravity_mode"));
+    options.show_entry_delay = getBoolOption(*option_map.at("show_entry_delay"));
+    options.show_das_bar = getBoolOption(*option_map.at("show_das_meter"));
+    options.show_controls = getBoolOption(*option_map.at("show_controls"));
     game_frame_processor_ = std::make_shared<GameProcessor>(options, renderer_, sample_player_);
     active_processor_ = game_frame_processor_;
   } else if (signal == ProgramFlowSignal::LevelSelectorScreen) {
@@ -111,6 +133,11 @@ void TetrisClone::processProgramFlowSignal(const ProgramFlowSignal &signal) {
   } else if (signal == ProgramFlowSignal::OptionsScreen) {
     active_processor_ = option_menu_processor_;
   }
+  // das_profile",
+  // hard_drop",
+  // wall_kick",
+  // show_das_chain",
+  // show_wall_charges",
 }
 
 void TetrisClone::sleepUntilNextFrame() {

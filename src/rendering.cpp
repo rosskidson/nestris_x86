@@ -1,13 +1,16 @@
 #include "rendering.hpp"
 
+#include <memory>
 #include <set>
 
 #include "assets.hpp"
 #include "game_logic.hpp"
 #include "game_processor.hpp"
+#include "game_states.hpp"
 #include "key_defines.hpp"
 #include "logging.hpp"
 #include "olcPixelGameEngine.h"
+#include "option.hpp"
 
 namespace tetris_clone {
 
@@ -283,46 +286,54 @@ void Renderer::renderLevelSelector(const int level) {
   ++frame_counter_;
 }
 
-void Renderer::renderOptionScreen(const OptionState &option_state) {
-  renderBackground("options-background");
-
+std::vector<int> Renderer::renderOptions(
+    const std::map<std::string, std::unique_ptr<OptionInterface>> &options,
+    const std::vector<std::string> &option_order, const std::set<int> &spacers,
+    const int left_column, const int right_column, const int first_row) {
   render_engine_ref_.DrawString(100, 17, "OPTIONS");
-  // render_engine_ref_.DrawString(32, 35, "DAS PROFILE        NTSC");
-  // render_engine_ref_.DrawString(32, 45, "FREQUENCY (HZ)      60");
-  // render_engine_ref_.DrawString(32, 55, "DAS INITAL DELAY    16");
-  // render_engine_ref_.DrawString(32, 65, "DAS REPEAT DELAY     6");
-  // render_engine_ref_.DrawString(32, 75, "LEVEL GRAVITY      NTSC");
-  // render_engine_ref_.DrawString(32, 90, "HARD DROP          OFF");
-  // render_engine_ref_.DrawString(32, 100, "HOLD               OFF");
-  // render_engine_ref_.DrawString(32, 110, "WALL KICK          OFF");
-  // render_engine_ref_.DrawString(32, 125, "SHOW DAS METER     OFF");
-  // render_engine_ref_.DrawString(32, 135, "SHOW DAS CHAIN     OFF");
-  // render_engine_ref_.DrawString(32, 145, "SHOW WALL CHARGES  OFF");
-  // render_engine_ref_.DrawString(32, 155, "SHOW ENTRY DELAY   OFF");
-  // render_engine_ref_.DrawString(32, 165, "SHOW CONTROLS      OFF");
-  // render_engine_ref_.DrawString(32, 175, "STATSTICS MODE  CLASSIC");
-  // render_engine_ref_.DrawString(32, 190, "  CONFIGURE KEYBOARD");
-  // render_engine_ref_.DrawString(32, 200, "  CONFIGURE CONTROLLER");
 
-  std::set<int> spacers({4, 6});
   std::vector<int> row_locations;
-  int x_left_column = 32;
-  int x_right_column = 185;
-  int y_row = 35;
+  int y_row = first_row;
   int counter = 0;
-  for (const auto &name : option_state.option_order) {
+  for (const auto &name : option_order) {
+    const auto &option = options.at(name);
     row_locations.push_back(y_row);
-    const auto &option = option_state.options.at(name);
-    render_engine_ref_.DrawString(x_left_column, y_row, option->getDisplayName());
-    render_engine_ref_.DrawString(x_right_column, y_row, option->getSelectedOptionText());
+    render_engine_ref_.DrawString(left_column, y_row, option->getDisplayName());
+    render_engine_ref_.DrawString(right_column, y_row, option->getSelectedOptionText());
     y_row += 10;
     if (spacers.count(counter++)) {
       y_row += 5;
     }
   }
+  return row_locations;
+}
 
-  // render_engine_ref_.DrawString(60, 80, "LEVEL GRAVITY:     NTSC");
-  // render_engine_ref_.DrawString(70, 80, "LEVEL GRAVITY:     NTSC");
+void Renderer::renderSelector(const OptionState &option_state, const int column_location,
+                              const std::vector<int> &row_locations) {
+  const auto color = frame_counter_++ % 4 ? olc::WHITE : olc::BLACK;
+  constexpr int size = 7;
+  const auto &option = option_state.getSelectedOption();
+  if (option.prevOptionAvailable()) {
+    drawTriangleSelector(column_location, row_locations.at(option_state.selected_index), size,
+                         color, true);
+  }
+  if (option.nextOptionAvailable()) {
+    drawTriangleSelector(column_location + 40, row_locations.at(option_state.selected_index), size,
+                         color, false);
+  }
+}
+
+void Renderer::renderOptionScreen(const OptionState &option_state) {
+  renderBackground("options-background");
+  render_engine_ref_.FillRect(30, 30, 195, 180, olc::BLACK);
+  const int x_left_column = 32;
+  const int x_right_column = 180;
+  const int y_row = 35;
+
+  std::set<int> spacers{4, 6};
+  const auto row_locations = renderOptions(option_state.options, option_state.option_order, spacers,
+                                           x_left_column, x_right_column, y_row);
+  renderSelector(option_state, x_right_column - 5, row_locations);
 }
 };  // namespace tetris_clone
 

@@ -52,6 +52,12 @@ OptionScreenProcessor::OptionScreenProcessor(
       "show_controls",
   });
 
+  // Missing options:
+  //  HOLD
+  //  STATSTICS MODE
+  //  CONFIGURE KEYBOARD
+  //  CONFIGURE CONTROLLER
+
   for (const auto& name : state_.option_order) {
     if (not state_.options.count(name)) {
       LOG_ERROR("Missing option in option map `" << name << "`.");
@@ -72,12 +78,33 @@ ProgramFlowSignal processKeyEvents(const KeyEvents& key_events,
     sample_player_.playSample("menu_select_02");
     return ProgramFlowSignal::LevelSelectorScreen;
   }
+  if (key_events.at(KeyAction::Up).pressed) {
+    sample_player_.playSample("menu_blip");
+    --menu_state.selected_index;
+  }
+  if (key_events.at(KeyAction::Down).pressed) {
+    sample_player_.playSample("menu_blip");
+    ++menu_state.selected_index;
+  }
+  if (key_events.at(KeyAction::Left).pressed) {
+    sample_player_.playSample("menu_blip");
+    menu_state.getSelectedOption().selectPrevOption();
+  }
+  if (key_events.at(KeyAction::Right).pressed) {
+    sample_player_.playSample("menu_blip");
+    menu_state.getSelectedOption().selectNextOption();
+  }
 
   return ProgramFlowSignal::FrameSuccess;
 }
 
 ProgramFlowSignal OptionScreenProcessor::processFrame(const KeyEvents& key_events) {
   const auto signal = processKeyEvents(key_events, *sample_player_, state_);
+
+  if(state_.option_order.at(state_.selected_index) == "das profile") {
+    if(state_.getSelectedOption().getSelectedOptionText() == "NTSC") {
+    }
+  }
   renderer_->renderOptionScreen(state_);
   return signal;
 }

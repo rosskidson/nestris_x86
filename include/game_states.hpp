@@ -57,6 +57,11 @@ struct GameState {
 struct OptionState {
   std::map<std::string, std::unique_ptr<OptionInterface>> options;
   std::vector<std::string> option_order;
+  int selected_index;
+  const OptionInterface& getSelectedOption() const {
+    return *options.at(option_order.at(selected_index));
+  }
+  OptionInterface& getSelectedOption() { return *options.at(option_order.at(selected_index)); }
 };
 
 struct MenuState {

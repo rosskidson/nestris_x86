@@ -1,5 +1,7 @@
 #pragma once
 
+#include <set>
+
 #include "das.hpp"
 #include "game_states.hpp"
 #include "key_defines.hpp"
@@ -52,24 +54,32 @@ class Renderer {
     }
   }
 
+  // #### BASIC/COMMON ######
+  void drawNumber(const int x, const int y, const int num, const int pad,
+                  const olc::Pixel color = olc::WHITE);
+  void renderText(const GameState<> &state);
+  void renderBackground(const std::string background_sprite);
   void drawTriangleSelector(const int x, const int y, const int size, const olc::Pixel &color,
                             const bool right);
 
-  void drawNumber(const int x, const int y, const int num, const int pad,
-                  const olc::Pixel color = olc::WHITE);
-
-  void renderText(const GameState<> &state);
-
+  // #### GAME SCREEN ######
   void renderNextTetromino(const Tetromino &next_tetromino, const int level);
-
   void renderDasBar(const int das_counter, const Das &das_processor, const int x, const int y);
   void renderControls(const GameState<> &state, const KeyEvents &key_events, const int x,
                       const int y);
   void renderEntryDelay(const bool delay_entry, const int x, const int y);
 
-  void renderBackground(const std::string background_sprite);
-
+  // #### LEVEL SCREEN ######
   void renderLevelSelector(const int level);
+
+  // #### OPTION SCREEN ######
+  [[nodiscard]] std::vector<int> renderOptions(
+      const std::map<std::string, std::unique_ptr<OptionInterface>> &options,
+      const std::vector<std::string> &option_order, const std::set<int> &spacers,
+      const int left_column, const int right_column, const int first_row);
+
+  void renderSelector(const OptionState &option_state, const int column_location,
+                      const std::vector<int> &row_locations);
 
   std::string background_rendered_;
   std::map<std::string, std::unique_ptr<olc::Sprite>> sprite_map_;

@@ -4,6 +4,7 @@
 
 #include "frame_processor_interface.hpp"
 #include "game_states.hpp"
+#include "option.hpp"
 #include "rendering.hpp"
 #include "sound.hpp"
 
@@ -15,6 +16,10 @@ class OptionScreenProcessor : public FrameProcessorInterface {
                         const std::shared_ptr<sound::SoundPlayer>& sample_player);
 
   ProgramFlowSignal processFrame(const KeyEvents& key_events);
+
+  const std::map<std::string, std::unique_ptr<OptionInterface>>& getOptions(){
+    return state_.options;
+  }
 
  private:
   std::shared_ptr<Renderer> renderer_;
