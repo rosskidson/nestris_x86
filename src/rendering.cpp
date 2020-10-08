@@ -303,7 +303,8 @@ std::vector<int> Renderer::renderOptions(const OptionState::OptionMap &options,
     const auto color =
         grey_out_das_options && das_options.count(name) ? olc::DARK_GREY : olc::WHITE;
     row_locations.push_back(y_row);
-    render_engine_ref_.DrawString(left_column, y_row, option->getDisplayName(), color);
+    const int indent = (dynamic_cast<DummyOption *>(option.get())) ? 15 : 0;
+    render_engine_ref_.DrawString(left_column + indent, y_row, option->getDisplayName(), color);
     render_engine_ref_.DrawString(right_column, y_row, option->getSelectedOptionText(), color);
     y_row += 10;
     if (spacers.count(counter++)) {
@@ -318,6 +319,13 @@ void Renderer::renderSelector(const OptionState &option_state, const int column_
   const auto color = frame_counter_++ % 4 ? olc::WHITE : olc::BLACK;
   constexpr int size = 7;
   const auto &option = option_state.getSelectedOption();
+  if(option_state.isSelectedOptionDummy()) {
+    drawTriangleSelector(40, row_locations.at(option_state.selected_index), size,
+                         color, true);
+    drawTriangleSelector(210, row_locations.at(option_state.selected_index), size,
+                         color, false);
+
+  }
   if (option.prevOptionAvailable()) {
     drawTriangleSelector(column_location, row_locations.at(option_state.selected_index), size,
                          color, true);
@@ -331,14 +339,14 @@ void Renderer::renderSelector(const OptionState &option_state, const int column_
 void Renderer::renderOptionScreen(const OptionState &option_state) {
   renderBackground("options-background");
   render_engine_ref_.FillRect(30, 30, 197, 180, olc::BLACK);
-  const int x_left_column = 32;
-  const int x_right_column = 180;
-  const int y_row = 35;
+  constexpr int x_left_column = 32;
+  constexpr int x_right_column = 180;
+  constexpr int y_row_start = 40;
 
-  std::set<int> spacers{4, 6};
+  std::set<int> spacers{1, 6, 8};
   const auto row_locations =
       renderOptions(option_state.options, option_state.option_order, spacers, x_left_column,
-                    x_right_column, y_row, option_state.grey_out_das_options);
+                    x_right_column, y_row_start, option_state.grey_out_das_options);
   renderSelector(option_state, x_right_column - 5, row_locations);
 }
 };  // namespace tetris_clone

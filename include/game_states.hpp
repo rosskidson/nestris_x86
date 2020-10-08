@@ -63,6 +63,10 @@ struct OptionState {
   const OptionInterface& getSelectedOption() const {
     return *options.at(option_order.at(selected_index));
   }
+  bool isSelectedOptionDummy() const {
+    return dynamic_cast<const DummyOption*>(options.at(option_order.at(selected_index)).get());
+  }
+
   OptionInterface& getSelectedOption() { return *options.at(option_order.at(selected_index)); }
 };
 

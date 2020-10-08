@@ -12,9 +12,10 @@ namespace tetris_clone {
 OptionScreenProcessor::OptionScreenProcessor(
     const std::shared_ptr<Renderer>& renderer,
     const std::shared_ptr<sound::SoundPlayer>& sample_player)
-    : renderer_(renderer),
-      sample_player_(sample_player),
-      state_{}{
+    : renderer_(renderer), sample_player_(sample_player), state_{} {
+  state_.options["configure_keyboard"] = std::make_unique<DummyOption>("CONFIGURE KEYBOARD");
+  state_.options["configure_controller"] = std::make_unique<DummyOption>("CONFIGURE CONTROLLER");
+
   state_.options["das_profile"] = std::make_unique<StringOption>(
       "DAS PROFILE", std::vector<std::string>{"NTSC", "PAL", "CUSTOM"});
 
@@ -40,6 +41,8 @@ OptionScreenProcessor::OptionScreenProcessor(
   state_.options["show_controls"] = std::make_unique<BoolOption>("SHOW CONTROLS", false);
 
   state_.option_order = std::vector<std::string>({
+      "configure_keyboard",
+      "configure_controller",
       "das_profile",
       "refresh_frequency",
       "das_initial_delay_frames",
@@ -79,7 +82,13 @@ ProgramFlowSignal processKeyEvents(const KeyEvents& key_events,
   auto& current_idx = menu_state.selected_index;
   if (key_events.at(KeyAction::Start).pressed) {
     sample_player_.playSample("menu_select_02");
-    return ProgramFlowSignal::LevelSelectorScreen;
+    if (menu_state.option_order.at(menu_state.selected_index) == "configure_keyboard") {
+      return ProgramFlowSignal::KeyboardConfigScreen;
+    } else if (menu_state.option_order.at(menu_state.selected_index) == "configure_controller") {
+      return ProgramFlowSignal::ControllerConfigScreen;
+    } else {
+      return ProgramFlowSignal::LevelSelectorScreen;
+    }
   }
   if (key_events.at(KeyAction::Up).pressed) {
     sample_player_.playSample("menu_blip");
@@ -103,20 +112,22 @@ ProgramFlowSignal processKeyEvents(const KeyEvents& key_events,
   return ProgramFlowSignal::FrameSuccess;
 }
 
+void setDasOptions(const int freq, const int inital_delay, const int repeat_delay,
+                   const std::string& gravity, OptionState::OptionMap& option_map) {
+  dynamic_cast<IntOption&>(*option_map.at("refresh_frequency")).setOption(freq);
+  dynamic_cast<IntOption&>(*option_map.at("das_initial_delay_frames")).setOption(inital_delay);
+  dynamic_cast<IntOption&>(*option_map.at("das_repeat_delay_frames")).setOption(repeat_delay);
+  dynamic_cast<StringOption&>(*option_map.at("gravity_mode")).setOption(gravity);
+}
+
 ProgramFlowSignal OptionScreenProcessor::processFrame(const KeyEvents& key_events) {
   const auto signal = processKeyEvents(key_events, *sample_player_, state_);
 
   if (state_.options.at("das_profile")->getSelectedOptionText() == "NTSC") {
-    dynamic_cast<IntOption&>(*state_.options.at("refresh_frequency")).setOption(60);
-    dynamic_cast<IntOption&>(*state_.options.at("das_initial_delay_frames")).setOption(16);
-    dynamic_cast<IntOption&>(*state_.options.at("das_repeat_delay_frames")).setOption(6);
-    dynamic_cast<StringOption&>(*state_.options.at("gravity_mode")).setOption("NTSC");
+    setDasOptions(60, 16, 6, "NTSC", state_.options);
     state_.grey_out_das_options = true;
   } else if (state_.options.at("das_profile")->getSelectedOptionText() == "PAL") {
-    dynamic_cast<IntOption&>(*state_.options.at("refresh_frequency")).setOption(50);
-    dynamic_cast<IntOption&>(*state_.options.at("das_initial_delay_frames")).setOption(12);
-    dynamic_cast<IntOption&>(*state_.options.at("das_repeat_delay_frames")).setOption(4);
-    dynamic_cast<StringOption&>(*state_.options.at("gravity_mode")).setOption("PAL");
+    setDasOptions(50, 12, 4, "PAL", state_.options);
     state_.grey_out_das_options = true;
   } else {
     state_.grey_out_das_options = false;

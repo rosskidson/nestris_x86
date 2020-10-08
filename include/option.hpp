@@ -117,11 +117,19 @@ class IntOption : public OptionInterface {
   int value_;
 };
 
-inline IntOption& castToIntOption(OptionInterface& option) {
-  return dynamic_cast<IntOption&>(option);
-}
-
 inline int getIntOption(const OptionInterface& option) {
   return dynamic_cast<const IntOption&>(option).getSelectedOption();
 }
+
+// This is used for selecting other menu screens
+class DummyOption : public OptionInterface {
+ public:
+  DummyOption(const std::string& display_name) : OptionInterface{display_name} {}
+  bool nextOptionAvailable() const override { return false; }
+  bool prevOptionAvailable() const override { return false; }
+  void selectNextOption() override {}
+  void selectPrevOption() override {}
+  std::string getSelectedOptionText() const override { return {}; }
+};
+
 }  // namespace tetris_clone

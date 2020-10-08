@@ -176,14 +176,14 @@ void TetrisClone::sleepUntilNextFrame() {
 /**
  * TODO:
  *
- * - Options screen
- * - Black bkgrd, restructure layout for
+ * - configure keyboard
+ * - configure controller
+ * - Restructure layout for
  *     -ARE box
  *     -7 digit score
  *     -tetromino hold
  *     -wall charge signal
  *     -DAS chain counter
- * - High score functionality
  * - Asset loading from binary
  * - Press down scoring
  * - Hard drop
