@@ -55,9 +55,11 @@ struct GameState {
 };
 
 struct OptionState {
-  std::map<std::string, std::unique_ptr<OptionInterface>> options;
+  using OptionMap = std::map<std::string, std::unique_ptr<OptionInterface>>;
+  OptionMap options;
   std::vector<std::string> option_order;
   int selected_index;
+  bool grey_out_das_options;
   const OptionInterface& getSelectedOption() const {
     return *options.at(option_order.at(selected_index));
   }

@@ -111,21 +111,25 @@ void dasDelaysToCharges(const int das_initial_delay, const int das_repeat_delay,
   }
 }
 
+GameOptions menuOptionsToGameOptions(const OptionState::OptionMap &option_map) {
+  GameOptions options{};
+  options.game_frequency = getIntOption(*option_map.at("refresh_frequency"));
+  const int das_repeat_delay = getIntOption(*option_map.at("das_repeat_delay_frames"));
+  const int das_initial_delay = getIntOption(*option_map.at("das_initial_delay_frames"));
+  dasDelaysToCharges(das_initial_delay, das_repeat_delay, options.das_full_charge,
+                     options.das_min_charge);
+  options.gravity_type = getGravityOption(*option_map.at("gravity_mode"));
+  options.show_entry_delay = getBoolOption(*option_map.at("show_entry_delay"));
+  options.show_das_bar = getBoolOption(*option_map.at("show_das_meter"));
+  options.show_controls = getBoolOption(*option_map.at("show_controls"));
+  return options;
+}
+
 void TetrisClone::processProgramFlowSignal(const ProgramFlowSignal &signal) {
   if (signal == ProgramFlowSignal::StartGame) {
-    const auto &option_map = option_menu_processor_->getOptions();
-    GameOptions options{};
+    auto options = menuOptionsToGameOptions(option_menu_processor_->getOptions());
     options.level = level_menu_processor_->getSelectedLevel();
-    options.game_frequency = getIntOption(*option_map.at("refresh_frequency"));
     single_frame_ = Duration_ns{static_cast<int>((1.0 / options.game_frequency) * 1e9)};
-    const int das_repeat_delay = getIntOption(*option_map.at("das_repeat_delay_frames"));
-    const int das_initial_delay = getIntOption(*option_map.at("das_initial_delay_frames"));
-    dasDelaysToCharges(das_initial_delay, das_repeat_delay, options.das_full_charge,
-                       options.das_min_charge);
-    options.gravity_type = getGravityOption(*option_map.at("gravity_mode"));
-    options.show_entry_delay = getBoolOption(*option_map.at("show_entry_delay"));
-    options.show_das_bar = getBoolOption(*option_map.at("show_das_meter"));
-    options.show_controls = getBoolOption(*option_map.at("show_controls"));
     game_frame_processor_ = std::make_shared<GameProcessor>(options, renderer_, sample_player_);
     active_processor_ = game_frame_processor_;
   } else if (signal == ProgramFlowSignal::LevelSelectorScreen) {

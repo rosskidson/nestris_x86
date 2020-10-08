@@ -73,10 +73,11 @@ class Renderer {
   void renderLevelSelector(const int level);
 
   // #### OPTION SCREEN ######
-  [[nodiscard]] std::vector<int> renderOptions(
-      const std::map<std::string, std::unique_ptr<OptionInterface>> &options,
-      const std::vector<std::string> &option_order, const std::set<int> &spacers,
-      const int left_column, const int right_column, const int first_row);
+  [[nodiscard]] std::vector<int> renderOptions(const OptionState::OptionMap &options,
+                                               const std::vector<std::string> &option_order,
+                                               const std::set<int> &spacers, const int left_column,
+                                               const int right_column, const int first_row,
+                                               const bool grey_out_das_options);
 
   void renderSelector(const OptionState &option_state, const int column_location,
                       const std::vector<int> &row_locations);

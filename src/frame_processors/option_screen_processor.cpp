@@ -12,7 +12,9 @@ namespace tetris_clone {
 OptionScreenProcessor::OptionScreenProcessor(
     const std::shared_ptr<Renderer>& renderer,
     const std::shared_ptr<sound::SoundPlayer>& sample_player)
-    : renderer_(renderer), sample_player_(sample_player), state_{} {
+    : renderer_(renderer),
+      sample_player_(sample_player),
+      state_{}{
   state_.options["das_profile"] = std::make_unique<StringOption>(
       "DAS PROFILE", std::vector<std::string>{"NTSC", "PAL", "CUSTOM"});
 
@@ -74,17 +76,20 @@ OptionScreenProcessor::OptionScreenProcessor(
 ProgramFlowSignal processKeyEvents(const KeyEvents& key_events,
                                    const sound::SoundPlayer& sample_player_,
                                    OptionState& menu_state) {
+  auto& current_idx = menu_state.selected_index;
   if (key_events.at(KeyAction::Start).pressed) {
     sample_player_.playSample("menu_select_02");
     return ProgramFlowSignal::LevelSelectorScreen;
   }
   if (key_events.at(KeyAction::Up).pressed) {
     sample_player_.playSample("menu_blip");
-    --menu_state.selected_index;
+    current_idx = current_idx > 1 ? current_idx - 1 : 0;
   }
   if (key_events.at(KeyAction::Down).pressed) {
     sample_player_.playSample("menu_blip");
-    ++menu_state.selected_index;
+    current_idx = current_idx < menu_state.option_order.size() - 2
+                      ? current_idx + 1
+                      : menu_state.option_order.size() - 1;
   }
   if (key_events.at(KeyAction::Left).pressed) {
     sample_player_.playSample("menu_blip");
@@ -101,10 +106,22 @@ ProgramFlowSignal processKeyEvents(const KeyEvents& key_events,
 ProgramFlowSignal OptionScreenProcessor::processFrame(const KeyEvents& key_events) {
   const auto signal = processKeyEvents(key_events, *sample_player_, state_);
 
-  if(state_.option_order.at(state_.selected_index) == "das profile") {
-    if(state_.getSelectedOption().getSelectedOptionText() == "NTSC") {
-    }
+  if (state_.options.at("das_profile")->getSelectedOptionText() == "NTSC") {
+    dynamic_cast<IntOption&>(*state_.options.at("refresh_frequency")).setOption(60);
+    dynamic_cast<IntOption&>(*state_.options.at("das_initial_delay_frames")).setOption(16);
+    dynamic_cast<IntOption&>(*state_.options.at("das_repeat_delay_frames")).setOption(6);
+    dynamic_cast<StringOption&>(*state_.options.at("gravity_mode")).setOption("NTSC");
+    state_.grey_out_das_options = true;
+  } else if (state_.options.at("das_profile")->getSelectedOptionText() == "PAL") {
+    dynamic_cast<IntOption&>(*state_.options.at("refresh_frequency")).setOption(50);
+    dynamic_cast<IntOption&>(*state_.options.at("das_initial_delay_frames")).setOption(12);
+    dynamic_cast<IntOption&>(*state_.options.at("das_repeat_delay_frames")).setOption(4);
+    dynamic_cast<StringOption&>(*state_.options.at("gravity_mode")).setOption("PAL");
+    state_.grey_out_das_options = true;
+  } else {
+    state_.grey_out_das_options = false;
   }
+
   renderer_->renderOptionScreen(state_);
   return signal;
 }

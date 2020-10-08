@@ -1,7 +1,11 @@
 #pragma once
 
+#include <algorithm>
+#include <iterator>
 #include <string>
 #include <vector>
+
+#include "logging.hpp"
 
 namespace tetris_clone {
 
@@ -30,12 +34,13 @@ class BoolOption : public OptionInterface {
   void selectPrevOption() override { option_value_ = false; }
   std::string getSelectedOptionText() const override { return option_value_ ? "ON" : "OFF"; }
   bool getSelectedOption() const { return option_value_; }
+  void setOption(const bool value) { option_value_ = value; }
 
  private:
   bool option_value_;
 };
 inline bool getBoolOption(const OptionInterface& option) {
-    return dynamic_cast<const BoolOption&>(option).getSelectedOption();
+  return dynamic_cast<const BoolOption&>(option).getSelectedOption();
 }
 
 class StringOption : public OptionInterface {
@@ -57,6 +62,17 @@ class StringOption : public OptionInterface {
   }
   std::string getSelectedOptionText() const override { return options_.at(selected_option_idx_); }
   std::string getSelectedOption() const { return getSelectedOptionText(); };
+  void setOption(const std::string& value) {
+    const auto itr = std::find(options_.begin(), options_.end(), value);
+    if (itr == options_.end()) {
+      LOG_ERROR("Could not set option with value `" << value << "`. Available options are:");
+      for (const auto& option : options_) {
+        LOG_ERROR(option);
+      }
+      return;
+    }
+    selected_option_idx_ = std::distance(options_.begin(), itr);
+  }
 
  private:
   int selected_option_idx_;
@@ -86,6 +102,14 @@ class IntOption : public OptionInterface {
   }
   std::string getSelectedOptionText() const override { return std::to_string(value_); }
   int getSelectedOption() const { return value_; }
+  void setOption(const int value) {
+    if (value < min_value_ || value > max_value_) {
+      LOG_ERROR("Cannot set option with value `" << value << "`. Allowed range is [" << min_value_
+                                                 << ", " << max_value_ << "]");
+      return;
+    }
+    value_ = value;
+  }
 
  private:
   int min_value_;
@@ -93,7 +117,11 @@ class IntOption : public OptionInterface {
   int value_;
 };
 
+inline IntOption& castToIntOption(OptionInterface& option) {
+  return dynamic_cast<IntOption&>(option);
+}
+
 inline int getIntOption(const OptionInterface& option) {
-    return dynamic_cast<const IntOption&>(option).getSelectedOption();
+  return dynamic_cast<const IntOption&>(option).getSelectedOption();
 }
 }  // namespace tetris_clone

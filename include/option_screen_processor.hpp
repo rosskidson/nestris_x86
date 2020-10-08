@@ -7,6 +7,7 @@
 #include "option.hpp"
 #include "rendering.hpp"
 #include "sound.hpp"
+#include "das.hpp"
 
 namespace tetris_clone {
 
@@ -17,7 +18,7 @@ class OptionScreenProcessor : public FrameProcessorInterface {
 
   ProgramFlowSignal processFrame(const KeyEvents& key_events);
 
-  const std::map<std::string, std::unique_ptr<OptionInterface>>& getOptions(){
+  const OptionState::OptionMap& getOptions(){
     return state_.options;
   }
 

@@ -286,20 +286,25 @@ void Renderer::renderLevelSelector(const int level) {
   ++frame_counter_;
 }
 
-std::vector<int> Renderer::renderOptions(
-    const std::map<std::string, std::unique_ptr<OptionInterface>> &options,
-    const std::vector<std::string> &option_order, const std::set<int> &spacers,
-    const int left_column, const int right_column, const int first_row) {
+std::vector<int> Renderer::renderOptions(const OptionState::OptionMap &options,
+                                         const std::vector<std::string> &option_order,
+                                         const std::set<int> &spacers, const int left_column,
+                                         const int right_column, const int first_row,
+                                         const bool grey_out_das_options) {
   render_engine_ref_.DrawString(100, 17, "OPTIONS");
+  const std::set<std::string> das_options{"refresh_frequency", "das_initial_delay_frames",
+                                          "das_repeat_delay_frames", "gravity_mode"};
 
   std::vector<int> row_locations;
   int y_row = first_row;
   int counter = 0;
   for (const auto &name : option_order) {
     const auto &option = options.at(name);
+    const auto color =
+        grey_out_das_options && das_options.count(name) ? olc::DARK_GREY : olc::WHITE;
     row_locations.push_back(y_row);
-    render_engine_ref_.DrawString(left_column, y_row, option->getDisplayName());
-    render_engine_ref_.DrawString(right_column, y_row, option->getSelectedOptionText());
+    render_engine_ref_.DrawString(left_column, y_row, option->getDisplayName(), color);
+    render_engine_ref_.DrawString(right_column, y_row, option->getSelectedOptionText(), color);
     y_row += 10;
     if (spacers.count(counter++)) {
       y_row += 5;
@@ -325,14 +330,15 @@ void Renderer::renderSelector(const OptionState &option_state, const int column_
 
 void Renderer::renderOptionScreen(const OptionState &option_state) {
   renderBackground("options-background");
-  render_engine_ref_.FillRect(30, 30, 195, 180, olc::BLACK);
+  render_engine_ref_.FillRect(30, 30, 197, 180, olc::BLACK);
   const int x_left_column = 32;
   const int x_right_column = 180;
   const int y_row = 35;
 
   std::set<int> spacers{4, 6};
-  const auto row_locations = renderOptions(option_state.options, option_state.option_order, spacers,
-                                           x_left_column, x_right_column, y_row);
+  const auto row_locations =
+      renderOptions(option_state.options, option_state.option_order, spacers, x_left_column,
+                    x_right_column, y_row, option_state.grey_out_das_options);
   renderSelector(option_state, x_right_column - 5, row_locations);
 }
 };  // namespace tetris_clone
