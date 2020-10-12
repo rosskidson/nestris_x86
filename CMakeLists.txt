@@ -24,8 +24,6 @@ if(UNIX AND NOT APPLE)
             PNG::PNG
             stdc++fs
             ${OPENGL_LIBRARIES}
-            ${SDL_MIXER_LIBRARIES}
-            ${SDL_LIBRARY}
         )
 endif()
 
@@ -45,23 +43,32 @@ if(APPLE)
             GLUT::GLUT
             PNG::PNG
             ${OPENGL_LIBRARIES}
-            ${SDL_MIXER_LIBRARY}
-            ${SDL_LIBRARY}
         )
 endif()
 
 # end of OS specific
 
+
+SET(TETRIS_LIBS
+  ${SDL_MIXER_LIBRARIES}
+  ${SDL_LIBRARY}
+)
+
+add_library(olc src/olcPixelGameEngine.cpp)
+target_link_libraries(olc ${OLC_LIBS})
+
 add_executable(tetris
         src/assets.cpp
         src/game_logic.cpp
         src/main.cpp
+        src/olc_drawer.cpp
         src/rendering.cpp
         src/frame_processors/game_processor.cpp
         src/frame_processors/level_screen_processor.cpp
         src/frame_processors/option_screen_processor.cpp
+        src/frame_processors/keyboard_config_processor.cpp
         src/sound.cpp
         src/tetris.cpp)
 
 
-target_link_libraries(tetris ${OLC_LIBS})
+target_link_libraries(tetris olc ${TETRIS_LIBS})

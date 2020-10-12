@@ -319,12 +319,9 @@ void Renderer::renderSelector(const OptionState &option_state, const int column_
   const auto color = frame_counter_++ % 4 ? olc::WHITE : olc::BLACK;
   constexpr int size = 7;
   const auto &option = option_state.getSelectedOption();
-  if(option_state.isSelectedOptionDummy()) {
-    drawTriangleSelector(40, row_locations.at(option_state.selected_index), size,
-                         color, true);
-    drawTriangleSelector(210, row_locations.at(option_state.selected_index), size,
-                         color, false);
-
+  if (option_state.isSelectedOptionDummy()) {
+    drawTriangleSelector(40, row_locations.at(option_state.selected_index), size, color, true);
+    drawTriangleSelector(210, row_locations.at(option_state.selected_index), size, color, false);
   }
   if (option.prevOptionAvailable()) {
     drawTriangleSelector(column_location, row_locations.at(option_state.selected_index), size,
@@ -348,6 +345,21 @@ void Renderer::renderOptionScreen(const OptionState &option_state) {
       renderOptions(option_state.options, option_state.option_order, spacers, x_left_column,
                     x_right_column, y_row_start, option_state.grey_out_das_options);
   renderSelector(option_state, x_right_column - 5, row_locations);
+}
+
+void Renderer::renderKeyboardConfigScreen(const KeyboardConfigState &state) {
+  renderBackground("options-background");
+  render_engine_ref_.FillRect(30, 30, 197, 180, olc::BLACK);
+  constexpr int x_left_column = 32;
+  constexpr int x_right_column = 180;
+  int y_row = 40;
+  for(const auto& [action, key]: state.key_bindings) {
+    render_engine_ref_.DrawString(x_left_column, y_row, keyActionToString(action));
+    render_engine_ref_.DrawString(x_right_column, y_row, keyToString(key));
+    y_row += 10;
+  }
+  render_engine_ref_.DrawString(x_left_column, y_row, keyActionToString(state.active_key));
+  render_engine_ref_.DrawString(x_right_column, y_row, "???");
 }
 };  // namespace tetris_clone
 

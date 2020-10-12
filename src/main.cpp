@@ -1,4 +1,3 @@
-#define OLC_PGE_APPLICATION
 #include "tetris.hpp"
 
 int main(const int argc, const char** argv)

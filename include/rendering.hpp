@@ -20,6 +20,7 @@ class Renderer {
 
   void renderMenu(const MenuState &menu_state);
   void renderOptionScreen(const OptionState &option_state);
+  void renderKeyboardConfigScreen(const KeyboardConfigState& state);
 
   void renderPaused();
 
@@ -57,12 +58,12 @@ class Renderer {
   // #### BASIC/COMMON ######
   void drawNumber(const int x, const int y, const int num, const int pad,
                   const olc::Pixel color = olc::WHITE);
-  void renderText(const GameState<> &state);
   void renderBackground(const std::string background_sprite);
   void drawTriangleSelector(const int x, const int y, const int size, const olc::Pixel &color,
                             const bool right);
 
   // #### GAME SCREEN ######
+  void renderText(const GameState<> &state);
   void renderNextTetromino(const Tetromino &next_tetromino, const int level);
   void renderDasBar(const int das_counter, const Das &das_processor, const int x, const int y);
   void renderControls(const GameState<> &state, const KeyEvents &key_events, const int x,
@@ -81,6 +82,8 @@ class Renderer {
 
   void renderSelector(const OptionState &option_state, const int column_location,
                       const std::vector<int> &row_locations);
+
+  // #### KEYBOARD CONFIG SCREEN ######
 
   std::string background_rendered_;
   std::map<std::string, std::unique_ptr<olc::Sprite>> sprite_map_;

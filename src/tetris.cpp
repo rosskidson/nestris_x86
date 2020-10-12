@@ -10,6 +10,7 @@
 #include "game_processor.hpp"
 #include "game_states.hpp"
 #include "key_defines.hpp"
+#include "keyboard_config_processor.hpp"
 #include "level_screen_processor.hpp"
 #include "logging.hpp"
 #include "option.hpp"
@@ -55,6 +56,7 @@ TetrisClone::TetrisClone()
           std::make_shared<GameProcessor>(GameOptions{}, renderer_, sample_player_)},
       level_menu_processor_{std::make_shared<LevelScreenProcessor>(renderer_, sample_player_)},
       option_menu_processor_{std::make_shared<OptionScreenProcessor>(renderer_, sample_player_)},
+      keyboard_config_processor_{std::make_shared<KeyboardConfigProcessor>(renderer_, sample_player_)},
       active_processor_{level_menu_processor_},
       key_bindings_{getKeyBindings()},
       key_states_{initializeKeyStatesFromBindings(key_bindings_)},
@@ -136,6 +138,8 @@ void TetrisClone::processProgramFlowSignal(const ProgramFlowSignal &signal) {
     active_processor_ = level_menu_processor_;
   } else if (signal == ProgramFlowSignal::OptionsScreen) {
     active_processor_ = option_menu_processor_;
+  } else if (signal == ProgramFlowSignal::KeyboardConfigScreen ) {
+    active_processor_ = keyboard_config_processor_;
   }
   // das_profile",
   // hard_drop",

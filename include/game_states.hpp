@@ -4,6 +4,7 @@
 #include <map>
 #include <memory>
 
+#include "key_defines.hpp"
 #include "option.hpp"
 #include "tetromino.hpp"
 
@@ -74,6 +75,12 @@ struct MenuState {
   int level{0};
   bool options_selected{false};
   bool plus_ten_levels{false};
+};
+
+struct KeyboardConfigState {
+  KeyBindings key_bindings;
+  KeyAction active_key;
+  int key_counter;
 };
 
 inline bool entryDelay(const GameState<>& state) {
