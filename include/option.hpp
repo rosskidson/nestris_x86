@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-#include "logging.hpp"
+#include "utils/logging.hpp"
 
 namespace tetris_clone {
 

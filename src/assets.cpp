@@ -1,15 +1,21 @@
 
 #include "assets.hpp"
-#include "logging.hpp"
+
+#include <filesystem>
 #include <sstream>
 
 #include "olcPixelGameEngine.h"
+#include "utils/logging.hpp"
 
 namespace tetris_clone {
 
+namespace fs = std::filesystem;
+
 namespace {
-bool spriteValid(const olc::Sprite &sprite) { return sprite.height > 0 && sprite.width > 0; }
-} // namespace
+bool spriteValid(const olc::Sprite &sprite) {
+  return sprite.height > 0 && sprite.width > 0;
+}
+}  // namespace
 
 // clang-format off
 const std::vector<std::pair<std::string, std::string>> SAMPLES{
@@ -26,16 +32,16 @@ const std::vector<std::pair<std::string, std::string>> SAMPLES{
     {"top_out.wav", "top_out"}};
 
 const std::vector<std::pair<std::string, std::string>> SPRITES{
-    {"basic_field_empty.png", "background"},
-    {"basic_field_empty_black.png", "background-black"},
-    {"basic_field_flash.png", "background_flash"},
+    {"basic-field-empty.png", "basic-field-empty"},
+    {"basic-field-empty-black.png", "basic-field-empty-black"},
+    {"basic-field-flash.png", "basic-field-flash"},
     {"a-type-background.png", "a-type-background"},
     {"options-background.png", "options-background"},
-    {"level-screen-levels.png", "levels"},
+    {"levels-screen.png", "levels-screen"},
     {"controller.png", "controller"},
     {"are-on.png", "are-on"},
     {"are-off.png", "are-off"},
-    {"das_meter.png", "das_meter"},
+    {"das-meter.png", "das-meter"},
     {"l0-counts.png", "l0-counts"},
     {"l1-counts.png", "l1-counts"},
     {"l2-counts.png", "l2-counts"},
@@ -47,6 +53,25 @@ const std::vector<std::pair<std::string, std::string>> SPRITES{
     {"l8-counts.png", "l8-counts"},
     {"l9-counts.png", "l9-counts"}};
 // clang-format on
+
+olc::Sprite *SpriteProvider::getSprite(const std::string &sprite_name) const try {
+  return sprite_map_.at(sprite_name).get();
+} catch (const std::out_of_range &e) {
+  LOG_ERROR("Sprite not loaded. Sprite name: `" << sprite_name << "`");
+  throw;
+}
+
+bool SpriteProvider::loadSprites(const std::string &path) {
+  for (const auto &dir_itr : fs::directory_iterator(fs::current_path() / fs::path(path))) {
+    const auto filepath = fs::path(dir_itr);
+    const auto extension = filepath.extension();
+    if(extension != ".PNG" and extension != ".png") {
+      continue;
+    }
+    sprite_map_[filepath.stem()] = std::make_unique<olc::Sprite>(filepath.string());
+  }
+  return true;
+}
 
 bool loadBlockSprites(const std::string &path,
                       std::vector<std::vector<std::unique_ptr<olc::Sprite>>> &block_sprites) {
@@ -90,4 +115,4 @@ bool loadSoundAssets(const std::string &path, sound::SoundPlayer &sample_player)
   return ret;
 }
 
-} // namespace tetris_clone
+}  // namespace tetris_clone

@@ -5,7 +5,7 @@
 #include "das.hpp"
 #include "game_states.hpp"
 #include "key_defines.hpp"
-#include "logging.hpp"
+#include "utils/logging.hpp"
 #include "olcPixelGameEngine.h"
 #include "tetromino.hpp"
 
@@ -19,7 +19,7 @@ class Renderer {
                        const KeyEvents &key_events, const Das &das_processor);
 
   void renderMenu(const MenuState &menu_state);
-  void renderOptionScreen(const OptionState &option_state);
+  //void renderOptionScreen(const OptionState &option_state);
   void renderKeyboardConfigScreen(const KeyboardConfigState& state);
 
   void renderPaused();
@@ -74,14 +74,14 @@ class Renderer {
   void renderLevelSelector(const int level);
 
   // #### OPTION SCREEN ######
-  [[nodiscard]] std::vector<int> renderOptions(const OptionState::OptionMap &options,
-                                               const std::vector<std::string> &option_order,
-                                               const std::set<int> &spacers, const int left_column,
-                                               const int right_column, const int first_row,
-                                               const bool grey_out_das_options);
+  //[[nodiscard]] std::vector<int> renderOptions(const OptionState::OptionMap &options,
+  //                                             const std::vector<std::string> &option_order,
+  //                                             const std::set<int> &spacers, const int left_column,
+  //                                             const int right_column, const int first_row,
+  //                                             const bool grey_out_das_options);
 
-  void renderSelector(const OptionState &option_state, const int column_location,
-                      const std::vector<int> &row_locations);
+  //void renderSelector(const OptionState &option_state, const int column_location,
+  //                    const std::vector<int> &row_locations);
 
   // #### KEYBOARD CONFIG SCREEN ######
 

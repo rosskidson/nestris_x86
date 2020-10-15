@@ -2,19 +2,20 @@
 
 #include <chrono>
 #include <ctime>
-#include <iomanip>
+//#include <iomanip>
 #include <memory>
 #include <thread>  //sleep until
 
 #include "assets.hpp"
-#include "game_processor.hpp"
+#include "frame_processors/game_processor.hpp"
+#include "frame_processors/keyboard_config_processor.hpp"
+#include "frame_processors/level_screen_processor.hpp"
+#include "frame_processors/option_screen_processor.hpp"
 #include "game_states.hpp"
 #include "key_defines.hpp"
-#include "keyboard_config_processor.hpp"
-#include "level_screen_processor.hpp"
-#include "logging.hpp"
+#include "olc_drawer.hpp"
 #include "option.hpp"
-#include "option_screen_processor.hpp"
+#include "utils/logging.hpp"
 
 namespace tetris_clone {
 
@@ -51,12 +52,15 @@ KeyEvent getButtonState(const bool button_old_state, const bool button_new_state
 TetrisClone::TetrisClone()
     : renderer_{std::make_shared<Renderer>(*this, "./assets/images")},
       sample_player_{std::make_shared<sound::SoundPlayer>()},
+      sprite_provider_{std::make_shared<SpriteProvider>()},
       game_options_{std::make_shared<GameOptions>()},
       game_frame_processor_{
           std::make_shared<GameProcessor>(GameOptions{}, renderer_, sample_player_)},
       level_menu_processor_{std::make_shared<LevelScreenProcessor>(renderer_, sample_player_)},
-      option_menu_processor_{std::make_shared<OptionScreenProcessor>(renderer_, sample_player_)},
-      keyboard_config_processor_{std::make_shared<KeyboardConfigProcessor>(renderer_, sample_player_)},
+      option_menu_processor_{std::make_shared<OptionScreenProcessor>(
+          std::make_unique<OlcDrawer>(*this), sample_player_, sprite_provider_)},
+      keyboard_config_processor_{
+          std::make_shared<KeyboardConfigProcessor>(renderer_, sample_player_)},
       active_processor_{level_menu_processor_},
       key_bindings_{getKeyBindings()},
       key_states_{initializeKeyStatesFromBindings(key_bindings_)},
@@ -75,6 +79,7 @@ bool TetrisClone::OnUserCreate() {
     return false;
   }
   this->SetPixelMode(olc::Pixel::MASK);
+  sprite_provider_->loadSprites("assets/images");
   frame_end_ = Clock::now() + single_frame_;
 
   return true;
@@ -113,7 +118,7 @@ void dasDelaysToCharges(const int das_initial_delay, const int das_repeat_delay,
   }
 }
 
-GameOptions menuOptionsToGameOptions(const OptionState::OptionMap &option_map) {
+GameOptions menuOptionsToGameOptions(const OptionScreenProcessor::OptionMap &option_map) {
   GameOptions options{};
   options.game_frequency = getIntOption(*option_map.at("refresh_frequency"));
   const int das_repeat_delay = getIntOption(*option_map.at("das_repeat_delay_frames"));
@@ -138,7 +143,7 @@ void TetrisClone::processProgramFlowSignal(const ProgramFlowSignal &signal) {
     active_processor_ = level_menu_processor_;
   } else if (signal == ProgramFlowSignal::OptionsScreen) {
     active_processor_ = option_menu_processor_;
-  } else if (signal == ProgramFlowSignal::KeyboardConfigScreen ) {
+  } else if (signal == ProgramFlowSignal::KeyboardConfigScreen) {
     active_processor_ = keyboard_config_processor_;
   }
   // das_profile",

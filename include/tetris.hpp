@@ -3,15 +3,16 @@
 #include <chrono>
 #include <memory>
 
+#include "assets.hpp"
 #include "frame_processor_interface.hpp"
-#include "game_processor.hpp"
+#include "frame_processors/game_processor.hpp"
+#include "frame_processors/keyboard_config_processor.hpp"
+#include "frame_processors/level_screen_processor.hpp"
+#include "frame_processors/option_screen_processor.hpp"
 #include "game_states.hpp"
 #include "key_defines.hpp"
-#include "keyboard_config_processor.hpp"
-#include "level_screen_processor.hpp"
-#include "logging.hpp"
+#include "utils/logging.hpp"
 #include "olcPixelGameEngine.h"
-#include "option_screen_processor.hpp"
 #include "rendering.hpp"
 #include "sound.hpp"
 
@@ -37,6 +38,7 @@ class TetrisClone : public olc::PixelGameEngine {
 
   std::shared_ptr<Renderer> renderer_;
   std::shared_ptr<sound::SoundPlayer> sample_player_;
+  std::shared_ptr<SpriteProvider> sprite_provider_;
   std::shared_ptr<GameOptions> game_options_;
   std::shared_ptr<GameProcessor> game_frame_processor_;
   std::shared_ptr<LevelScreenProcessor> level_menu_processor_;

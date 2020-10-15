@@ -1,5 +1,5 @@
 
-#include "game_processor.hpp"
+#include "frame_processors/game_processor.hpp"
 
 #include <stdexcept>
 
@@ -7,7 +7,7 @@
 #include "game_logic.hpp"
 #include "gravity.hpp"
 #include "key_defines.hpp"
-#include "logging.hpp"
+#include "utils/logging.hpp"
 #include "sound.hpp"
 
 namespace tetris_clone {

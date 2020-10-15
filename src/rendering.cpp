@@ -4,13 +4,13 @@
 #include <set>
 
 #include "assets.hpp"
+#include "frame_processors/game_processor.hpp"
 #include "game_logic.hpp"
-#include "game_processor.hpp"
 #include "game_states.hpp"
 #include "key_defines.hpp"
-#include "logging.hpp"
 #include "olcPixelGameEngine.h"
 #include "option.hpp"
+#include "utils/logging.hpp"
 
 namespace tetris_clone {
 
@@ -93,7 +93,7 @@ void Renderer::renderDasBar(const int das_counter, const Das &das_processor, con
   const Coords das_bar_pos{das_box_pos.x + 31, das_box_pos.y + 7};
   const int das_bar_length_pixels = 32;
   const int das_bar_width_pixels = 8;
-  render_engine_ref_.DrawSprite(das_box_pos.x, das_box_pos.y, getSprite("das_meter"));
+  render_engine_ref_.DrawSprite(das_box_pos.x, das_box_pos.y, getSprite("das-meter"));
 
   auto get_das_color = [&das_processor](const int &das) {
     const int das_min_charge = das_processor.getMinDasChargeCount();
@@ -162,10 +162,7 @@ void Renderer::renderControls(const GameState<> &state, const KeyEvents &key_eve
 }
 
 void Renderer::renderBackground(const std::string background_sprite) {
-  if (background_rendered_ != background_sprite) {
-    render_engine_ref_.DrawSprite(0, 0, getSprite(background_sprite));
-    background_rendered_ = background_sprite;
-  }
+  render_engine_ref_.DrawSprite(0, 0, getSprite(background_sprite));
 }
 
 // This is a little hacky as it undermines the renderBackground function.
@@ -173,9 +170,9 @@ void Renderer::renderBackground(const std::string background_sprite) {
 void Renderer::doTetrisFlash(const int &line_clear_frame_number) {
   const auto &frame = line_clear_frame_number;
   if ((frame - 1) % 4 == 0) {
-    render_engine_ref_.DrawSprite(0, 0, getSprite("background_flash"));
+    render_engine_ref_.DrawSprite(0, 0, getSprite("basic-field-flash"));
   } else {
-    render_engine_ref_.DrawSprite(0, 0, getSprite("background-black"));
+    render_engine_ref_.DrawSprite(0, 0, getSprite("basic-field-empty-black"));
   }
 }
 
@@ -183,6 +180,8 @@ void Renderer::renderPaused() {
   constexpr Coords paused_pos{110, 116};
   render_engine_ref_.DrawString(paused_pos.x, paused_pos.y, "PAUSED", olc::WHITE);
 }
+
+bool new_game = true;
 
 void Renderer::renderGameState(const GameState<> &state, const bool render_controls,
                                const bool render_das_bar, const bool render_entry_delay,
@@ -201,7 +200,10 @@ void Renderer::renderGameState(const GameState<> &state, const bool render_contr
       return addTetrominoToGrid(state.grid, state.active_tetromino);
     }
   };
-  renderBackground("background-black");
+  if(new_game) {
+    renderBackground("basic-field-empty-black");
+    new_game = false;
+  }
   // Clear the field.
   render_engine_ref_.FillRect(grid_top_left.x, grid_top_left.y, grid_size.width, grid_size.height,
                               olc::BLACK);
@@ -281,71 +283,72 @@ void Renderer::renderLevelSelector(const int level) {
     render_engine_ref_.FillRect(coords.x, coords.y, selector_size.width, selector_size.height,
                                 color);
   }
-  render_engine_ref_.DrawSprite(level_selector.x, level_selector.y, getSprite("levels"));
+  render_engine_ref_.DrawSprite(level_selector.x, level_selector.y, getSprite("levels-screen"));
 
   ++frame_counter_;
 }
 
-std::vector<int> Renderer::renderOptions(const OptionState::OptionMap &options,
-                                         const std::vector<std::string> &option_order,
-                                         const std::set<int> &spacers, const int left_column,
-                                         const int right_column, const int first_row,
-                                         const bool grey_out_das_options) {
-  render_engine_ref_.DrawString(100, 17, "OPTIONS");
-  const std::set<std::string> das_options{"refresh_frequency", "das_initial_delay_frames",
-                                          "das_repeat_delay_frames", "gravity_mode"};
+// std::vector<int> Renderer::renderOptions(const OptionState::OptionMap &options,
+//                                         const std::vector<std::string> &option_order,
+//                                         const std::set<int> &spacers, const int left_column,
+//                                         const int right_column, const int first_row,
+//                                         const bool grey_out_das_options) {
+//  render_engine_ref_.DrawString(100, 17, "OPTIONS");
+//  const std::set<std::string> das_options{"refresh_frequency", "das_initial_delay_frames",
+//                                          "das_repeat_delay_frames", "gravity_mode"};
 
-  std::vector<int> row_locations;
-  int y_row = first_row;
-  int counter = 0;
-  for (const auto &name : option_order) {
-    const auto &option = options.at(name);
-    const auto color =
-        grey_out_das_options && das_options.count(name) ? olc::DARK_GREY : olc::WHITE;
-    row_locations.push_back(y_row);
-    const int indent = (dynamic_cast<DummyOption *>(option.get())) ? 15 : 0;
-    render_engine_ref_.DrawString(left_column + indent, y_row, option->getDisplayName(), color);
-    render_engine_ref_.DrawString(right_column, y_row, option->getSelectedOptionText(), color);
-    y_row += 10;
-    if (spacers.count(counter++)) {
-      y_row += 5;
-    }
-  }
-  return row_locations;
-}
+//  std::vector<int> row_locations;
+//  int y_row = first_row;
+//  int counter = 0;
+//  for (const auto &name : option_order) {
+//    const auto &option = options.at(name);
+//    const auto color =
+//        grey_out_das_options && das_options.count(name) ? olc::DARK_GREY : olc::WHITE;
+//    row_locations.push_back(y_row);
+//    const int indent = (dynamic_cast<DummyOption *>(option.get())) ? 15 : 0;
+//    render_engine_ref_.DrawString(left_column + indent, y_row, option->getDisplayName(), color);
+//    render_engine_ref_.DrawString(right_column, y_row, option->getSelectedOptionText(), color);
+//    y_row += 10;
+//    if (spacers.count(counter++)) {
+//      y_row += 5;
+//    }
+//  }
+//  return row_locations;
+//}
 
-void Renderer::renderSelector(const OptionState &option_state, const int column_location,
-                              const std::vector<int> &row_locations) {
-  const auto color = frame_counter_++ % 4 ? olc::WHITE : olc::BLACK;
-  constexpr int size = 7;
-  const auto &option = option_state.getSelectedOption();
-  if (option_state.isSelectedOptionDummy()) {
-    drawTriangleSelector(40, row_locations.at(option_state.selected_index), size, color, true);
-    drawTriangleSelector(210, row_locations.at(option_state.selected_index), size, color, false);
-  }
-  if (option.prevOptionAvailable()) {
-    drawTriangleSelector(column_location, row_locations.at(option_state.selected_index), size,
-                         color, true);
-  }
-  if (option.nextOptionAvailable()) {
-    drawTriangleSelector(column_location + 40, row_locations.at(option_state.selected_index), size,
-                         color, false);
-  }
-}
+// void Renderer::renderSelector(const OptionState &option_state, const int column_location,
+//                              const std::vector<int> &row_locations) {
+//  const auto color = frame_counter_++ % 4 ? olc::WHITE : olc::BLACK;
+//  constexpr int size = 7;
+//  const auto &option = option_state.getSelectedOption();
+//  if (option_state.isSelectedOptionDummy()) {
+//    drawTriangleSelector(40, row_locations.at(option_state.selected_index), size, color, true);
+//    drawTriangleSelector(210, row_locations.at(option_state.selected_index), size, color, false);
+//  }
+//  if (option.prevOptionAvailable()) {
+//    drawTriangleSelector(column_location, row_locations.at(option_state.selected_index), size,
+//                         color, true);
+//  }
+//  if (option.nextOptionAvailable()) {
+//    drawTriangleSelector(column_location + 40, row_locations.at(option_state.selected_index),
+//    size,
+//                         color, false);
+//  }
+//}
 
-void Renderer::renderOptionScreen(const OptionState &option_state) {
-  renderBackground("options-background");
-  render_engine_ref_.FillRect(30, 30, 197, 180, olc::BLACK);
-  constexpr int x_left_column = 32;
-  constexpr int x_right_column = 180;
-  constexpr int y_row_start = 40;
+// void Renderer::renderOptionScreen(const OptionState &option_state) {
+//  renderBackground("options-background");
+//  render_engine_ref_.FillRect(30, 30, 197, 180, olc::BLACK);
+//  constexpr int x_left_column = 32;
+//  constexpr int x_right_column = 180;
+//  constexpr int y_row_start = 40;
 
-  std::set<int> spacers{1, 6, 8};
-  const auto row_locations =
-      renderOptions(option_state.options, option_state.option_order, spacers, x_left_column,
-                    x_right_column, y_row_start, option_state.grey_out_das_options);
-  renderSelector(option_state, x_right_column - 5, row_locations);
-}
+//  std::set<int> spacers{1, 6, 8};
+//  const auto row_locations =
+//      renderOptions(option_state.options, option_state.option_order, spacers, x_left_column,
+//                    x_right_column, y_row_start, option_state.grey_out_das_options);
+//  renderSelector(option_state, x_right_column - 5, row_locations);
+//}
 
 void Renderer::renderKeyboardConfigScreen(const KeyboardConfigState &state) {
   renderBackground("options-background");
@@ -353,7 +356,7 @@ void Renderer::renderKeyboardConfigScreen(const KeyboardConfigState &state) {
   constexpr int x_left_column = 32;
   constexpr int x_right_column = 180;
   int y_row = 40;
-  for(const auto& [action, key]: state.key_bindings) {
+  for (const auto &[action, key] : state.key_bindings) {
     render_engine_ref_.DrawString(x_left_column, y_row, keyActionToString(action));
     render_engine_ref_.DrawString(x_right_column, y_row, keyToString(key));
     y_row += 10;

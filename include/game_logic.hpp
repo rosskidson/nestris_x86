@@ -1,7 +1,7 @@
 #include <vector>
 
 #include "das.hpp"
-#include "game_processor.hpp"
+#include "frame_processors/game_processor.hpp"
 #include "game_states.hpp"
 #include "gravity.hpp"
 #include "key_defines.hpp"

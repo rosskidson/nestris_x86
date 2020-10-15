@@ -2,6 +2,9 @@ cmake_minimum_required(VERSION 2.6)
 project(tetris_clone)
 
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
 set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
 
 INCLUDE_DIRECTORIES(olc)
@@ -59,6 +62,7 @@ target_link_libraries(olc ${OLC_LIBS})
 
 add_executable(tetris
         src/assets.cpp
+        src/drawing_utils.cpp
         src/game_logic.cpp
         src/main.cpp
         src/olc_drawer.cpp

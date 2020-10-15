@@ -5,7 +5,6 @@
 #include <memory>
 
 #include "key_defines.hpp"
-#include "option.hpp"
 #include "tetromino.hpp"
 
 namespace tetris_clone {
@@ -53,22 +52,6 @@ struct GameState {
   std::array<int, 7> tetromino_counts;  // Ordered according to enum.
   bool topped_out;
   bool paused;
-};
-
-struct OptionState {
-  using OptionMap = std::map<std::string, std::unique_ptr<OptionInterface>>;
-  OptionMap options;
-  std::vector<std::string> option_order;
-  int selected_index;
-  bool grey_out_das_options;
-  const OptionInterface& getSelectedOption() const {
-    return *options.at(option_order.at(selected_index));
-  }
-  bool isSelectedOptionDummy() const {
-    return dynamic_cast<const DummyOption*>(options.at(option_order.at(selected_index)).get());
-  }
-
-  OptionInterface& getSelectedOption() { return *options.at(option_order.at(selected_index)); }
 };
 
 struct MenuState {

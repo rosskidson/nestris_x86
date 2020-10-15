@@ -1,46 +1,55 @@
 
-#include "option_screen_processor.hpp"
+#include "frame_processors/option_screen_processor.hpp"
 
 #include <memory>
 
+#include "drawing_utils.hpp"
 #include "game_states.hpp"
-#include "logging.hpp"
 #include "option.hpp"
+#include "pixel_drawing_interface.hpp"
+#include "utils/logging.hpp"
 
 namespace tetris_clone {
 
 OptionScreenProcessor::OptionScreenProcessor(
-    const std::shared_ptr<Renderer>& renderer,
-    const std::shared_ptr<sound::SoundPlayer>& sample_player)
-    : renderer_(renderer), sample_player_(sample_player), state_{} {
-  state_.options["configure_keyboard"] = std::make_unique<DummyOption>("CONFIGURE KEYBOARD");
-  state_.options["configure_controller"] = std::make_unique<DummyOption>("CONFIGURE CONTROLLER");
+    std::unique_ptr<PixelDrawingInterface>&& drawer,
+    const std::shared_ptr<sound::SoundPlayer>& sample_player,
+    const std::shared_ptr<SpriteProvider>& sprite_provider)
+    : drawer_(std::move(drawer)),
+      sample_player_(sample_player),
+      sprite_provider_(sprite_provider),
+      options_{},
+      option_order_{},
+      selected_index_{},
+      grey_out_das_options_{},
+      frame_counter_{std::make_unique<std::atomic_int>(0)} {
+  options_["configure_keyboard"] = std::make_unique<DummyOption>("CONFIGURE KEYBOARD");
+  options_["configure_controller"] = std::make_unique<DummyOption>("CONFIGURE CONTROLLER");
 
-  state_.options["das_profile"] = std::make_unique<StringOption>(
+  options_["das_profile"] = std::make_unique<StringOption>(
       "DAS PROFILE", std::vector<std::string>{"NTSC", "PAL", "CUSTOM"});
 
-  state_.options["refresh_frequency"] =  //
+  options_["refresh_frequency"] =  //
       std::make_unique<IntOption>("FREQUENCY (HZ)", 1, 99, 60);
 
-  state_.options["das_initial_delay_frames"] =
+  options_["das_initial_delay_frames"] =
       std::make_unique<IntOption>("DAS INITIAL DELAY", 0, 99, 16);
 
-  state_.options["das_repeat_delay_frames"] =
-      std::make_unique<IntOption>("DAS REPEAT DELAY", 1, 99, 6);
+  options_["das_repeat_delay_frames"] = std::make_unique<IntOption>("DAS REPEAT DELAY", 1, 99, 6);
 
-  state_.options["gravity_mode"] =
+  options_["gravity_mode"] =
       std::make_unique<StringOption>("LEVEL GRAVITY", std::vector<std::string>{"NTSC", "PAL"});
 
-  state_.options["hard_drop"] = std::make_unique<BoolOption>("HARD DROP", false);
-  state_.options["wall_kick"] = std::make_unique<BoolOption>("WALL KICK", false);
+  options_["hard_drop"] = std::make_unique<BoolOption>("HARD DROP", false);
+  options_["wall_kick"] = std::make_unique<BoolOption>("WALL KICK", false);
 
-  state_.options["show_das_meter"] = std::make_unique<BoolOption>("SHOW DAS METER", false);
-  state_.options["show_das_chain"] = std::make_unique<BoolOption>("SHOW DAS CHAIN", false);
-  state_.options["show_wall_charges"] = std::make_unique<BoolOption>("SHOW WALL CHARGES", false);
-  state_.options["show_entry_delay"] = std::make_unique<BoolOption>("SHOW ENTRY DELAY", false);
-  state_.options["show_controls"] = std::make_unique<BoolOption>("SHOW CONTROLS", false);
+  options_["show_das_meter"] = std::make_unique<BoolOption>("SHOW DAS METER", false);
+  options_["show_das_chain"] = std::make_unique<BoolOption>("SHOW DAS CHAIN", false);
+  options_["show_wall_charges"] = std::make_unique<BoolOption>("SHOW WALL CHARGES", false);
+  options_["show_entry_delay"] = std::make_unique<BoolOption>("SHOW ENTRY DELAY", false);
+  options_["show_controls"] = std::make_unique<BoolOption>("SHOW CONTROLS", false);
 
-  state_.option_order = std::vector<std::string>({
+  option_order_ = std::vector<std::string>({
       "configure_keyboard",
       "configure_controller",
       "das_profile",
@@ -57,34 +66,32 @@ OptionScreenProcessor::OptionScreenProcessor(
       "show_controls",
   });
 
-  // Missing options:
+  // Missing options_:
   //  HOLD
   //  STATSTICS MODE
   //  CONFIGURE KEYBOARD
   //  CONFIGURE CONTROLLER
 
-  for (const auto& name : state_.option_order) {
-    if (not state_.options.count(name)) {
+  for (const auto& name : option_order_) {
+    if (not options_.count(name)) {
       LOG_ERROR("Missing option in option map `" << name << "`.");
     }
   }
-  for (const auto& [name, option] : state_.options) {
-    if (std::find(state_.option_order.begin(), state_.option_order.end(), name) ==
-        state_.option_order.end()) {
+  for (const auto& [name, option] : options_) {
+    if (std::find(option_order_.begin(), option_order_.end(), name) == option_order_.end()) {
       LOG_ERROR("Missing option in option order list `" << name << "`.");
     }
   }
 }
 
-ProgramFlowSignal processKeyEvents(const KeyEvents& key_events,
-                                   const sound::SoundPlayer& sample_player_,
-                                   OptionState& menu_state) {
-  auto& current_idx = menu_state.selected_index;
+ProgramFlowSignal OptionScreenProcessor::processKeyEvents(
+    const KeyEvents& key_events, const sound::SoundPlayer& sample_player_) {
+  auto& current_idx = selected_index_;
   if (key_events.at(KeyAction::Start).pressed) {
     sample_player_.playSample("menu_select_02");
-    if (menu_state.option_order.at(menu_state.selected_index) == "configure_keyboard") {
+    if (option_order_.at(selected_index_) == "configure_keyboard") {
       return ProgramFlowSignal::KeyboardConfigScreen;
-    } else if (menu_state.option_order.at(menu_state.selected_index) == "configure_controller") {
+    } else if (option_order_.at(selected_index_) == "configure_controller") {
       return ProgramFlowSignal::ControllerConfigScreen;
     } else {
       return ProgramFlowSignal::LevelSelectorScreen;
@@ -96,44 +103,110 @@ ProgramFlowSignal processKeyEvents(const KeyEvents& key_events,
   }
   if (key_events.at(KeyAction::Down).pressed) {
     sample_player_.playSample("menu_blip");
-    current_idx = current_idx < menu_state.option_order.size() - 2
-                      ? current_idx + 1
-                      : menu_state.option_order.size() - 1;
+    current_idx =
+        current_idx < option_order_.size() - 2 ? current_idx + 1 : option_order_.size() - 1;
   }
   if (key_events.at(KeyAction::Left).pressed) {
     sample_player_.playSample("menu_blip");
-    menu_state.getSelectedOption().selectPrevOption();
+    getSelectedOption().selectPrevOption();
   }
   if (key_events.at(KeyAction::Right).pressed) {
     sample_player_.playSample("menu_blip");
-    menu_state.getSelectedOption().selectNextOption();
+    getSelectedOption().selectNextOption();
   }
 
   return ProgramFlowSignal::FrameSuccess;
 }
 
 void setDasOptions(const int freq, const int inital_delay, const int repeat_delay,
-                   const std::string& gravity, OptionState::OptionMap& option_map) {
+                   const std::string& gravity, OptionScreenProcessor::OptionMap& option_map) {
   dynamic_cast<IntOption&>(*option_map.at("refresh_frequency")).setOption(freq);
   dynamic_cast<IntOption&>(*option_map.at("das_initial_delay_frames")).setOption(inital_delay);
   dynamic_cast<IntOption&>(*option_map.at("das_repeat_delay_frames")).setOption(repeat_delay);
   dynamic_cast<StringOption&>(*option_map.at("gravity_mode")).setOption(gravity);
 }
 
-ProgramFlowSignal OptionScreenProcessor::processFrame(const KeyEvents& key_events) {
-  const auto signal = processKeyEvents(key_events, *sample_player_, state_);
+std::vector<int> OptionScreenProcessor::renderOptions(const std::set<int>& spacers,
+                                                      const int left_column, const int right_column,
+                                                      const int first_row,
+                                                      const bool grey_out_das_options_) const {
+  drawer_->drawString(100, 17, "OPTIONS");
+  const std::set<std::string> das_options{"refresh_frequency", "das_initial_delay_frames",
+                                          "das_repeat_delay_frames", "gravity_mode"};
 
-  if (state_.options.at("das_profile")->getSelectedOptionText() == "NTSC") {
-    setDasOptions(60, 16, 6, "NTSC", state_.options);
-    state_.grey_out_das_options = true;
-  } else if (state_.options.at("das_profile")->getSelectedOptionText() == "PAL") {
-    setDasOptions(50, 12, 4, "PAL", state_.options);
-    state_.grey_out_das_options = true;
+  std::vector<int> row_locations;
+  int y_row = first_row;
+  int counter = 0;
+  for (const auto& name : option_order_) {
+    const auto& option = options_.at(name);
+    const auto color = grey_out_das_options_ && das_options.count(name)
+                           ? PixelDrawingInterface::DARK_GREY()
+                           : PixelDrawingInterface::WHITE();
+    row_locations.push_back(y_row);
+    const int indent = (dynamic_cast<DummyOption*>(option.get())) ? 15 : 0;
+    drawer_->drawString(left_column + indent, y_row, option->getDisplayName(), color);
+    drawer_->drawString(right_column, y_row, option->getSelectedOptionText(), color);
+    y_row += 10;
+    if (spacers.count(counter++)) {
+      y_row += 5;
+    }
+  }
+  return row_locations;
+}
+
+void OptionScreenProcessor::renderSelector(const int column_location,
+                                           const std::vector<int>& row_locations) const {
+  const auto color =
+      (*frame_counter_)++ % 4 ? PixelDrawingInterface::WHITE() : PixelDrawingInterface::BLACK();
+  constexpr int size = 7;
+  const auto& option = getSelectedOption();
+  if (isSelectedOptionDummy()) {
+    drawTriangleSelector(*drawer_, 40, row_locations.at(selected_index_), size, color, true);
+    drawTriangleSelector(*drawer_, 210, row_locations.at(selected_index_), size, color, false);
+  }
+  if (option.prevOptionAvailable()) {
+    drawTriangleSelector(*drawer_, column_location, row_locations.at(selected_index_), size, color,
+                         true);
+  }
+  if (option.nextOptionAvailable()) {
+    drawTriangleSelector(*drawer_, column_location + 40, row_locations.at(selected_index_), size,
+                         color, false);
+  }
+}
+
+void OptionScreenProcessor::renderOptionScreen() const {
+  // renderBackground("options-background");
+  drawer_->drawSprite(0, 0, sprite_provider_->getSprite("options-background"));
+  drawer_->fillRect(30, 30, 197, 180, PixelDrawingInterface::BLACK());
+  constexpr int x_left_column = 32;
+  constexpr int x_right_column = 180;
+  constexpr int y_row_start = 40;
+
+  std::set<int> spacers{1, 6, 8};
+  const auto row_locations =
+      renderOptions(spacers, x_left_column, x_right_column, y_row_start, grey_out_das_options_);
+  renderSelector(x_right_column - 5, row_locations);
+}
+
+ProgramFlowSignal OptionScreenProcessor::processFrame(const KeyEvents& key_events) {
+  const auto signal = processKeyEvents(key_events, *sample_player_);
+
+  if (options_.at("das_profile")->getSelectedOptionText() == "NTSC") {
+    setDasOptions(60, 16, 6, "NTSC", options_);
+    grey_out_das_options_ = true;
+  } else if (options_.at("das_profile")->getSelectedOptionText() == "PAL") {
+    setDasOptions(50, 12, 4, "PAL", options_);
+    grey_out_das_options_ = true;
   } else {
-    state_.grey_out_das_options = false;
+    grey_out_das_options_ = false;
   }
 
-  renderer_->renderOptionScreen(state_);
+  // Reset the frame counter if the processing has ended.
+  if (signal != ProgramFlowSignal::FrameSuccess) {
+    *frame_counter_ = 0;
+  }
+
+  renderOptionScreen();
   return signal;
 }
 

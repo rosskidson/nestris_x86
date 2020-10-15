@@ -5,7 +5,7 @@
 #include <memory>
 #include <stdexcept>
 
-#include "logging.hpp"
+#include "utils/logging.hpp"
 
 namespace sound {
 SoundPlayer::SoundPlayer() {
