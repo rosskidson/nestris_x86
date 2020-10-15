@@ -243,50 +243,50 @@ void Renderer::drawTriangleSelector(const int x, const int y, const int size,
   }
 }
 
-void Renderer::renderMenu(const MenuState &menu_state) {
-  renderBackground("a-type-background");
+//void Renderer::renderMenu(const MenuState &menu_state) {
+//  renderBackground("a-type-background");
 
-  // Clear the top area.
-  render_engine_ref_.FillRect(30, 72, 190, 50, olc::BLACK);
+//  // Clear the top area.
+//  render_engine_ref_.FillRect(30, 72, 190, 50, olc::BLACK);
 
-  render_engine_ref_.DrawString(157, 80, "OPTIONS");
+//  render_engine_ref_.DrawString(157, 80, "OPTIONS");
 
-  render_engine_ref_.DrawString(72, 153, "JDMFX  1357428 30");
-  render_engine_ref_.DrawString(72, 169, "KORYAN 1273120 29");
-  render_engine_ref_.DrawString(72, 185, "JONAS  1245200 29");
+//  render_engine_ref_.DrawString(72, 153, "JDMFX  1357428 30");
+//  render_engine_ref_.DrawString(72, 169, "KORYAN 1273120 29");
+//  render_engine_ref_.DrawString(72, 185, "JONAS  1245200 29");
 
-  if (menu_state.options_selected) {
-    const auto color = frame_counter_ % 4 ? olc::WHITE : olc::BLACK;
-    drawTriangleSelector(148, 80, 7, color, false);
-    drawTriangleSelector(219, 80, 7, color, true);
-    renderLevelSelector(-1);
-  } else {
-    renderLevelSelector(menu_state.level);
-  }
-}
+//  if (menu_state.options_selected) {
+//    const auto color = frame_counter_ % 4 ? olc::WHITE : olc::BLACK;
+//    drawTriangleSelector(148, 80, 7, color, false);
+//    drawTriangleSelector(219, 80, 7, color, true);
+//    renderLevelSelector(-1);
+//  } else {
+//    renderLevelSelector(menu_state.level);
+//  }
+//}
 
-void Renderer::renderLevelSelector(const int level) {
-  constexpr Coords level_selector{51, 75};
-  constexpr Rect level_selector_size{83, 35};
-  constexpr Rect selector_size{16, 16};
-  const olc::Pixel selector_color(252, 151, 56);
+//void Renderer::renderLevelSelector(const int level) {
+//  constexpr Coords level_selector{51, 75};
+//  constexpr Rect level_selector_size{83, 35};
+//  constexpr Rect selector_size{16, 16};
+//  const olc::Pixel selector_color(252, 151, 56);
 
-  auto get_selector_coords = [&](const int level) -> Coords {
-    const int y = (level % 10 > 4) ? level_selector.y + selector_size.height : level_selector.y;
-    return {(selector_size.width * (level % 5)) + level_selector.x + 1, y + 2};
-  };
+//  auto get_selector_coords = [&](const int level) -> Coords {
+//    const int y = (level % 10 > 4) ? level_selector.y + selector_size.height : level_selector.y;
+//    return {(selector_size.width * (level % 5)) + level_selector.x + 1, y + 2};
+//  };
 
-  // Draw the flashing selector, and then draw the levels on top with transparency.
-  const auto coords = get_selector_coords(level);
-  const auto color = frame_counter_ % 4 ? selector_color : olc::BLACK;
-  if (level >= 0) {
-    render_engine_ref_.FillRect(coords.x, coords.y, selector_size.width, selector_size.height,
-                                color);
-  }
-  render_engine_ref_.DrawSprite(level_selector.x, level_selector.y, getSprite("levels-screen"));
+//  // Draw the flashing selector, and then draw the levels on top with transparency.
+//  const auto coords = get_selector_coords(level);
+//  const auto color = frame_counter_ % 4 ? selector_color : olc::BLACK;
+//  if (level >= 0) {
+//    render_engine_ref_.FillRect(coords.x, coords.y, selector_size.width, selector_size.height,
+//                                color);
+//  }
+//  render_engine_ref_.DrawSprite(level_selector.x, level_selector.y, getSprite("levels-screen"));
 
-  ++frame_counter_;
-}
+//  ++frame_counter_;
+//}
 
 // std::vector<int> Renderer::renderOptions(const OptionState::OptionMap &options,
 //                                         const std::vector<std::string> &option_order,
@@ -350,19 +350,19 @@ void Renderer::renderLevelSelector(const int level) {
 //  renderSelector(option_state, x_right_column - 5, row_locations);
 //}
 
-void Renderer::renderKeyboardConfigScreen(const KeyboardConfigState &state) {
-  renderBackground("options-background");
-  render_engine_ref_.FillRect(30, 30, 197, 180, olc::BLACK);
-  constexpr int x_left_column = 32;
-  constexpr int x_right_column = 180;
-  int y_row = 40;
-  for (const auto &[action, key] : state.key_bindings) {
-    render_engine_ref_.DrawString(x_left_column, y_row, keyActionToString(action));
-    render_engine_ref_.DrawString(x_right_column, y_row, keyToString(key));
-    y_row += 10;
-  }
-  render_engine_ref_.DrawString(x_left_column, y_row, keyActionToString(state.active_key));
-  render_engine_ref_.DrawString(x_right_column, y_row, "???");
-}
+//void Renderer::renderKeyboardConfigScreen(const KeyboardConfigState &state) {
+//  renderBackground("options-background");
+//  render_engine_ref_.FillRect(30, 30, 197, 180, olc::BLACK);
+//  constexpr int x_left_column = 32;
+//  constexpr int x_right_column = 180;
+//  int y_row = 40;
+//  for (const auto &[action, key] : state.key_bindings) {
+//    render_engine_ref_.DrawString(x_left_column, y_row, keyActionToString(action));
+//    render_engine_ref_.DrawString(x_right_column, y_row, keyToString(key));
+//    y_row += 10;
+//  }
+//  render_engine_ref_.DrawString(x_left_column, y_row, keyActionToString(state.active_key));
+//  render_engine_ref_.DrawString(x_right_column, y_row, "???");
+//}
 };  // namespace tetris_clone
 

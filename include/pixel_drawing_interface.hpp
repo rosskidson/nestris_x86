@@ -7,6 +7,16 @@ namespace tetris_clone {
 
 class PixelDrawingInterface {
  public:
+  struct Coords {
+    int x;
+    int y;
+  };
+
+  struct Rect {
+    int width;
+    int height;
+  };
+
   struct Color {
     uint8_t r;
     uint8_t g;
@@ -39,6 +49,37 @@ class PixelDrawingInterface {
 
   virtual void fillRect(const int x, const int y, const int width, const int height,
                         const Color& color = WHITE()) const = 0;
+
+  inline void drawSprite(const Coords& coords, const std::any& sprite) {
+    drawSprite(coords.x, coords.y, sprite);
+  }
+
+  inline void drawString(const Coords& coords, const std::string& text,
+                         const Color& color = WHITE()) const {
+    drawString(coords.x, coords.y, text, color);
+  }
+
+  inline void drawPixel(const Coords& coords, const Color& color = WHITE()) const {
+    drawPixel(coords.x, coords.y, color);
+  }
+
+  inline void drawLine(const Coords p1, const Coords& p2, const Color& color = WHITE()) const {
+    drawLine(p1.x, p1.y, p2.y, p2.y, color);
+  }
+
+  inline void drawCircle(const Coords& coords, const int radius,
+                         const Color& color = WHITE()) const {
+    drawCircle(coords.x, coords.y, radius, color);
+  }
+
+  inline void fillCircle(const Coords& coords, const int radius,
+                         const Color& color = WHITE()) const {
+    fillCircle(coords.x, coords.y, radius, color);
+  }
+
+  inline void fillRect(const Coords& coords, const Rect& size, const Color& color = WHITE()) const {
+    fillRect(coords.x, coords.y, size.width, size.height, color);
+  }
 };
 
 }  // namespace tetris_clone

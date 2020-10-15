@@ -11,6 +11,17 @@
 
 namespace tetris_clone {
 
+namespace {
+
+void setDasOptions(const int freq, const int inital_delay, const int repeat_delay,
+                   const std::string& gravity, OptionScreenProcessor::OptionMap& option_map) {
+  dynamic_cast<IntOption&>(*option_map.at("refresh_frequency")).setOption(freq);
+  dynamic_cast<IntOption&>(*option_map.at("das_initial_delay_frames")).setOption(inital_delay);
+  dynamic_cast<IntOption&>(*option_map.at("das_repeat_delay_frames")).setOption(repeat_delay);
+  dynamic_cast<StringOption&>(*option_map.at("gravity_mode")).setOption(gravity);
+}
+}  // namespace
+
 OptionScreenProcessor::OptionScreenProcessor(
     std::unique_ptr<PixelDrawingInterface>&& drawer,
     const std::shared_ptr<sound::SoundPlayer>& sample_player,
@@ -116,14 +127,6 @@ ProgramFlowSignal OptionScreenProcessor::processKeyEvents(
   }
 
   return ProgramFlowSignal::FrameSuccess;
-}
-
-void setDasOptions(const int freq, const int inital_delay, const int repeat_delay,
-                   const std::string& gravity, OptionScreenProcessor::OptionMap& option_map) {
-  dynamic_cast<IntOption&>(*option_map.at("refresh_frequency")).setOption(freq);
-  dynamic_cast<IntOption&>(*option_map.at("das_initial_delay_frames")).setOption(inital_delay);
-  dynamic_cast<IntOption&>(*option_map.at("das_repeat_delay_frames")).setOption(repeat_delay);
-  dynamic_cast<StringOption&>(*option_map.at("gravity_mode")).setOption(gravity);
 }
 
 std::vector<int> OptionScreenProcessor::renderOptions(const std::set<int>& spacers,

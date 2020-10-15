@@ -1,14 +1,12 @@
 #pragma once
 
 #include <memory>
+#include <set>
 
 #include "assets.hpp"
-#include "das.hpp"
 #include "frame_processor_interface.hpp"
-#include "game_states.hpp"
 #include "option.hpp"
 #include "pixel_drawing_interface.hpp"
-#include "rendering.hpp"
 #include "sound.hpp"
 
 namespace tetris_clone {

@@ -57,7 +57,7 @@ SET(TETRIS_LIBS
   ${SDL_LIBRARY}
 )
 
-add_library(olc src/olcPixelGameEngine.cpp)
+add_library(olc olc/olcPixelGameEngine.cpp)
 target_link_libraries(olc ${OLC_LIBS})
 
 add_executable(tetris

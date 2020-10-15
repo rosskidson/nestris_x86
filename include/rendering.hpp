@@ -18,9 +18,9 @@ class Renderer {
                        const bool render_das_bar, const bool render_entry_delay,
                        const KeyEvents &key_events, const Das &das_processor);
 
-  void renderMenu(const MenuState &menu_state);
+  //void renderMenu(const MenuState &menu_state);
   //void renderOptionScreen(const OptionState &option_state);
-  void renderKeyboardConfigScreen(const KeyboardConfigState& state);
+  //void renderKeyboardConfigScreen(const KeyboardConfigState& state);
 
   void renderPaused();
 
@@ -71,7 +71,7 @@ class Renderer {
   void renderEntryDelay(const bool delay_entry, const int x, const int y);
 
   // #### LEVEL SCREEN ######
-  void renderLevelSelector(const int level);
+  //void renderLevelSelector(const int level);
 
   // #### OPTION SCREEN ######
   //[[nodiscard]] std::vector<int> renderOptions(const OptionState::OptionMap &options,

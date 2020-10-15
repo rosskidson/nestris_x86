@@ -56,11 +56,12 @@ TetrisClone::TetrisClone()
       game_options_{std::make_shared<GameOptions>()},
       game_frame_processor_{
           std::make_shared<GameProcessor>(GameOptions{}, renderer_, sample_player_)},
-      level_menu_processor_{std::make_shared<LevelScreenProcessor>(renderer_, sample_player_)},
+      level_menu_processor_{std::make_shared<LevelScreenProcessor>(
+          std::make_unique<OlcDrawer>(*this), sample_player_, sprite_provider_)},
       option_menu_processor_{std::make_shared<OptionScreenProcessor>(
           std::make_unique<OlcDrawer>(*this), sample_player_, sprite_provider_)},
-      keyboard_config_processor_{
-          std::make_shared<KeyboardConfigProcessor>(renderer_, sample_player_)},
+      keyboard_config_processor_{std::make_shared<KeyboardConfigProcessor>(
+          std::make_unique<OlcDrawer>(*this), sample_player_)},
       active_processor_{level_menu_processor_},
       key_bindings_{getKeyBindings()},
       key_states_{initializeKeyStatesFromBindings(key_bindings_)},
