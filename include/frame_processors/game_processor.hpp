@@ -2,10 +2,12 @@
 
 #include <random>
 
+#include "assets.hpp"
 #include "das.hpp"
 #include "frame_processor_interface.hpp"
 #include "game_states.hpp"
 #include "gravity.hpp"
+#include "pixel_drawing_interface.hpp"
 #include "rendering.hpp"
 #include "sound.hpp"
 
@@ -18,8 +20,9 @@ struct LineClearAnimationInfo {
 
 class GameProcessor : public FrameProcessorInterface {
  public:
-  GameProcessor(const GameOptions& options, const std::shared_ptr<Renderer>& renderer,
-                const std::shared_ptr<sound::SoundPlayer>& sample_player_);
+  GameProcessor(const GameOptions& options, std::unique_ptr<PixelDrawingInterface>&& drawer,
+                const std::shared_ptr<sound::SoundPlayer>& sample_player_,
+                const std::shared_ptr<SpriteProvider>& sprite_provider);
 
   ProgramFlowSignal processFrame(const KeyEvents& key_events);
 
@@ -31,7 +34,7 @@ class GameProcessor : public FrameProcessorInterface {
   void doGravityStep(const KeyEvents& key_events);
   void doEntryDelayStep(const KeyEvents& key_events);
 
-  std::shared_ptr<Renderer> renderer_;
+  Renderer renderer_;
   std::shared_ptr<sound::SoundPlayer> sample_player_;
   GameState<> state_;
   std::random_device real_rng_;

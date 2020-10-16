@@ -20,8 +20,8 @@ class LevelScreenProcessor : public FrameProcessorInterface {
   int getSelectedLevel() const;
 
  private:
-  ProgramFlowSignal processKeyEvents(const KeyEvents& key_events,
-                                     const sound::SoundPlayer& sample_player_);
+  ProgramFlowSignal processKeyEvents(const KeyEvents& key_events);
+
   void renderMenu() const;
   void renderLevelSelector(const int level) const;
 

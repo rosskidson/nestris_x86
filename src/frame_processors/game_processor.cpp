@@ -7,16 +7,19 @@
 #include "game_logic.hpp"
 #include "gravity.hpp"
 #include "key_defines.hpp"
-#include "utils/logging.hpp"
+#include "pixel_drawing_interface.hpp"
 #include "sound.hpp"
+#include "utils/logging.hpp"
 
 namespace tetris_clone {
 
 constexpr int GRAVITY_FIRST_FRAME = 100;
 
-GameProcessor::GameProcessor(const GameOptions& options, const std::shared_ptr<Renderer>& renderer,
-                             const std::shared_ptr<sound::SoundPlayer>& sample_player)
-    : renderer_(renderer),
+GameProcessor::GameProcessor(const GameOptions& options,
+                             std::unique_ptr<PixelDrawingInterface>&& drawer,
+                             const std::shared_ptr<sound::SoundPlayer>& sample_player,
+                             const std::shared_ptr<SpriteProvider>& sprite_provider)
+    : renderer_(std::move(drawer), sprite_provider, "./assets/images"),
       sample_player_(sample_player),
       state_{},
       real_rng_{},
@@ -28,6 +31,7 @@ GameProcessor::GameProcessor(const GameOptions& options, const std::shared_ptr<R
       show_entry_delay_{options.show_entry_delay},
       line_clear_info_{},
       top_out_frame_counter_{} {
+        LOG_INFO("test game processor ctor");
   state_ = getNewState(options.level);
 }
 
@@ -88,7 +92,7 @@ void GameProcessor::doEntryDelayStep(const KeyEvents& key_events) {
 
   animateLineClear(*sample_player_, state_, line_clear_info_);
   if (line_clear_info_.rows.size() == 4) {
-    renderer_->doTetrisFlash(line_clear_info_.animation_frame);
+    renderer_.doTetrisFlash(line_clear_info_.animation_frame);
   }
   // When the animation is almost over, update the score.
   if (line_clear_info_.animation_frame == 4) {
@@ -112,8 +116,8 @@ ProgramFlowSignal GameProcessor::processFrame(const KeyEvents& key_events) {
   } else {
     doGravityStep(key_events);
   }
-  renderer_->renderGameState(state_, show_controls_, show_das_bar_, show_entry_delay_, key_events,
-                             das_processor_);
+  renderer_.renderGameState(state_, show_controls_, show_das_bar_, show_entry_delay_, key_events,
+                            das_processor_);
   return ProgramFlowSignal::FrameSuccess;
 }
 

@@ -7,23 +7,22 @@
 
 namespace tetris_clone {
 
-ProgramFlowSignal LevelScreenProcessor::processKeyEvents(const KeyEvents& key_events,
-                                                         const sound::SoundPlayer& sample_player_) {
+ProgramFlowSignal LevelScreenProcessor::processKeyEvents(const KeyEvents& key_events) {
   auto& level = level_;
   if (options_selected_) {
     if (key_events.at(KeyAction::Left).pressed) {
-      sample_player_.playSample("menu_blip");
+      sample_player_->playSample("menu_blip");
       options_selected_ = false;
       return ProgramFlowSignal::FrameSuccess;
     }
     if (key_events.at(KeyAction::Start).pressed) {
-      sample_player_.playSample("menu_select_02");
+      sample_player_->playSample("menu_select_02");
       return ProgramFlowSignal::OptionsScreen;
     }
   }
 
   if (key_events.at(KeyAction::Left).pressed && level > 0) {
-    sample_player_.playSample("menu_blip");
+    sample_player_->playSample("menu_blip");
     --level;
   }
   if (key_events.at(KeyAction::Right).pressed) {
@@ -32,19 +31,19 @@ ProgramFlowSignal LevelScreenProcessor::processKeyEvents(const KeyEvents& key_ev
     } else {
       ++level;
     }
-    sample_player_.playSample("menu_blip");
+    sample_player_->playSample("menu_blip");
   }
   if (key_events.at(KeyAction::Down).pressed && level < 5) {
-    sample_player_.playSample("menu_blip");
+    sample_player_->playSample("menu_blip");
     level += 5;
   }
   if (key_events.at(KeyAction::Up).pressed && level >= 5) {
-    sample_player_.playSample("menu_blip");
+    sample_player_->playSample("menu_blip");
     level -= 5;
   }
 
   if (key_events.at(KeyAction::Start).pressed) {
-    sample_player_.playSample("menu_select_01");
+    sample_player_->playSample("menu_select_01");
     plus_ten_levels_ = (key_events.at(KeyAction::RotateClockwise).held);
     return ProgramFlowSignal::StartGame;
   }
@@ -110,7 +109,7 @@ void LevelScreenProcessor::renderLevelSelector(const int level) const {
 }
 
 ProgramFlowSignal LevelScreenProcessor::processFrame(const KeyEvents& key_events) {
-  auto signal = processKeyEvents(key_events, *sample_player_);
+  auto signal = processKeyEvents(key_events);
   renderMenu();
 
   if (signal != ProgramFlowSignal::FrameSuccess) {

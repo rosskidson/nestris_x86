@@ -4,15 +4,17 @@
 #include <set>
 
 #include "assets.hpp"
+#include "drawing_utils.hpp"
 #include "frame_processors/game_processor.hpp"
 #include "game_logic.hpp"
 #include "game_states.hpp"
 #include "key_defines.hpp"
-#include "olcPixelGameEngine.h"
 #include "option.hpp"
+#include "pixel_drawing_interface.hpp"
 #include "utils/logging.hpp"
 
 namespace tetris_clone {
+using pdi = PixelDrawingInterface;
 
 struct Coords {
   int x;
@@ -24,8 +26,10 @@ struct Rect {
   int height;
 };
 
-Renderer::Renderer(olc::PixelGameEngine &render_engine, const std::string &sprites_path)
-    : render_engine_ref_(render_engine), frame_counter_(0) {
+Renderer::Renderer(std::unique_ptr<PixelDrawingInterface> &&drawer,
+                   const std::shared_ptr<SpriteProvider> &sprite_provider,
+                   const std::string &sprites_path)
+    : drawer_(std::move(drawer)), sprite_provider_(sprite_provider), frame_counter_(0) {
   if (not loadBlockSprites(sprites_path, block_sprites_)) {
     throw std::runtime_error("Failed loading block sprites.");
   }
@@ -34,29 +38,20 @@ Renderer::Renderer(olc::PixelGameEngine &render_engine, const std::string &sprit
   }
 }
 
-void Renderer::drawNumber(const int x, const int y, const int num, const int pad,
-                          const olc::Pixel color) {
-  constexpr int TEXT_WIDTH_PX = 8;
-  render_engine_ref_.FillRect(x, y, TEXT_WIDTH_PX * pad, TEXT_WIDTH_PX, olc::BLACK);
-  std::stringstream ss;
-  ss << std::setw(pad) << std::setfill('0') << num;
-  render_engine_ref_.DrawString(x, y, ss.str(), color);
-}
-
 void Renderer::renderText(const GameState<> &state) {
   constexpr Coords lines_pos{152, 16};
   constexpr Coords high_score_pos{192, 32};
   constexpr Coords score_pos{192, 56};
   constexpr Coords level_pos{208, 160};
-  drawNumber(lines_pos.x, lines_pos.y, state.lines, 3);
-  drawNumber(high_score_pos.x, high_score_pos.y, state.high_score, 6);
-  drawNumber(score_pos.x, score_pos.y, state.score, 6);
-  drawNumber(level_pos.x, level_pos.y, state.level, 2);
+  drawNumber(*drawer_, lines_pos.x, lines_pos.y, state.lines, 3);
+  drawNumber(*drawer_, high_score_pos.x, high_score_pos.y, state.high_score, 6);
+  drawNumber(*drawer_, score_pos.x, score_pos.y, state.score, 6);
+  drawNumber(*drawer_, level_pos.x, level_pos.y, state.level, 2);
 
   constexpr Coords tetromino_counter_start{48, 88};
   for (int i = 0; i < 7; ++i) {
-    drawNumber(tetromino_counter_start.x, tetromino_counter_start.y + (i * 16),
-               state.tetromino_counts[i], 3, olc::RED);
+    drawNumber(*drawer_, tetromino_counter_start.x, tetromino_counter_start.y + (i * 16),
+               state.tetromino_counts[i], 3, pdi::RED());
   }
 }
 
@@ -75,7 +70,7 @@ void Renderer::renderNextTetromino(const Tetromino &next_tetromino, const int le
   };
 
   // Clear existing tetromino.
-  render_engine_ref_.FillRect(191, 112, 33, 15, olc::BLACK);
+  drawer_->fillRect(191, 112, 33, 15, pdi::BLACK());
 
   const auto tetromino = getTetrominoGrid(next_tetromino, 0);
   const auto [x, y] = get_next_tetromino_plotting_coords(next_tetromino);
@@ -84,7 +79,7 @@ void Renderer::renderNextTetromino(const Tetromino &next_tetromino, const int le
 
 void Renderer::renderEntryDelay(const bool delay_entry, const int x, const int y) {
   const auto delay_sprite = delay_entry ? "are-on" : "are-off";
-  render_engine_ref_.DrawSprite(x, y, getSprite(delay_sprite));
+  drawer_->drawSprite(x, y, sprite_provider_->getSprite(delay_sprite));
 }
 
 void Renderer::renderDasBar(const int das_counter, const Das &das_processor, const int x,
@@ -93,16 +88,16 @@ void Renderer::renderDasBar(const int das_counter, const Das &das_processor, con
   const Coords das_bar_pos{das_box_pos.x + 31, das_box_pos.y + 7};
   const int das_bar_length_pixels = 32;
   const int das_bar_width_pixels = 8;
-  render_engine_ref_.DrawSprite(das_box_pos.x, das_box_pos.y, getSprite("das-meter"));
+  drawer_->drawSprite(das_box_pos.x, das_box_pos.y, sprite_provider_->getSprite("das-meter"));
 
   auto get_das_color = [&das_processor](const int &das) {
     const int das_min_charge = das_processor.getMinDasChargeCount();
     if (das >= das_min_charge) {
-      return olc::GREEN;
+      return pdi::GREEN();
     } else if (das >= das_min_charge / 2) {
-      return olc::YELLOW;
+      return pdi::YELLOW();
     } else {
-      return olc::RED;
+      return pdi::RED();
     };
   };
 
@@ -114,8 +109,7 @@ void Renderer::renderDasBar(const int das_counter, const Das &das_processor, con
 
   const auto color = get_das_color(das_counter);
   const auto das_bar_pixels = get_das_bar_pixel_length(das_counter);
-  render_engine_ref_.FillRect(das_bar_pos.x, das_bar_pos.y, das_bar_pixels, das_bar_width_pixels,
-                              color);
+  drawer_->fillRect(das_bar_pos.x, das_bar_pos.y, das_bar_pixels, das_bar_width_pixels, color);
 }
 
 void Renderer::renderControls(const GameState<> &state, const KeyEvents &key_events, const int x,
@@ -129,40 +123,40 @@ void Renderer::renderControls(const GameState<> &state, const KeyEvents &key_eve
   const Coords b_button{controller_box_pos.x + 46, controller_box_pos.y + 15};
   const Coords start_button{controller_box_pos.x + 34, controller_box_pos.y + 17};
 
-  render_engine_ref_.DrawSprite(controller_box_pos.x, controller_box_pos.y,
-                                getSprite("controller"));
+  drawer_->drawSprite(controller_box_pos.x, controller_box_pos.y,
+                      sprite_provider_->getSprite("controller"));
   auto key_action_to_bool = [](const KeyEvent &key_event) {
     return key_event.held || key_event.pressed;
   };
 
   if (key_action_to_bool(key_events.at(KeyAction::Left))) {
-    render_engine_ref_.FillRect(arrow_left.x, arrow_left.y, 4, 4, olc::GREEN);
+    drawer_->fillRect(arrow_left.x, arrow_left.y, 4, 4, pdi::GREEN());
   }
   if (key_action_to_bool(key_events.at(KeyAction::Right))) {
-    render_engine_ref_.FillRect(arrow_right.x, arrow_right.y, 4, 4, olc::GREEN);
+    drawer_->fillRect(arrow_right.x, arrow_right.y, 4, 4, pdi::GREEN());
   }
   if (key_action_to_bool(key_events.at(KeyAction::Up))) {
-    render_engine_ref_.FillRect(arrow_up.x, arrow_up.y, 5, 4, olc::GREEN);
+    drawer_->fillRect(arrow_up.x, arrow_up.y, 5, 4, pdi::GREEN());
   }
   if (key_action_to_bool(key_events.at(KeyAction::Down))) {
-    render_engine_ref_.FillRect(arrow_down.x, arrow_down.y, 5, 4, olc::GREEN);
+    drawer_->fillRect(arrow_down.x, arrow_down.y, 5, 4, pdi::GREEN());
   }
   if (key_action_to_bool(key_events.at(KeyAction::RotateClockwise))) {
-    render_engine_ref_.FillRect(a_button.x + 1, a_button.y, 4, 6, olc::GREEN);
-    render_engine_ref_.FillRect(a_button.x, a_button.y + 1, 6, 4, olc::GREEN);
+    drawer_->fillRect(a_button.x + 1, a_button.y, 4, 6, pdi::GREEN());
+    drawer_->fillRect(a_button.x, a_button.y + 1, 6, 4, pdi::GREEN());
   }
   if (key_action_to_bool(key_events.at(KeyAction::RotateAntiClockwise))) {
-    render_engine_ref_.FillRect(b_button.x + 1, b_button.y, 4, 6, olc::GREEN);
-    render_engine_ref_.FillRect(b_button.x, b_button.y + 1, 6, 4, olc::GREEN);
+    drawer_->fillRect(b_button.x + 1, b_button.y, 4, 6, pdi::GREEN());
+    drawer_->fillRect(b_button.x, b_button.y + 1, 6, 4, pdi::GREEN());
   }
   if (key_action_to_bool(key_events.at(KeyAction::Start))) {
-    render_engine_ref_.FillRect(start_button.x + 1, start_button.y, 4, 3, olc::GREEN);
-    render_engine_ref_.FillRect(start_button.x, start_button.y + 1, 6, 1, olc::GREEN);
+    drawer_->fillRect(start_button.x + 1, start_button.y, 4, 3, pdi::GREEN());
+    drawer_->fillRect(start_button.x, start_button.y + 1, 6, 1, pdi::GREEN());
   }
 }
 
 void Renderer::renderBackground(const std::string background_sprite) {
-  render_engine_ref_.DrawSprite(0, 0, getSprite(background_sprite));
+  drawer_->drawSprite(0, 0, sprite_provider_->getSprite(background_sprite));
 }
 
 // This is a little hacky as it undermines the renderBackground function.
@@ -170,15 +164,15 @@ void Renderer::renderBackground(const std::string background_sprite) {
 void Renderer::doTetrisFlash(const int &line_clear_frame_number) {
   const auto &frame = line_clear_frame_number;
   if ((frame - 1) % 4 == 0) {
-    render_engine_ref_.DrawSprite(0, 0, getSprite("basic-field-flash"));
+    drawer_->drawSprite(0, 0, sprite_provider_->getSprite("basic-field-flash"));
   } else {
-    render_engine_ref_.DrawSprite(0, 0, getSprite("basic-field-empty-black"));
+    drawer_->drawSprite(0, 0, sprite_provider_->getSprite("basic-field-empty-black"));
   }
 }
 
 void Renderer::renderPaused() {
   constexpr Coords paused_pos{110, 116};
-  render_engine_ref_.DrawString(paused_pos.x, paused_pos.y, "PAUSED", olc::WHITE);
+  drawer_->drawString(paused_pos.x, paused_pos.y, "PAUSED", pdi::WHITE());
 }
 
 bool new_game = true;
@@ -192,7 +186,6 @@ void Renderer::renderGameState(const GameState<> &state, const bool render_contr
   constexpr Coords das_box_pos{184, 175};
   constexpr Coords controller_box_pos{184, 196};
   constexpr Coords entry_delay_pos{193, 129};
-
   auto get_grid_for_render = [](const GameState<> &state) {
     if (entryDelay(state)) {
       return state.grid;
@@ -200,16 +193,17 @@ void Renderer::renderGameState(const GameState<> &state, const bool render_contr
       return addTetrominoToGrid(state.grid, state.active_tetromino);
     }
   };
-  if(new_game) {
+  if (new_game) {
     renderBackground("basic-field-empty-black");
     new_game = false;
   }
   // Clear the field.
-  render_engine_ref_.FillRect(grid_top_left.x, grid_top_left.y, grid_size.width, grid_size.height,
-                              olc::BLACK);
+  drawer_->fillRect(grid_top_left.x, grid_top_left.y, grid_size.width, grid_size.height,
+                    pdi::BLACK());
 
-  render_engine_ref_.DrawSprite(counter_sprite_pos.x, counter_sprite_pos.y,
-                                getSprite("l" + std::to_string(state.level % 10) + "-counts"));
+  drawer_->drawSprite(
+      counter_sprite_pos.x, counter_sprite_pos.y,
+      sprite_provider_->getSprite("l" + std::to_string(state.level % 10) + "-counts"));
   renderGrid(grid_top_left.x, grid_top_left.y, get_grid_for_render(state), state.level);
   renderNextTetromino(state.next_tetromino, state.level);
   renderText(state);
@@ -227,142 +221,4 @@ void Renderer::renderGameState(const GameState<> &state, const bool render_contr
   }
 }
 
-void Renderer::drawTriangleSelector(const int x, const int y, const int size,
-                                    const olc::Pixel &color, const bool right) {
-  for (int j = 0; j < size; ++j) {
-    const int j_max = j < size / 2 ? j + 1 : size - j;
-    if (right) {
-      for (int i = 0; i > -j_max; --i) {
-        render_engine_ref_.Draw(x + i, y + j, color);
-      }
-    } else {
-      for (int i = 0; i < j_max; ++i) {
-        render_engine_ref_.Draw(x + i, y + j, color);
-      }
-    }
-  }
-}
-
-//void Renderer::renderMenu(const MenuState &menu_state) {
-//  renderBackground("a-type-background");
-
-//  // Clear the top area.
-//  render_engine_ref_.FillRect(30, 72, 190, 50, olc::BLACK);
-
-//  render_engine_ref_.DrawString(157, 80, "OPTIONS");
-
-//  render_engine_ref_.DrawString(72, 153, "JDMFX  1357428 30");
-//  render_engine_ref_.DrawString(72, 169, "KORYAN 1273120 29");
-//  render_engine_ref_.DrawString(72, 185, "JONAS  1245200 29");
-
-//  if (menu_state.options_selected) {
-//    const auto color = frame_counter_ % 4 ? olc::WHITE : olc::BLACK;
-//    drawTriangleSelector(148, 80, 7, color, false);
-//    drawTriangleSelector(219, 80, 7, color, true);
-//    renderLevelSelector(-1);
-//  } else {
-//    renderLevelSelector(menu_state.level);
-//  }
-//}
-
-//void Renderer::renderLevelSelector(const int level) {
-//  constexpr Coords level_selector{51, 75};
-//  constexpr Rect level_selector_size{83, 35};
-//  constexpr Rect selector_size{16, 16};
-//  const olc::Pixel selector_color(252, 151, 56);
-
-//  auto get_selector_coords = [&](const int level) -> Coords {
-//    const int y = (level % 10 > 4) ? level_selector.y + selector_size.height : level_selector.y;
-//    return {(selector_size.width * (level % 5)) + level_selector.x + 1, y + 2};
-//  };
-
-//  // Draw the flashing selector, and then draw the levels on top with transparency.
-//  const auto coords = get_selector_coords(level);
-//  const auto color = frame_counter_ % 4 ? selector_color : olc::BLACK;
-//  if (level >= 0) {
-//    render_engine_ref_.FillRect(coords.x, coords.y, selector_size.width, selector_size.height,
-//                                color);
-//  }
-//  render_engine_ref_.DrawSprite(level_selector.x, level_selector.y, getSprite("levels-screen"));
-
-//  ++frame_counter_;
-//}
-
-// std::vector<int> Renderer::renderOptions(const OptionState::OptionMap &options,
-//                                         const std::vector<std::string> &option_order,
-//                                         const std::set<int> &spacers, const int left_column,
-//                                         const int right_column, const int first_row,
-//                                         const bool grey_out_das_options) {
-//  render_engine_ref_.DrawString(100, 17, "OPTIONS");
-//  const std::set<std::string> das_options{"refresh_frequency", "das_initial_delay_frames",
-//                                          "das_repeat_delay_frames", "gravity_mode"};
-
-//  std::vector<int> row_locations;
-//  int y_row = first_row;
-//  int counter = 0;
-//  for (const auto &name : option_order) {
-//    const auto &option = options.at(name);
-//    const auto color =
-//        grey_out_das_options && das_options.count(name) ? olc::DARK_GREY : olc::WHITE;
-//    row_locations.push_back(y_row);
-//    const int indent = (dynamic_cast<DummyOption *>(option.get())) ? 15 : 0;
-//    render_engine_ref_.DrawString(left_column + indent, y_row, option->getDisplayName(), color);
-//    render_engine_ref_.DrawString(right_column, y_row, option->getSelectedOptionText(), color);
-//    y_row += 10;
-//    if (spacers.count(counter++)) {
-//      y_row += 5;
-//    }
-//  }
-//  return row_locations;
-//}
-
-// void Renderer::renderSelector(const OptionState &option_state, const int column_location,
-//                              const std::vector<int> &row_locations) {
-//  const auto color = frame_counter_++ % 4 ? olc::WHITE : olc::BLACK;
-//  constexpr int size = 7;
-//  const auto &option = option_state.getSelectedOption();
-//  if (option_state.isSelectedOptionDummy()) {
-//    drawTriangleSelector(40, row_locations.at(option_state.selected_index), size, color, true);
-//    drawTriangleSelector(210, row_locations.at(option_state.selected_index), size, color, false);
-//  }
-//  if (option.prevOptionAvailable()) {
-//    drawTriangleSelector(column_location, row_locations.at(option_state.selected_index), size,
-//                         color, true);
-//  }
-//  if (option.nextOptionAvailable()) {
-//    drawTriangleSelector(column_location + 40, row_locations.at(option_state.selected_index),
-//    size,
-//                         color, false);
-//  }
-//}
-
-// void Renderer::renderOptionScreen(const OptionState &option_state) {
-//  renderBackground("options-background");
-//  render_engine_ref_.FillRect(30, 30, 197, 180, olc::BLACK);
-//  constexpr int x_left_column = 32;
-//  constexpr int x_right_column = 180;
-//  constexpr int y_row_start = 40;
-
-//  std::set<int> spacers{1, 6, 8};
-//  const auto row_locations =
-//      renderOptions(option_state.options, option_state.option_order, spacers, x_left_column,
-//                    x_right_column, y_row_start, option_state.grey_out_das_options);
-//  renderSelector(option_state, x_right_column - 5, row_locations);
-//}
-
-//void Renderer::renderKeyboardConfigScreen(const KeyboardConfigState &state) {
-//  renderBackground("options-background");
-//  render_engine_ref_.FillRect(30, 30, 197, 180, olc::BLACK);
-//  constexpr int x_left_column = 32;
-//  constexpr int x_right_column = 180;
-//  int y_row = 40;
-//  for (const auto &[action, key] : state.key_bindings) {
-//    render_engine_ref_.DrawString(x_left_column, y_row, keyActionToString(action));
-//    render_engine_ref_.DrawString(x_right_column, y_row, keyToString(key));
-//    y_row += 10;
-//  }
-//  render_engine_ref_.DrawString(x_left_column, y_row, keyActionToString(state.active_key));
-//  render_engine_ref_.DrawString(x_right_column, y_row, "???");
-//}
-};  // namespace tetris_clone
-
+}  // namespace tetris_clone

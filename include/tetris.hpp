@@ -13,7 +13,6 @@
 #include "key_defines.hpp"
 #include "utils/logging.hpp"
 #include "olcPixelGameEngine.h"
-#include "rendering.hpp"
 #include "sound.hpp"
 
 namespace tetris_clone {
@@ -36,7 +35,6 @@ class TetrisClone : public olc::PixelGameEngine {
 
   KeyEvents getKeyEvents(KeyStates& current_key_state);
 
-  std::shared_ptr<Renderer> renderer_;
   std::shared_ptr<sound::SoundPlayer> sample_player_;
   std::shared_ptr<SpriteProvider> sprite_provider_;
   std::shared_ptr<GameOptions> game_options_;

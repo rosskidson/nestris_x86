@@ -6,7 +6,7 @@
 namespace tetris_clone {
 using pdi = PixelDrawingInterface;
 
-void drawNumber(PixelDrawingInterface& drawer, const int x, const int y, const int num,
+void drawNumber(const PixelDrawingInterface& drawer, const int x, const int y, const int num,
                 const int pad, const pdi::Color& color) {
   constexpr int TEXT_WIDTH_PX = 8;
   drawer.fillRect(x, y, TEXT_WIDTH_PX * pad, TEXT_WIDTH_PX, pdi::BLACK());

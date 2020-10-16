@@ -50,12 +50,11 @@ KeyEvent getButtonState(const bool button_old_state, const bool button_new_state
 }
 
 TetrisClone::TetrisClone()
-    : renderer_{std::make_shared<Renderer>(*this, "./assets/images")},
-      sample_player_{std::make_shared<sound::SoundPlayer>()},
+    : sample_player_{std::make_shared<sound::SoundPlayer>()},
       sprite_provider_{std::make_shared<SpriteProvider>()},
       game_options_{std::make_shared<GameOptions>()},
-      game_frame_processor_{
-          std::make_shared<GameProcessor>(GameOptions{}, renderer_, sample_player_)},
+      game_frame_processor_{std::make_shared<GameProcessor>(
+          GameOptions{}, std::make_unique<OlcDrawer>(*this), sample_player_, sprite_provider_)},
       level_menu_processor_{std::make_shared<LevelScreenProcessor>(
           std::make_unique<OlcDrawer>(*this), sample_player_, sprite_provider_)},
       option_menu_processor_{std::make_shared<OptionScreenProcessor>(
@@ -138,7 +137,8 @@ void TetrisClone::processProgramFlowSignal(const ProgramFlowSignal &signal) {
     auto options = menuOptionsToGameOptions(option_menu_processor_->getOptions());
     options.level = level_menu_processor_->getSelectedLevel();
     single_frame_ = Duration_ns{static_cast<int>((1.0 / options.game_frequency) * 1e9)};
-    game_frame_processor_ = std::make_shared<GameProcessor>(options, renderer_, sample_player_);
+    game_frame_processor_ = std::make_shared<GameProcessor>(
+        options, std::make_unique<OlcDrawer>(*this), sample_player_, sprite_provider_);
     active_processor_ = game_frame_processor_;
   } else if (signal == ProgramFlowSignal::LevelSelectorScreen) {
     active_processor_ = level_menu_processor_;

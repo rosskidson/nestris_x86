@@ -30,6 +30,7 @@ class PixelDrawingInterface {
   static Color RED() { return Color{255, 0, 0, 255}; }
   static Color BLUE() { return Color{0, 255, 0, 255}; }
   static Color GREEN() { return Color{0, 0, 255, 255}; }
+  static Color YELLOW() { return Color{255, 255, 0, 255}; }
 
   virtual void drawSprite(const int x, const int y, const std::any& sprite) const = 0;
 

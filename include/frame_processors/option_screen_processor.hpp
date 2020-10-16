@@ -24,8 +24,8 @@ class OptionScreenProcessor : public FrameProcessorInterface {
   const OptionMap& getOptions() { return options_; }
 
  private:
-  ProgramFlowSignal processKeyEvents(const KeyEvents& key_events,
-                                     const sound::SoundPlayer& sample_player_);
+  ProgramFlowSignal processKeyEvents(const KeyEvents& key_events);
+
   void renderOptionScreen() const;
 
   std::vector<int> renderOptions(const std::set<int>& spacers, const int left_column,

@@ -95,11 +95,10 @@ OptionScreenProcessor::OptionScreenProcessor(
   }
 }
 
-ProgramFlowSignal OptionScreenProcessor::processKeyEvents(
-    const KeyEvents& key_events, const sound::SoundPlayer& sample_player_) {
+ProgramFlowSignal OptionScreenProcessor::processKeyEvents(const KeyEvents& key_events) {
   auto& current_idx = selected_index_;
   if (key_events.at(KeyAction::Start).pressed) {
-    sample_player_.playSample("menu_select_02");
+    sample_player_->playSample("menu_select_02");
     if (option_order_.at(selected_index_) == "configure_keyboard") {
       return ProgramFlowSignal::KeyboardConfigScreen;
     } else if (option_order_.at(selected_index_) == "configure_controller") {
@@ -109,20 +108,20 @@ ProgramFlowSignal OptionScreenProcessor::processKeyEvents(
     }
   }
   if (key_events.at(KeyAction::Up).pressed) {
-    sample_player_.playSample("menu_blip");
+    sample_player_->playSample("menu_blip");
     current_idx = current_idx > 1 ? current_idx - 1 : 0;
   }
   if (key_events.at(KeyAction::Down).pressed) {
-    sample_player_.playSample("menu_blip");
+    sample_player_->playSample("menu_blip");
     current_idx =
         current_idx < option_order_.size() - 2 ? current_idx + 1 : option_order_.size() - 1;
   }
   if (key_events.at(KeyAction::Left).pressed) {
-    sample_player_.playSample("menu_blip");
+    sample_player_->playSample("menu_blip");
     getSelectedOption().selectPrevOption();
   }
   if (key_events.at(KeyAction::Right).pressed) {
-    sample_player_.playSample("menu_blip");
+    sample_player_->playSample("menu_blip");
     getSelectedOption().selectNextOption();
   }
 
@@ -192,7 +191,7 @@ void OptionScreenProcessor::renderOptionScreen() const {
 }
 
 ProgramFlowSignal OptionScreenProcessor::processFrame(const KeyEvents& key_events) {
-  const auto signal = processKeyEvents(key_events, *sample_player_);
+  const auto signal = processKeyEvents(key_events);
 
   if (options_.at("das_profile")->getSelectedOptionText() == "NTSC") {
     setDasOptions(60, 16, 6, "NTSC", options_);
