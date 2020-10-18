@@ -17,7 +17,7 @@
 
 namespace tetris_clone {
 
-constexpr int NTSC_frame_ns = (1.0 / 60.0) * 1e9;
+constexpr int NTSC_frame_ns = (1.0 / NTSC_FREQUENCY) * 1e9;
 
 KeyBindings getKeyBindings() {
   KeyBindings key_bindings;
@@ -73,7 +73,7 @@ TetrisClone::TetrisClone()
 
 bool TetrisClone::OnUserCreate() {
   if (ScreenWidth() != 256 || ScreenHeight() != 225) {
-    LOG_ERROR("Screen size must be set to 256x240 for this application.");
+    LOG_ERROR("Screen size must be set to 256x225 for this application.");
     return false;
   }
   this->SetPixelMode(olc::Pixel::MASK);
