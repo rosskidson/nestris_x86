@@ -26,15 +26,37 @@ struct Rect {
   int height;
 };
 
+bool spriteValid(const olc::Sprite &sprite) {
+  return sprite.height > 0 && sprite.width > 0;
+}
+
+bool loadBlockSprites(const SpriteProvider& sprite_provider,
+                      std::vector<std::vector<std::unique_ptr<olc::Sprite>>> &block_sprites) {
+  block_sprites.clear();
+  block_sprites.resize(10);
+  for (int level = 0; level < 10; ++level) {
+    block_sprites[level].emplace_back(std::make_unique<olc::Sprite>(8, 8));
+    for (int color = 0; color < 4; ++color) {
+      std::stringstream ss;
+      ss << "l" << level << "-c" << color;
+      auto * sprite = sprite_provider.getSprite(ss.str())->Duplicate();
+      std::unique_ptr<olc::Sprite> clone_ptr(sprite);
+      block_sprites[level].emplace_back(std::move(clone_ptr));
+      if (not spriteValid(*block_sprites.at(level).back())) {
+        LOG_ERROR("Failed loading `" << ss.str() << "`.");
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
 Renderer::Renderer(std::unique_ptr<PixelDrawingInterface> &&drawer,
                    const std::shared_ptr<SpriteProvider> &sprite_provider,
                    const std::string &sprites_path)
     : drawer_(std::move(drawer)), sprite_provider_(sprite_provider), frame_counter_(0) {
-  if (not loadBlockSprites(sprites_path, block_sprites_)) {
+  if (not loadBlockSprites(*sprite_provider_, block_sprites_)) {
     throw std::runtime_error("Failed loading block sprites.");
-  }
-  if (not loadSprites(sprites_path, sprite_map_)) {
-    throw std::runtime_error("Failed loading sprites.");
   }
 }
 

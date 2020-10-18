@@ -62,7 +62,6 @@ class Renderer {
   std::string background_rendered_;
   std::unique_ptr<PixelDrawingInterface> drawer_;
   std::shared_ptr<SpriteProvider> sprite_provider_;
-  std::map<std::string, std::unique_ptr<olc::Sprite>> sprite_map_;
   std::vector<std::vector<std::unique_ptr<olc::Sprite>>> block_sprites_;
   // olc::PixelGameEngine &render_engine_ref_;
   int frame_counter_;

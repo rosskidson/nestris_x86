@@ -53,8 +53,10 @@ TetrisClone::TetrisClone()
     : sample_player_{std::make_shared<sound::SoundPlayer>()},
       sprite_provider_{std::make_shared<SpriteProvider>()},
       game_options_{std::make_shared<GameOptions>()},
-      game_frame_processor_{std::make_shared<GameProcessor>(
-          GameOptions{}, std::make_unique<OlcDrawer>(*this), sample_player_, sprite_provider_)},
+      // TODO:: FIX THIS
+      // game_frame_processor_{std::make_shared<GameProcessor>(
+      //    GameOptions{}, std::make_unique<OlcDrawer>(*this), sample_player_, sprite_provider_)},
+      game_frame_processor_{},
       level_menu_processor_{std::make_shared<LevelScreenProcessor>(
           std::make_unique<OlcDrawer>(*this), sample_player_, sprite_provider_)},
       option_menu_processor_{std::make_shared<OptionScreenProcessor>(
@@ -80,6 +82,8 @@ bool TetrisClone::OnUserCreate() {
   }
   this->SetPixelMode(olc::Pixel::MASK);
   sprite_provider_->loadSprites("assets/images");
+  game_frame_processor_ = std::make_shared<GameProcessor>(
+      GameOptions{}, std::make_unique<OlcDrawer>(*this), sample_player_, sprite_provider_);
   frame_end_ = Clock::now() + single_frame_;
 
   return true;
