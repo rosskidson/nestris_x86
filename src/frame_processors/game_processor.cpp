@@ -31,8 +31,19 @@ GameProcessor::GameProcessor(const GameOptions& options,
       show_entry_delay_{options.show_entry_delay},
       line_clear_info_{},
       top_out_frame_counter_{} {
-        LOG_INFO("test game processor ctor");
   state_ = getNewState(options.level);
+}
+
+void GameProcessor::reset(const GameOptions& options) {
+  das_processor_ = Das{options.das_full_charge, options.das_min_charge};
+  gravity_provider_ = Gravity{options.gravity_type};
+  show_controls_ = options.show_controls;
+  show_das_bar_ = options.show_das_bar;
+  show_entry_delay_ = options.show_entry_delay;
+  line_clear_info_ = {};
+  top_out_frame_counter_ = {};
+  state_ = getNewState(options.level);
+  renderer_.startNewGame();
 }
 
 Tetromino GameProcessor::getRandomTetromino() {

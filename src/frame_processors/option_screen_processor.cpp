@@ -3,10 +3,11 @@
 
 #include <memory>
 
+#include "das.hpp"
 #include "drawing_utils.hpp"
-#include "game_states.hpp"
 #include "option.hpp"
 #include "pixel_drawing_interface.hpp"
+#include "tetris_type.hpp"
 #include "utils/logging.hpp"
 
 namespace tetris_clone {
@@ -41,7 +42,7 @@ OptionScreenProcessor::OptionScreenProcessor(
       "DAS PROFILE", std::vector<std::string>{"NTSC", "PAL", "CUSTOM"});
 
   options_["refresh_frequency"] =  //
-      std::make_unique<IntOption>("FREQUENCY (HZ)", 1, 99, 60);
+      std::make_unique<IntOption>("FREQUENCY (HZ)", 1, 99, NTSC_FREQUENCY);
 
   options_["das_initial_delay_frames"] =
       std::make_unique<IntOption>("DAS INITIAL DELAY", 0, 99, 16);
@@ -194,10 +195,12 @@ ProgramFlowSignal OptionScreenProcessor::processFrame(const KeyEvents& key_event
   const auto signal = processKeyEvents(key_events);
 
   if (options_.at("das_profile")->getSelectedOptionText() == "NTSC") {
-    setDasOptions(60, 16, 6, "NTSC", options_);
+    setDasOptions(NTSC_FREQUENCY, Das::NTSC_FULL_CHARGE,
+                  Das::NTSC_FULL_CHARGE - Das::NTSC_MIN_CHARGE, "NTSC", options_);
     grey_out_das_options_ = true;
   } else if (options_.at("das_profile")->getSelectedOptionText() == "PAL") {
-    setDasOptions(50, 12, 4, "PAL", options_);
+    setDasOptions(PAL_FREQUENCY, Das::PAL_FULL_CHARGE, Das::PAL_FULL_CHARGE - Das::PAL_MIN_CHARGE,
+                  "PAL", options_);
     grey_out_das_options_ = true;
   } else {
     grey_out_das_options_ = false;

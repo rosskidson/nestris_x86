@@ -1,9 +1,7 @@
 
 #include "frame_processors/keyboard_config_processor.hpp"
 
-#include "frame_processor_interface.hpp"
 #include "pixel_drawing_interface.hpp"
-#include "tetris.hpp"
 
 namespace tetris_clone {
 

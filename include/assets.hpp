@@ -15,6 +15,8 @@ namespace tetris_clone {
 
 class SpriteProvider {
  public:
+  SpriteProvider(const std::string& path);
+
   bool loadSprites(const std::string &path);
 
   olc::Sprite *getSprite(const std::string &sprite_name) const;
@@ -22,12 +24,6 @@ class SpriteProvider {
  private:
   std::map<std::string, std::unique_ptr<olc::Sprite>> sprite_map_;
 };
-
-bool loadBlockSprites(const std::string &path,
-                      std::vector<std::vector<std::unique_ptr<olc::Sprite>>> &block_sprites);
-
-bool loadSprites(const std::string &path,
-                 std::map<std::string, std::unique_ptr<olc::Sprite>> &sprite_map);
 
 bool loadSoundAssets(const std::string &path, sound::SoundPlayer &sample_player);
 

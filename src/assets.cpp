@@ -3,6 +3,7 @@
 
 #include <filesystem>
 #include <sstream>
+#include <stdexcept>
 
 #include "olcPixelGameEngine.h"
 #include "utils/logging.hpp"
@@ -54,6 +55,12 @@ const std::vector<std::pair<std::string, std::string>> SPRITES{
     {"l9-counts.png", "l9-counts"}};
 // clang-format on
 
+SpriteProvider::SpriteProvider(const std::string &path) {
+  if(not loadSprites(path) ) {
+    throw std::runtime_error("Failed initializing SpriteProvider with path `" + path + "`");
+  }
+}
+
 olc::Sprite *SpriteProvider::getSprite(const std::string &sprite_name) const try {
   return sprite_map_.at(sprite_name).get();
 } catch (const std::out_of_range &e) {
@@ -65,41 +72,13 @@ bool SpriteProvider::loadSprites(const std::string &path) {
   for (const auto &dir_itr : fs::directory_iterator(fs::current_path() / fs::path(path))) {
     const auto filepath = fs::path(dir_itr);
     const auto extension = filepath.extension();
-    if(extension != ".PNG" and extension != ".png") {
+    const auto name = filepath.stem();
+    if (extension != ".PNG" and extension != ".png") {
       continue;
     }
-    sprite_map_[filepath.stem()] = std::make_unique<olc::Sprite>(filepath.string());
-  }
-  return true;
-}
-
-bool loadBlockSprites(const std::string &path,
-                      std::vector<std::vector<std::unique_ptr<olc::Sprite>>> &block_sprites) {
-  block_sprites.clear();
-  block_sprites.resize(10);
-  for (int level = 0; level < 10; ++level) {
-    block_sprites[level].emplace_back(std::make_unique<olc::Sprite>(8, 8));
-    for (int color = 0; color < 4; ++color) {
-      std::stringstream ss;
-      ss << "/l" << level << "-c" << color << ".png";
-      const std::string full_path = path + ss.str();
-      block_sprites[level].emplace_back(std::make_unique<olc::Sprite>(full_path));
-      if (not spriteValid(*block_sprites.at(level).back())) {
-        LOG_ERROR("Failed loading `" << full_path << "`.");
-        return false;
-      }
-    }
-  }
-  return true;
-}
-
-bool loadSprites(const std::string &path,
-                 std::map<std::string, std::unique_ptr<olc::Sprite>> &sprite_map) {
-  for (const auto &[filename, name] : SPRITES) {
-    const std::string full_path = path + "/" + filename;
-    sprite_map[name] = std::make_unique<olc::Sprite>(full_path);
-    if (not spriteValid(*sprite_map.at(name))) {
-      LOG_ERROR("Failed loading sprite `" << full_path << "`");
+    sprite_map_[name] = std::make_unique<olc::Sprite>(filepath.string());
+    if (not spriteValid(*sprite_map_.at(name))) {
+      LOG_ERROR("Failed loading `" << filepath << "`.");
       return false;
     }
   }

@@ -15,6 +15,11 @@ void drawNumber(const PixelDrawingInterface& drawer, const int x, const int y, c
   drawer.drawString(x, y, ss.str(), color);
 }
 
+void drawNumber(const PixelDrawingInterface& drawer, const pdi::Coords& coords, const int num,
+                const int pad, const pdi::Color& color) {
+  drawNumber(drawer, coords.x, coords.y, num, pad, color);
+}
+
 void drawTriangleSelector(const PixelDrawingInterface& drawer, const int x, const int y,
                           const int size, const pdi::Color& color, const bool right) {
   for (int j = 0; j < size; ++j) {

@@ -9,12 +9,6 @@
 
 namespace tetris_clone {
 
-constexpr int DAS_FULL_CHARGE_DEFAULT = 16;
-constexpr int DAS_MIN_CHARGE_DEFAULT = 10;
-constexpr int NTSC_FREQUENCY = 60;
-
-enum class TetrisType { NTSC, PAL };
-
 template <int W = 10, int H = 20>
 // clang-format off
 struct GameState {
@@ -58,18 +52,9 @@ inline bool entryDelay(const GameState<>& state) {
   return state.entry_delay_counter > 0;
 }
 
-enum class StatisticsMode { classic, ctwc };
-
-struct GameOptions {
-  int level{};
-  int das_full_charge{DAS_FULL_CHARGE_DEFAULT};
-  int das_min_charge{DAS_MIN_CHARGE_DEFAULT};
-  int game_frequency{NTSC_FREQUENCY};
-  TetrisType gravity_type{TetrisType::NTSC};
-  bool show_controls{true};
-  bool show_das_bar{true};
-  bool show_entry_delay{true};
-  StatisticsMode statistics_mode{};
+struct LineClearAnimationInfo {
+  std::vector<int> rows;
+  int animation_frame{};
 };
 
 }  // namespace tetris_clone

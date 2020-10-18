@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#include "game_states.hpp"
+#include "tetris_type.hpp"
 
 namespace tetris_clone {
 

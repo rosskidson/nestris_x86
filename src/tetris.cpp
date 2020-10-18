@@ -2,7 +2,6 @@
 
 #include <chrono>
 #include <ctime>
-//#include <iomanip>
 #include <memory>
 #include <thread>  //sleep until
 
@@ -11,7 +10,6 @@
 #include "frame_processors/keyboard_config_processor.hpp"
 #include "frame_processors/level_screen_processor.hpp"
 #include "frame_processors/option_screen_processor.hpp"
-#include "game_states.hpp"
 #include "key_defines.hpp"
 #include "olc_drawer.hpp"
 #include "option.hpp"
@@ -51,12 +49,10 @@ KeyEvent getButtonState(const bool button_old_state, const bool button_new_state
 
 TetrisClone::TetrisClone()
     : sample_player_{std::make_shared<sound::SoundPlayer>()},
-      sprite_provider_{std::make_shared<SpriteProvider>()},
+      sprite_provider_{std::make_shared<SpriteProvider>("./assets/images/")},
       game_options_{std::make_shared<GameOptions>()},
-      // TODO:: FIX THIS
-      // game_frame_processor_{std::make_shared<GameProcessor>(
-      //    GameOptions{}, std::make_unique<OlcDrawer>(*this), sample_player_, sprite_provider_)},
-      game_frame_processor_{},
+       game_frame_processor_{std::make_shared<GameProcessor>(
+          GameOptions{}, std::make_unique<OlcDrawer>(*this), sample_player_, sprite_provider_)},
       level_menu_processor_{std::make_shared<LevelScreenProcessor>(
           std::make_unique<OlcDrawer>(*this), sample_player_, sprite_provider_)},
       option_menu_processor_{std::make_shared<OptionScreenProcessor>(
@@ -81,9 +77,6 @@ bool TetrisClone::OnUserCreate() {
     return false;
   }
   this->SetPixelMode(olc::Pixel::MASK);
-  sprite_provider_->loadSprites("assets/images");
-  game_frame_processor_ = std::make_shared<GameProcessor>(
-      GameOptions{}, std::make_unique<OlcDrawer>(*this), sample_player_, sprite_provider_);
   frame_end_ = Clock::now() + single_frame_;
 
   return true;
@@ -141,8 +134,7 @@ void TetrisClone::processProgramFlowSignal(const ProgramFlowSignal &signal) {
     auto options = menuOptionsToGameOptions(option_menu_processor_->getOptions());
     options.level = level_menu_processor_->getSelectedLevel();
     single_frame_ = Duration_ns{static_cast<int>((1.0 / options.game_frequency) * 1e9)};
-    game_frame_processor_ = std::make_shared<GameProcessor>(
-        options, std::make_unique<OlcDrawer>(*this), sample_player_, sprite_provider_);
+    game_frame_processor_->reset(options);
     active_processor_ = game_frame_processor_;
   } else if (signal == ProgramFlowSignal::LevelSelectorScreen) {
     active_processor_ = level_menu_processor_;
@@ -156,6 +148,7 @@ void TetrisClone::processProgramFlowSignal(const ProgramFlowSignal &signal) {
   // wall_kick",
   // show_das_chain",
   // show_wall_charges",
+  // staistics mode",
 }
 
 void TetrisClone::sleepUntilNextFrame() {
@@ -172,10 +165,8 @@ void TetrisClone::sleepUntilNextFrame() {
     LOG_INFO("End of frame (us): " << end_of_frame_us.count());
     LOG_INFO("Time overrun (us): " << overrun_us);
 
-    // If the computer goes into standby or hibernate, the frame_end can end up lagging
-    // Clock::now() by multiple hours. It takes many frames without sleep for frame_end to catch up.
-    // If the difference is over one second, reset frame_end.
-    if (overrun_us > 1e6) {
+    // If the overrun is more than a frame, reset so the game doesn't have to play catch up.
+    if (overrun_us > single_frame_.count() / 1000) {
       frame_end_ = Clock::now();
       const auto reset_us =
           std::chrono::duration_cast<std::chrono::microseconds>(frame_end_.time_since_epoch());
@@ -190,6 +181,7 @@ void TetrisClone::sleepUntilNextFrame() {
 /**
  * TODO:
  *
+ * - timing overrun errors in the menu on macos
  * - configure keyboard
  * - configure controller
  * - Restructure layout for
@@ -201,6 +193,7 @@ void TetrisClone::sleepUntilNextFrame() {
  * - Asset loading from binary
  * - Press down scoring
  * - Hard drop
+ * - Statistics mode
  * - Hold
  * - Remove magic numbers in game_logic (entry delay, line clear frame numbers)
  * - Press down hold between blocks?

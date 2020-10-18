@@ -11,6 +11,12 @@ void drawNumber(const PixelDrawingInterface& drawer,
                 const int pad,
                 const PixelDrawingInterface::Color& color = PixelDrawingInterface::WHITE());
 
+void drawNumber(const PixelDrawingInterface& drawer,
+                const PixelDrawingInterface::Coords& coords,
+                const int num,
+                const int pad,
+                const PixelDrawingInterface::Color& color = PixelDrawingInterface::WHITE());
+
 void drawTriangleSelector(const PixelDrawingInterface& drawer,
                           const int x,
                           const int y,

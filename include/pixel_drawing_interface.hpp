@@ -28,9 +28,11 @@ class PixelDrawingInterface {
   static Color GREY() { return Color{192, 192, 192, 255}; }
   static Color DARK_GREY() { return Color{128, 128, 128, 255}; }
   static Color RED() { return Color{255, 0, 0, 255}; }
-  static Color BLUE() { return Color{0, 255, 0, 255}; }
-  static Color GREEN() { return Color{0, 0, 255, 255}; }
+  static Color GREEN() { return Color{0, 255, 0, 255}; }
+  static Color BLUE() { return Color{0, 0, 255, 255}; }
   static Color YELLOW() { return Color{255, 255, 0, 255}; }
+
+  virtual ~PixelDrawingInterface() = default;
 
   virtual void drawSprite(const int x, const int y, const std::any& sprite) const = 0;
 
