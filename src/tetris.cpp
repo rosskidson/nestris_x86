@@ -12,6 +12,7 @@
 #include "frame_processors/option_screen_processor.hpp"
 #include "key_defines.hpp"
 #include "olc_drawer.hpp"
+#include "olc_keyboard.hpp"
 #include "option.hpp"
 #include "utils/logging.hpp"
 
@@ -60,6 +61,7 @@ TetrisClone::TetrisClone()
       keyboard_config_processor_{std::make_shared<KeyboardConfigProcessor>(
           std::make_unique<OlcDrawer>(*this), sample_player_)},
       active_processor_{level_menu_processor_},
+      keyboard_input_{std::make_unique<OlcKeyboard>(*this)},
       key_bindings_{getKeyBindings()},
       key_states_{initializeKeyStatesFromBindings(key_bindings_)},
       frame_end_{},

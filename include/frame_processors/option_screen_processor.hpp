@@ -26,6 +26,8 @@ class OptionScreenProcessor : public FrameProcessorInterface {
  private:
   ProgramFlowSignal processKeyEvents(const KeyEvents& key_events);
 
+  void setDasProfile();
+
   void renderOptionScreen() const;
 
   std::vector<int> renderOptions(const std::set<int>& spacers, const int left_column,

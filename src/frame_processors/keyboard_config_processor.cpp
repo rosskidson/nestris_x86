@@ -21,7 +21,7 @@ void KeyboardConfigProcessor::renderKeyboardConfigScreen() {
   int y_row = 40;
   for (const auto& [action, key] : key_bindings_) {
     drawer_->drawString(x_left_column, y_row, keyActionToString(action));
-    drawer_->drawString(x_right_column, y_row, keyToString(key));
+    //drawer_->drawString(x_right_column, y_row, keyToString(key));
     y_row += 10;
   }
   drawer_->drawString(x_left_column, y_row, keyActionToString(active_key_));

@@ -39,7 +39,7 @@ OptionScreenProcessor::OptionScreenProcessor(
   options_["configure_controller"] = std::make_unique<DummyOption>("CONFIGURE CONTROLLER");
 
   options_["das_profile"] = std::make_unique<StringOption>(
-      "DAS PROFILE", std::vector<std::string>{"NTSC", "PAL", "CUSTOM"});
+      "DAS PROFILE", std::vector<std::string>{"NTSC", "PAL", "NONE", "FULL", "CUSTOM"});
 
   options_["refresh_frequency"] =  //
       std::make_unique<IntOption>("FREQUENCY (HZ)", 1, 99, NTSC_FREQUENCY);
@@ -178,9 +178,8 @@ void OptionScreenProcessor::renderSelector(const int column_location,
 }
 
 void OptionScreenProcessor::renderOptionScreen() const {
-  // renderBackground("options-background");
   drawer_->drawSprite(0, 0, sprite_provider_->getSprite("options-background"));
-  drawer_->fillRect(30, 30, 197, 180, PixelDrawingInterface::BLACK());
+  //drawer_->fillRect(30, 30, 197, 180, PixelDrawingInterface::BLACK());
   constexpr int x_left_column = 32;
   constexpr int x_right_column = 180;
   constexpr int y_row_start = 40;
@@ -191,9 +190,7 @@ void OptionScreenProcessor::renderOptionScreen() const {
   renderSelector(x_right_column - 5, row_locations);
 }
 
-ProgramFlowSignal OptionScreenProcessor::processFrame(const KeyEvents& key_events) {
-  const auto signal = processKeyEvents(key_events);
-
+void OptionScreenProcessor::setDasProfile() {
   if (options_.at("das_profile")->getSelectedOptionText() == "NTSC") {
     setDasOptions(NTSC_FREQUENCY, Das::NTSC_FULL_CHARGE,
                   Das::NTSC_FULL_CHARGE - Das::NTSC_MIN_CHARGE, "NTSC", options_);
@@ -202,9 +199,22 @@ ProgramFlowSignal OptionScreenProcessor::processFrame(const KeyEvents& key_event
     setDasOptions(PAL_FREQUENCY, Das::PAL_FULL_CHARGE, Das::PAL_FULL_CHARGE - Das::PAL_MIN_CHARGE,
                   "PAL", options_);
     grey_out_das_options_ = true;
+  } else if (options_.at("das_profile")->getSelectedOptionText() == "NONE") {
+    setDasOptions(NTSC_FREQUENCY, 99, 99, "NTSC", options_);
+    grey_out_das_options_ = true;
+  } else if (options_.at("das_profile")->getSelectedOptionText() == "FULL") {
+    setDasOptions(NTSC_FREQUENCY, 0, Das::NTSC_FULL_CHARGE - Das::NTSC_MIN_CHARGE, "NTSC",
+                  options_);
+    grey_out_das_options_ = true;
   } else {
     grey_out_das_options_ = false;
   }
+}
+
+ProgramFlowSignal OptionScreenProcessor::processFrame(const KeyEvents& key_events) {
+  const auto signal = processKeyEvents(key_events);
+
+  setDasProfile();
 
   // Reset the frame counter if the processing has ended.
   if (signal != ProgramFlowSignal::FrameSuccess) {
