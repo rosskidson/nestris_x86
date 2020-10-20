@@ -12,19 +12,21 @@ class OlcKeyboard : public InputInterface {
  public:
   OlcKeyboard(olc::PixelGameEngine& pixel_game_engine_ref);
 
-  bool getKeyState(const int key_code) const override;
+  bool getKeyState(const KeyCode key_code) const override;
 
-  int getPressedKey() const override;
+  KeyCode getPressedKey() const override;
 
-  std::string keyCodeToStr(const int key_code) const override;
-  int lookupKeyCode(const std::string& key_name) const override;
+  std::string keyCodeToStr(const KeyCode key_code) const override;
+  KeyCode lookupKeyCode(const std::string& key_name) const override;
 
  private:
-  int olcToKeyCode(const olc::Key& key) const;
-  olc::Key keyCodeToOlc(const int& key_code) const;
+  static KeyCode olcToKeyCode(const olc::Key& key);
+  static olc::Key keyCodeToOlc(const KeyCode key_code);
 
   olc::PixelGameEngine& pixel_game_engine_ref_;
   static constexpr int num_keys{85};
+  const static std::map<std::string, int> name_code_lookup;
+  const static std::array<std::string, 85> key_names;
 };
 
 }  // namespace tetris_clone

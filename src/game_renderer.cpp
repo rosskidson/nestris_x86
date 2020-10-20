@@ -1,6 +1,7 @@
 #include "game_renderer.hpp"
 
 #include <memory>
+#include <sstream>
 #include <set>
 
 #include "assets.hpp"

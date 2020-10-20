@@ -20,15 +20,15 @@ namespace tetris_clone {
 
 constexpr int NTSC_frame_ns = (1.0 / NTSC_FREQUENCY) * 1e9;
 
-KeyBindings getKeyBindings() {
+KeyBindings getKeyBindings(const InputInterface &key_input) {
   KeyBindings key_bindings;
-  key_bindings[KeyAction::Up] = olc::Key::UP;
-  key_bindings[KeyAction::Down] = olc::Key::DOWN;
-  key_bindings[KeyAction::Left] = olc::Key::LEFT;
-  key_bindings[KeyAction::Right] = olc::Key::RIGHT;
-  key_bindings[KeyAction::RotateClockwise] = olc::Key::X;      // NES gamepad A
-  key_bindings[KeyAction::RotateAntiClockwise] = olc::Key::Z;  // NES gamepad B
-  key_bindings[KeyAction::Start] = olc::Key::ENTER;
+  key_bindings[KeyAction::Up] = key_input.lookupKeyCode("UP");
+  key_bindings[KeyAction::Down] = key_input.lookupKeyCode("DOWN");
+  key_bindings[KeyAction::Left] = key_input.lookupKeyCode("LEFT");
+  key_bindings[KeyAction::Right] = key_input.lookupKeyCode("RIGHT");
+  key_bindings[KeyAction::RotateClockwise] = key_input.lookupKeyCode("X");      // NES gamepad A
+  key_bindings[KeyAction::RotateAntiClockwise] = key_input.lookupKeyCode("Z");  // NES gamepad B
+  key_bindings[KeyAction::Start] = key_input.lookupKeyCode("ENTER");
   return key_bindings;
 }
 
@@ -48,21 +48,32 @@ KeyEvent getButtonState(const bool button_old_state, const bool button_new_state
   return event;
 }
 
+KeyEvents TetrisClone::getKeyEvents(KeyStates &last_key_states) {
+  KeyEvents ret_val{};
+  for (const auto &[action, key] : key_bindings_) {
+    const auto new_key_state = keyboard_input_->getKeyState(key);
+    ret_val[action] = getButtonState(last_key_states.at(action), new_key_state);
+    last_key_states[action] = new_key_state;
+  }
+  return ret_val;
+}
+
 TetrisClone::TetrisClone()
     : sample_player_{std::make_shared<sound::SoundPlayer>()},
       sprite_provider_{std::make_shared<SpriteProvider>("./assets/images/")},
       game_options_{std::make_shared<GameOptions>()},
-       game_frame_processor_{std::make_shared<GameProcessor>(
+      game_frame_processor_{std::make_shared<GameProcessor>(
           GameOptions{}, std::make_unique<OlcDrawer>(*this), sample_player_, sprite_provider_)},
       level_menu_processor_{std::make_shared<LevelScreenProcessor>(
           std::make_unique<OlcDrawer>(*this), sample_player_, sprite_provider_)},
       option_menu_processor_{std::make_shared<OptionScreenProcessor>(
           std::make_unique<OlcDrawer>(*this), sample_player_, sprite_provider_)},
       keyboard_config_processor_{std::make_shared<KeyboardConfigProcessor>(
-          std::make_unique<OlcDrawer>(*this), sample_player_)},
+          std::make_unique<OlcDrawer>(*this), sample_player_,
+          std::make_unique<OlcKeyboard>(*this))},
       active_processor_{level_menu_processor_},
       keyboard_input_{std::make_unique<OlcKeyboard>(*this)},
-      key_bindings_{getKeyBindings()},
+      key_bindings_{getKeyBindings(*keyboard_input_)},
       key_states_{initializeKeyStatesFromBindings(key_bindings_)},
       frame_end_{},
       single_frame_{NTSC_frame_ns} {
@@ -90,16 +101,6 @@ bool TetrisClone::OnUserUpdate(float fElapsedTime) {
   processProgramFlowSignal(signal);
   sleepUntilNextFrame();
   return not(GetKey(olc::Key::Q).bHeld || signal == ProgramFlowSignal::EndProgram);
-}
-
-KeyEvents TetrisClone::getKeyEvents(KeyStates &last_key_states) {
-  KeyEvents ret_val{};
-  for (const auto &[action, key] : key_bindings_) {
-    const auto new_key_state = GetKey(key).bHeld;
-    ret_val[action] = getButtonState(last_key_states.at(action), new_key_state);
-    last_key_states[action] = new_key_state;
-  }
-  return ret_val;
 }
 
 TetrisType getGravityOption(const OptionInterface &option) {
@@ -183,7 +184,6 @@ void TetrisClone::sleepUntilNextFrame() {
 /**
  * TODO:
  *
- * - timing overrun errors in the menu on macos
  * - configure keyboard
  * - configure controller
  * - Restructure layout for
@@ -205,6 +205,7 @@ void TetrisClone::sleepUntilNextFrame() {
  *    - delay between death and end animation
  *    - end animation speed
  * - Remove full path from logging
+ * - timing overrun errors in the menu on macos
  *
  * IDEAS::
  * - Wall charge animation/signal
@@ -214,9 +215,6 @@ void TetrisClone::sleepUntilNextFrame() {
  * - Record all inputs, implement a replay functionality
  *
  * REFACTOR:
- * - Make a SpriteProvider, refactor Renderer into multiple render classes
- * - Move rendering functions behind an interface
- *      - Render class hold an interface pointer
  */
 
 }  // namespace tetris_clone

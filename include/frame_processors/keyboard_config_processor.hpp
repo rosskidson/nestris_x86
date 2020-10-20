@@ -13,7 +13,8 @@ namespace tetris_clone {
 class KeyboardConfigProcessor : public FrameProcessorInterface {
  public:
   KeyboardConfigProcessor(std::unique_ptr<PixelDrawingInterface>&& drawer,
-                          const std::shared_ptr<sound::SoundPlayer>& sample_player);
+                          const std::shared_ptr<sound::SoundPlayer>& sample_player,
+                          std::unique_ptr<InputInterface>&& input_interface);
 
   ProgramFlowSignal processFrame(const KeyEvents& key_events);
 
@@ -25,9 +26,12 @@ class KeyboardConfigProcessor : public FrameProcessorInterface {
   std::unique_ptr<PixelDrawingInterface> drawer_;
   std::shared_ptr<sound::SoundPlayer> sample_player_;
   std::shared_ptr<SpriteProvider> sprite_provider_;
+  std::unique_ptr<InputInterface> keyboard_input_;
   KeyBindings key_bindings_;
   KeyAction active_key_;
   int key_counter_;
+  bool wait_until_key_lifted_;
+  bool keybinding_finished_;
 
 };
 

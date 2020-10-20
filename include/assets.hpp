@@ -6,10 +6,7 @@
 #include <vector>
 
 #include "sound.hpp"
-
-namespace olc {
-class Sprite;
-}
+#include "olcPixelGameEngine.h"
 
 namespace tetris_clone {
 

@@ -5,7 +5,6 @@
 #include <sstream>
 #include <stdexcept>
 
-#include "olcPixelGameEngine.h"
 #include "utils/logging.hpp"
 
 namespace tetris_clone {
