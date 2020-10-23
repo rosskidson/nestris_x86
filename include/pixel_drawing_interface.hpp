@@ -85,4 +85,9 @@ class PixelDrawingInterface {
   }
 };
 
+inline PixelDrawingInterface::Coords operator+(const PixelDrawingInterface::Coords& lhs,
+                                               const PixelDrawingInterface::Coords& rhs) {
+  return {lhs.x + rhs.x, lhs.y + rhs.y};
+}
+
 }  // namespace tetris_clone

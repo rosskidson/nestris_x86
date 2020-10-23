@@ -19,6 +19,8 @@ class OlcKeyboard : public InputInterface {
   std::string keyCodeToStr(const KeyCode key_code) const override;
   KeyCode lookupKeyCode(const std::string& key_name) const override;
 
+  KeyCode getNullKey() const override;
+
  private:
   static KeyCode olcToKeyCode(const olc::Key& key);
   static olc::Key keyCodeToOlc(const KeyCode key_code);

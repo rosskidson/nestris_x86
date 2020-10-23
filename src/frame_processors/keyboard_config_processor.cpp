@@ -1,41 +1,82 @@
 
 #include "frame_processors/keyboard_config_processor.hpp"
 
-#include "pixel_drawing_interface.hpp"
+#include "drawing_utils.hpp"
 
 namespace tetris_clone {
+
+using pdi = PixelDrawingInterface;
 
 KeyboardConfigProcessor::KeyboardConfigProcessor(
     std::unique_ptr<PixelDrawingInterface>&& drawer,
     const std::shared_ptr<sound::SoundPlayer>& sample_player,
-    std::unique_ptr<InputInterface>&& input_interface)
+    std::unique_ptr<InputInterface>&& input_interface, const KeyBindings& initial_bindings)
     : drawer_(std::move(drawer)),
       sample_player_(sample_player),
       keyboard_input_(std::move(input_interface)),
-      key_bindings_{},
-      active_key_{},
-      key_counter_{},
+      key_bindings_(initial_bindings),
+      active_key_{KeyAction::COUNT},
+      selector_idx_{},
       wait_until_key_lifted_{true},
-      keybinding_finished_{} {}
+      keybinding_active_{},
+      frame_counter_{std::make_unique<std::atomic_int>(0)} {}
 
 ProgramFlowSignal KeyboardConfigProcessor::processKeyEvents(const KeyEvents& key_events) {
+  if (key_events.at(KeyAction::Up).pressed) {
+    sample_player_->playSample("menu_blip");
+    selector_idx_ = selector_idx_ > 0 ? selector_idx_ - 1 : selector_idx_;
+  }
+  if (key_events.at(KeyAction::Down).pressed) {
+    sample_player_->playSample("menu_blip");
+    selector_idx_ = selector_idx_ < 2 ? selector_idx_ + 1 : selector_idx_;
+  }
+  if (key_events.at(KeyAction::Start).pressed) {
+    sample_player_->playSample("menu_select_02");
+    if (selector_idx_ == 0) {
+      key_bindings_ = {};
+      keybinding_active_ = true;
+      active_key_ = static_cast<KeyAction>(0);
+      wait_until_key_lifted_ = true;
+    }
+    if (selector_idx_ == 1) {
+      key_bindings_ = getDefaultKeyBindings(*keyboard_input_);
+    }
+    if (selector_idx_ == 2) {
+      return ProgramFlowSignal::OptionsScreen;
+    }
+  }
   return ProgramFlowSignal::FrameSuccess;
 }
 
-void KeyboardConfigProcessor::renderKeyboardConfigScreen() {
-  drawer_->fillRect(30, 30, 197, 180, PixelDrawingInterface::BLACK());
+void KeyboardConfigProcessor::renderKeyboardConfigScreen() const {
+  constexpr pdi::Coords top_left{30, 30};
+  constexpr pdi::Rect screen_size{197, 180};
+  drawer_->fillRect(top_left, screen_size, pdi::BLACK());
   constexpr int x_left_column = 32;
   constexpr int x_right_column = 180;
+
   int y_row = 40;
   for (const auto& [action, key] : key_bindings_) {
     drawer_->drawString(x_left_column, y_row, keyActionToString(action));
     drawer_->drawString(x_right_column, y_row, keyboard_input_->keyCodeToStr(key));
     y_row += 10;
   }
+
   if (active_key_ < KeyAction::COUNT) {
     drawer_->drawString(x_left_column, y_row, keyActionToString(active_key_));
     drawer_->drawString(x_right_column, y_row, "???");
   }
+
+  constexpr pdi::Coords menu_items_start{80, 150};
+  drawer_->drawString(menu_items_start, "CHANGE CONFIG");
+  drawer_->drawString(menu_items_start + pdi::Coords{20, 10}, "DEFAULTS");
+  drawer_->drawString(menu_items_start + pdi::Coords{30, 20}, "ACCEPT");
+
+  const auto selector_color = (*frame_counter_)++ % 4 ? pdi::WHITE() : pdi::BLACK();
+  drawTriangleSelector(*drawer_, menu_items_start.x - 15, menu_items_start.y + (selector_idx_ * 10),
+                       7, selector_color, false);
+  drawTriangleSelector(*drawer_, menu_items_start.x + 120,
+                       menu_items_start.y + (selector_idx_ * 10), 7, selector_color, true);
 }
 
 ProgramFlowSignal KeyboardConfigProcessor::processFrame(const KeyEvents& key_events) {
@@ -43,23 +84,34 @@ ProgramFlowSignal KeyboardConfigProcessor::processFrame(const KeyEvents& key_eve
     wait_until_key_lifted_ = (keyboard_input_->getPressedKey() > 0) ? true : false;
     return ProgramFlowSignal::FrameSuccess;
   }
-  // const auto signal = processKeyEvents(key_events);
 
-  if (not keybinding_finished_) {
+  ProgramFlowSignal return_signal{ProgramFlowSignal::FrameSuccess};
+  if (keybinding_active_) {
     const auto pressed_key = keyboard_input_->getPressedKey();
     if (pressed_key != keyboard_input_->lookupKeyCode("NONE")) {
+      for(auto &[action, key] : key_bindings_ ) {
+        if(key == pressed_key) {
+          key = keyboard_input_->getNullKey();
+        }
+      }
       key_bindings_[active_key_] = pressed_key;
       wait_until_key_lifted_ = true;
       active_key_ = static_cast<KeyAction>(static_cast<int>(active_key_) + 1);
       if (active_key_ == KeyAction::COUNT) {
-        keybinding_finished_ = true;
+        keybinding_active_ = false;
       }
     }
+  } else {
+    return_signal = processKeyEvents(key_events);
   }
 
   renderKeyboardConfigScreen();
 
-  return ProgramFlowSignal::FrameSuccess;
+  return return_signal;
+}
+
+KeyBindings KeyboardConfigProcessor::getKeyBindings() const {
+  return key_bindings_;
 }
 
 }  // namespace tetris_clone

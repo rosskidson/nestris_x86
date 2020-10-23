@@ -15,6 +15,8 @@ class InputInterface {
 
   virtual std::string keyCodeToStr(const KeyCode key_code) const = 0;
   virtual KeyCode lookupKeyCode(const std::string& key_name) const = 0;
+
+  virtual KeyCode getNullKey() const = 0;
 };
 
 }  // namespace tetris_clone

@@ -38,14 +38,14 @@ class TetrisClone : public olc::PixelGameEngine {
 
   std::shared_ptr<sound::SoundPlayer> sample_player_;
   std::shared_ptr<SpriteProvider> sprite_provider_;
+  std::unique_ptr<InputInterface> keyboard_input_;
+  KeyBindings key_bindings_;
   std::shared_ptr<GameOptions> game_options_;
   std::shared_ptr<GameProcessor> game_frame_processor_;
   std::shared_ptr<LevelScreenProcessor> level_menu_processor_;
   std::shared_ptr<OptionScreenProcessor> option_menu_processor_;
   std::shared_ptr<KeyboardConfigProcessor> keyboard_config_processor_;
   std::shared_ptr<FrameProcessorInterface> active_processor_;
-  std::unique_ptr<InputInterface> keyboard_input_;
-  KeyBindings key_bindings_;
   KeyStates key_states_;
   std::chrono::time_point<std::chrono::high_resolution_clock> frame_end_;
   Duration_ns single_frame_;

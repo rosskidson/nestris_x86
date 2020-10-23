@@ -60,4 +60,8 @@ olc::Key OlcKeyboard::keyCodeToOlc(const KeyCode key_code) {
   return static_cast<olc::Key>(key_code);
 }
 
+InputInterface::KeyCode OlcKeyboard::getNullKey() const {
+  return 0;
+}
+
 }  // namespace tetris_clone

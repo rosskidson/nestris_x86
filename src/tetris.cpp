@@ -20,18 +20,6 @@ namespace tetris_clone {
 
 constexpr int NTSC_frame_ns = (1.0 / NTSC_FREQUENCY) * 1e9;
 
-KeyBindings getKeyBindings(const InputInterface &key_input) {
-  KeyBindings key_bindings;
-  key_bindings[KeyAction::Up] = key_input.lookupKeyCode("UP");
-  key_bindings[KeyAction::Down] = key_input.lookupKeyCode("DOWN");
-  key_bindings[KeyAction::Left] = key_input.lookupKeyCode("LEFT");
-  key_bindings[KeyAction::Right] = key_input.lookupKeyCode("RIGHT");
-  key_bindings[KeyAction::RotateClockwise] = key_input.lookupKeyCode("X");      // NES gamepad A
-  key_bindings[KeyAction::RotateAntiClockwise] = key_input.lookupKeyCode("Z");  // NES gamepad B
-  key_bindings[KeyAction::Start] = key_input.lookupKeyCode("ENTER");
-  return key_bindings;
-}
-
 KeyStates initializeKeyStatesFromBindings(const KeyBindings &key_bindings) {
   KeyStates key_states{};
   for (const auto &pair : key_bindings) {
@@ -61,6 +49,8 @@ KeyEvents TetrisClone::getKeyEvents(KeyStates &last_key_states) {
 TetrisClone::TetrisClone()
     : sample_player_{std::make_shared<sound::SoundPlayer>()},
       sprite_provider_{std::make_shared<SpriteProvider>("./assets/images/")},
+      keyboard_input_{std::make_unique<OlcKeyboard>(*this)},
+      key_bindings_{getDefaultKeyBindings(*keyboard_input_)},
       game_options_{std::make_shared<GameOptions>()},
       game_frame_processor_{std::make_shared<GameProcessor>(
           GameOptions{}, std::make_unique<OlcDrawer>(*this), sample_player_, sprite_provider_)},
@@ -70,10 +60,9 @@ TetrisClone::TetrisClone()
           std::make_unique<OlcDrawer>(*this), sample_player_, sprite_provider_)},
       keyboard_config_processor_{std::make_shared<KeyboardConfigProcessor>(
           std::make_unique<OlcDrawer>(*this), sample_player_,
-          std::make_unique<OlcKeyboard>(*this))},
+          std::make_unique<OlcKeyboard>(*this),
+          key_bindings_)},
       active_processor_{level_menu_processor_},
-      keyboard_input_{std::make_unique<OlcKeyboard>(*this)},
-      key_bindings_{getKeyBindings(*keyboard_input_)},
       key_states_{initializeKeyStatesFromBindings(key_bindings_)},
       frame_end_{},
       single_frame_{NTSC_frame_ns} {
@@ -142,6 +131,9 @@ void TetrisClone::processProgramFlowSignal(const ProgramFlowSignal &signal) {
   } else if (signal == ProgramFlowSignal::LevelSelectorScreen) {
     active_processor_ = level_menu_processor_;
   } else if (signal == ProgramFlowSignal::OptionsScreen) {
+    if(active_processor_ == keyboard_config_processor_) {
+      key_bindings_ = keyboard_config_processor_->getKeyBindings();
+    }
     active_processor_ = option_menu_processor_;
   } else if (signal == ProgramFlowSignal::KeyboardConfigScreen) {
     active_processor_ = keyboard_config_processor_;
@@ -184,8 +176,8 @@ void TetrisClone::sleepUntilNextFrame() {
 /**
  * TODO:
  *
- * - configure keyboard
  * - configure controller
+ * - Add a/b buttons for navigating menu
  * - Restructure layout for
  *     -ARE box
  *     -7 digit score
