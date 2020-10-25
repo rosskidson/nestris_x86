@@ -77,3 +77,7 @@ add_executable(tetris
 
 
 target_link_libraries(tetris olc ${TETRIS_LIBS})
+
+
+add_executable(olc_sprite_gen src/olc_sprite_gen.cpp)
+target_link_libraries(olc_sprite_gen ${OLC_LIBS})
