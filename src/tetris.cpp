@@ -189,7 +189,6 @@ void TetrisClone::sleepUntilNextFrame() {
 /**
  * TODO:
  *
- * - test controllers
  * - Add a/b buttons for navigating menu
  * - Restructure layout for
  *     -ARE box

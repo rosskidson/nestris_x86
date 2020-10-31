@@ -110,12 +110,11 @@ ProgramFlowSignal OptionScreenProcessor::processKeyEvents(const KeyEvents& key_e
   }
   if (key_events.at(KeyAction::Up).pressed) {
     sample_player_->playSample("menu_blip");
-    current_idx = current_idx > 1 ? current_idx - 1 : 0;
+    current_idx = current_idx > 0 ? current_idx - 1 : option_order_.size() - 1;
   }
   if (key_events.at(KeyAction::Down).pressed) {
     sample_player_->playSample("menu_blip");
-    current_idx =
-        current_idx < option_order_.size() - 2 ? current_idx + 1 : option_order_.size() - 1;
+    current_idx = current_idx < option_order_.size() - 1 ? current_idx + 1 : 0;
   }
   if (key_events.at(KeyAction::Left).pressed) {
     sample_player_->playSample("menu_blip");
@@ -179,7 +178,7 @@ void OptionScreenProcessor::renderSelector(const int column_location,
 
 void OptionScreenProcessor::renderOptionScreen() const {
   drawer_->drawSprite(0, 0, sprite_provider_->getSprite("options-background"));
-  //drawer_->fillRect(30, 30, 197, 180, PixelDrawingInterface::BLACK());
+  // drawer_->fillRect(30, 30, 197, 180, PixelDrawingInterface::BLACK());
   constexpr int x_left_column = 32;
   constexpr int x_right_column = 180;
   constexpr int y_row_start = 40;

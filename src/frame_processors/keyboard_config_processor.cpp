@@ -29,11 +29,11 @@ KeyBindings KeyboardConfigProcessor::getDefaultBindings() {
 ProgramFlowSignal KeyboardConfigProcessor::processKeyEvents(const KeyEvents& key_events) {
   if (key_events.at(KeyAction::Up).pressed) {
     sample_player_->playSample("menu_blip");
-    selector_idx_ = selector_idx_ > 0 ? selector_idx_ - 1 : selector_idx_;
+    selector_idx_ = selector_idx_ > 0 ? selector_idx_ - 1 : 2;
   }
   if (key_events.at(KeyAction::Down).pressed) {
     sample_player_->playSample("menu_blip");
-    selector_idx_ = selector_idx_ < 2 ? selector_idx_ + 1 : selector_idx_;
+    selector_idx_ = selector_idx_ < 2 ? selector_idx_ + 1 : 0;
   }
   if (key_events.at(KeyAction::Start).pressed) {
     sample_player_->playSample("menu_select_02");
