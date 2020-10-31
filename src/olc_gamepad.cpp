@@ -23,8 +23,8 @@ const std::map<int, std::string> OlcGamePad::code_to_name_{
   {9,  "START"},
   {14, "DPAD_L"},
   {15, "DPAD_R"},
-  {16, "DPAD_U"},
-  {17, "DPAD_D"}
+  {16, "DPAD_D"},
+  {17, "DPAD_U"}
 };
 
 constexpr int OLC_NUMBER_OF_KEYS = 18;
