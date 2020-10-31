@@ -55,4 +55,16 @@ inline KeyBindings getDefaultKeyBindings(const InputInterface &key_input) {
   return key_bindings;
 }
 
+inline KeyBindings getDefaultGamePadBindings(const InputInterface &key_input) {
+  KeyBindings key_bindings;
+  key_bindings[KeyAction::Up] = key_input.lookupKeyCode("DPAD_U");
+  key_bindings[KeyAction::Down] = key_input.lookupKeyCode("DPAD_D");
+  key_bindings[KeyAction::Left] = key_input.lookupKeyCode("DPAD_L");
+  key_bindings[KeyAction::Right] = key_input.lookupKeyCode("DPAD_R");
+  key_bindings[KeyAction::RotateClockwise] = key_input.lookupKeyCode("FACE_R");      // NES gamepad A
+  key_bindings[KeyAction::RotateAntiClockwise] = key_input.lookupKeyCode("FACE_D");  // NES gamepad B
+  key_bindings[KeyAction::Start] = key_input.lookupKeyCode("START");
+  return key_bindings;
+}
+
 }  // namespace tetris_clone

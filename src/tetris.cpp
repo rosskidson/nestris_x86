@@ -12,6 +12,7 @@
 #include "frame_processors/option_screen_processor.hpp"
 #include "key_defines.hpp"
 #include "olc_drawer.hpp"
+#include "olc_gamepad.hpp"
 #include "olc_keyboard.hpp"
 #include "option.hpp"
 #include "utils/logging.hpp"
@@ -36,12 +37,14 @@ KeyEvent getButtonState(const bool button_old_state, const bool button_new_state
   return event;
 }
 
-KeyEvents TetrisClone::getKeyEvents(KeyStates &last_key_states) {
+KeyEvents TetrisClone::getKeyEvents() {
   KeyEvents ret_val{};
-  for (const auto &[action, key] : key_bindings_) {
-    const auto new_key_state = keyboard_input_->getKeyState(key);
-    ret_val[action] = getButtonState(last_key_states.at(action), new_key_state);
-    last_key_states[action] = new_key_state;
+  for (const auto &[action, key] : keyboard_key_bindings_) {
+    const auto new_keyboard_state = keyboard_input_->getKeyState(key);
+    const auto new_gamepad_state = gamepad_input_->getKeyState(gamepad_key_bindings_.at(action));
+    const auto new_key_state = new_gamepad_state | new_keyboard_state;
+    ret_val[action] = getButtonState(key_states_.at(action), new_key_state);
+    key_states_[action] = new_key_state;
   }
   return ret_val;
 }
@@ -50,7 +53,9 @@ TetrisClone::TetrisClone()
     : sample_player_{std::make_shared<sound::SoundPlayer>()},
       sprite_provider_{std::make_shared<SpriteProvider>("./assets/images/")},
       keyboard_input_{std::make_unique<OlcKeyboard>(*this)},
-      key_bindings_{getDefaultKeyBindings(*keyboard_input_)},
+      keyboard_key_bindings_{getDefaultKeyBindings(*keyboard_input_)},
+      gamepad_input_{std::make_unique<OlcGamePad>()},
+      gamepad_key_bindings_{getDefaultGamePadBindings(*gamepad_input_)},
       game_options_{std::make_shared<GameOptions>()},
       game_frame_processor_{std::make_shared<GameProcessor>(
           GameOptions{}, std::make_unique<OlcDrawer>(*this), sample_player_, sprite_provider_)},
@@ -59,11 +64,13 @@ TetrisClone::TetrisClone()
       option_menu_processor_{std::make_shared<OptionScreenProcessor>(
           std::make_unique<OlcDrawer>(*this), sample_player_, sprite_provider_)},
       keyboard_config_processor_{std::make_shared<KeyboardConfigProcessor>(
-          std::make_unique<OlcDrawer>(*this), sample_player_,
-          std::make_unique<OlcKeyboard>(*this),
-          key_bindings_)},
+          std::make_unique<OlcDrawer>(*this), sample_player_, std::make_unique<OlcKeyboard>(*this),
+          keyboard_key_bindings_)},
+      gamepad_config_processor_{std::make_shared<GamePadConfigProcessor>(
+          std::make_unique<OlcDrawer>(*this), sample_player_, std::make_unique<OlcGamePad>(),
+          gamepad_key_bindings_)},
       active_processor_{level_menu_processor_},
-      key_states_{initializeKeyStatesFromBindings(key_bindings_)},
+      key_states_{initializeKeyStatesFromBindings(keyboard_key_bindings_)},
       frame_end_{},
       single_frame_{NTSC_frame_ns} {
   sAppName = "TetrisClone";
@@ -78,14 +85,16 @@ bool TetrisClone::OnUserCreate() {
     LOG_ERROR("Screen size must be set to 256x225 for this application.");
     return false;
   }
+
+
   this->SetPixelMode(olc::Pixel::MASK);
   frame_end_ = Clock::now() + single_frame_;
-
   return true;
 }
 
 bool TetrisClone::OnUserUpdate(float fElapsedTime) {
-  const auto key_events = getKeyEvents(key_states_);
+  dynamic_cast<OlcGamePad&>(*gamepad_input_).detectAndInit();
+  const auto key_events = getKeyEvents();
   const auto signal = active_processor_->processFrame(key_events);
   processProgramFlowSignal(signal);
   sleepUntilNextFrame();
@@ -131,12 +140,16 @@ void TetrisClone::processProgramFlowSignal(const ProgramFlowSignal &signal) {
   } else if (signal == ProgramFlowSignal::LevelSelectorScreen) {
     active_processor_ = level_menu_processor_;
   } else if (signal == ProgramFlowSignal::OptionsScreen) {
-    if(active_processor_ == keyboard_config_processor_) {
-      key_bindings_ = keyboard_config_processor_->getKeyBindings();
+    if (active_processor_ == keyboard_config_processor_) {
+      keyboard_key_bindings_ = keyboard_config_processor_->getKeyBindings();
+    } else if (active_processor_ == gamepad_config_processor_) {
+      gamepad_key_bindings_ = gamepad_config_processor_->getKeyBindings();
     }
     active_processor_ = option_menu_processor_;
   } else if (signal == ProgramFlowSignal::KeyboardConfigScreen) {
     active_processor_ = keyboard_config_processor_;
+  } else if (signal == ProgramFlowSignal::ControllerConfigScreen) {
+    active_processor_ = gamepad_config_processor_;
   }
   // das_profile",
   // hard_drop",

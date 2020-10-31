@@ -13,13 +13,17 @@ KeyboardConfigProcessor::KeyboardConfigProcessor(
     std::unique_ptr<InputInterface>&& input_interface, const KeyBindings& initial_bindings)
     : drawer_(std::move(drawer)),
       sample_player_(sample_player),
-      keyboard_input_(std::move(input_interface)),
       key_bindings_(initial_bindings),
       active_key_{KeyAction::COUNT},
       selector_idx_{},
       wait_until_key_lifted_{true},
       keybinding_active_{},
-      frame_counter_{std::make_unique<std::atomic_int>(0)} {}
+      frame_counter_{std::make_unique<std::atomic_int>(0)},
+      keyboard_input_(std::move(input_interface)) {}
+
+KeyBindings KeyboardConfigProcessor::getDefaultBindings() {
+  return getDefaultKeyBindings(*keyboard_input_);
+}
 
 ProgramFlowSignal KeyboardConfigProcessor::processKeyEvents(const KeyEvents& key_events) {
   if (key_events.at(KeyAction::Up).pressed) {
@@ -39,7 +43,7 @@ ProgramFlowSignal KeyboardConfigProcessor::processKeyEvents(const KeyEvents& key
       wait_until_key_lifted_ = true;
     }
     if (selector_idx_ == 1) {
-      key_bindings_ = getDefaultKeyBindings(*keyboard_input_);
+      key_bindings_ = this->getDefaultBindings();
     }
     if (selector_idx_ == 2) {
       return ProgramFlowSignal::OptionsScreen;
@@ -89,8 +93,8 @@ ProgramFlowSignal KeyboardConfigProcessor::processFrame(const KeyEvents& key_eve
   if (keybinding_active_) {
     const auto pressed_key = keyboard_input_->getPressedKey();
     if (pressed_key != keyboard_input_->lookupKeyCode("NONE")) {
-      for(auto &[action, key] : key_bindings_ ) {
-        if(key == pressed_key) {
+      for (auto& [action, key] : key_bindings_) {
+        if (key == pressed_key) {
           key = keyboard_input_->getNullKey();
         }
       }
