@@ -38,6 +38,7 @@ KeyEvent getButtonState(const bool button_old_state, const bool button_new_state
 }
 
 KeyEvents TetrisClone::getKeyEvents() {
+  dynamic_cast<OlcGamePad&>(*gamepad_input_).detectAndInit();
   KeyEvents ret_val{};
   for (const auto &[action, key] : keyboard_key_bindings_) {
     const auto new_keyboard_state = keyboard_input_->getKeyState(key);
@@ -93,7 +94,6 @@ bool TetrisClone::OnUserCreate() {
 }
 
 bool TetrisClone::OnUserUpdate(float fElapsedTime) {
-  dynamic_cast<OlcGamePad&>(*gamepad_input_).detectAndInit();
   const auto key_events = getKeyEvents();
   const auto signal = active_processor_->processFrame(key_events);
   processProgramFlowSignal(signal);
@@ -189,7 +189,7 @@ void TetrisClone::sleepUntilNextFrame() {
 /**
  * TODO:
  *
- * - configure controller
+ * - test controllers
  * - Add a/b buttons for navigating menu
  * - Restructure layout for
  *     -ARE box

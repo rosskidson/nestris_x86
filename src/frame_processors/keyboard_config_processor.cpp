@@ -2,6 +2,7 @@
 #include "frame_processors/keyboard_config_processor.hpp"
 
 #include "drawing_utils.hpp"
+#include "utils/logging.hpp"
 
 namespace tetris_clone {
 
@@ -11,18 +12,18 @@ KeyboardConfigProcessor::KeyboardConfigProcessor(
     std::unique_ptr<PixelDrawingInterface>&& drawer,
     const std::shared_ptr<sound::SoundPlayer>& sample_player,
     std::unique_ptr<InputInterface>&& input_interface, const KeyBindings& initial_bindings)
-    : drawer_(std::move(drawer)),
-      sample_player_(sample_player),
+    : sample_player_(sample_player),
       key_bindings_(initial_bindings),
       active_key_{KeyAction::COUNT},
       selector_idx_{},
       wait_until_key_lifted_{true},
       keybinding_active_{},
       frame_counter_{std::make_unique<std::atomic_int>(0)},
-      keyboard_input_(std::move(input_interface)) {}
+      drawer_(std::move(drawer)),
+      input_ptr_(std::move(input_interface)) {}
 
 KeyBindings KeyboardConfigProcessor::getDefaultBindings() {
-  return getDefaultKeyBindings(*keyboard_input_);
+  return getDefaultKeyBindings(*input_ptr_);
 }
 
 ProgramFlowSignal KeyboardConfigProcessor::processKeyEvents(const KeyEvents& key_events) {
@@ -52,17 +53,21 @@ ProgramFlowSignal KeyboardConfigProcessor::processKeyEvents(const KeyEvents& key
   return ProgramFlowSignal::FrameSuccess;
 }
 
-void KeyboardConfigProcessor::renderKeyboardConfigScreen() const {
+void KeyboardConfigProcessor::clearScreen() const {
   constexpr pdi::Coords top_left{30, 30};
   constexpr pdi::Rect screen_size{197, 180};
   drawer_->fillRect(top_left, screen_size, pdi::BLACK());
+}
+
+void KeyboardConfigProcessor::renderKeyboardConfigScreen() const {
+  clearScreen();
   constexpr int x_left_column = 32;
   constexpr int x_right_column = 180;
 
   int y_row = 40;
   for (const auto& [action, key] : key_bindings_) {
     drawer_->drawString(x_left_column, y_row, keyActionToString(action));
-    drawer_->drawString(x_right_column, y_row, keyboard_input_->keyCodeToStr(key));
+    drawer_->drawString(x_right_column, y_row, input_ptr_->keyCodeToStr(key));
     y_row += 10;
   }
 
@@ -85,17 +90,17 @@ void KeyboardConfigProcessor::renderKeyboardConfigScreen() const {
 
 ProgramFlowSignal KeyboardConfigProcessor::processFrame(const KeyEvents& key_events) {
   if (wait_until_key_lifted_) {
-    wait_until_key_lifted_ = (keyboard_input_->getPressedKey() > 0) ? true : false;
+    wait_until_key_lifted_ = input_ptr_->getPressedKey() != input_ptr_->getNullKey();
     return ProgramFlowSignal::FrameSuccess;
   }
 
   ProgramFlowSignal return_signal{ProgramFlowSignal::FrameSuccess};
   if (keybinding_active_) {
-    const auto pressed_key = keyboard_input_->getPressedKey();
-    if (pressed_key != keyboard_input_->lookupKeyCode("NONE")) {
+    const auto pressed_key = input_ptr_->getPressedKey();
+    if (pressed_key != input_ptr_->lookupKeyCode("NONE")) {
       for (auto& [action, key] : key_bindings_) {
         if (key == pressed_key) {
-          key = keyboard_input_->getNullKey();
+          key = input_ptr_->getNullKey();
         }
       }
       key_bindings_[active_key_] = pressed_key;

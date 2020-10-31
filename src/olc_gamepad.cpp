@@ -1,4 +1,5 @@
 #include "olc_gamepad.hpp"
+#include <string>
 
 #include "utils/logging.hpp"
 
@@ -7,6 +8,7 @@ namespace tetris_clone {
 // copy pasted from olc source code and formatted to strings.
 // clang-format off
 const std::map<int, std::string> OlcGamePad::code_to_name_{
+  {-1,  "NONE"},
   {1,  "FACE_D"},
   {0,  "FACE_L"},
   {2,  "FACE_R"},
@@ -24,6 +26,9 @@ const std::map<int, std::string> OlcGamePad::code_to_name_{
   {16, "DPAD_U"},
   {17, "DPAD_D"}
 };
+
+constexpr int OLC_NUMBER_OF_KEYS = 18;
+
 // clang-format on
 
 std::map<std::string, int> getLookupTable(const std::map<int, std::string>& code_to_name) {
@@ -48,10 +53,7 @@ bool OlcGamePad::detectAndInit() {
   }
   for (auto& gamepad : gamepads_) {
     gamepad.poll();
-    for (int i = 0; i < 18; ++i) {
-      if (i == 12 || i == 13) {
-        continue;
-      }
+    for (int i = 0; i < OLC_NUMBER_OF_KEYS; ++i) {
       if (gamepad.getButton(static_cast<olc::GPButtons>(i)).bHeld) {
         gamepad_ = gamepad;
         gamepad_ptr_ = &gamepad_;
@@ -80,8 +82,8 @@ InputInterface::KeyCode OlcGamePad::getPressedKey() const {
 
 std::string OlcGamePad::keyCodeToStr(const KeyCode key_code) const {
   if (not code_to_name_.count(key_code)) {
-    LOG_ERROR("Invalid key code `" << key_code << "`.");
-    return "INVALID";
+    LOG_ERROR("Unknown key code `" << key_code << "`.");
+    return std::to_string(key_code);
   }
   return code_to_name_.at(key_code);
 }

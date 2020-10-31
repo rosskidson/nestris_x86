@@ -9,7 +9,6 @@
 
 namespace tetris_clone {
 
-  // TODO:: Add polling to the interface. Use it to also initialize.
 class OlcGamePad : public InputInterface {
  public:
   OlcGamePad();
@@ -30,7 +29,7 @@ class OlcGamePad : public InputInterface {
   static olc::GPButtons keyCodeToOlc(const KeyCode key_code);
 
   std::vector<olc::GamePad> gamepads_;
-  // TODO:: this pointer shit is here because gamepad.getButton(...) is not marker const. Fix this
+  // HACKS:: The pointer indirection is because GamePad::poll() and GamePad::getButton are not const
   olc::GamePad gamepad_;
   olc::GamePad* gamepad_ptr_;
   const static std::map<std::string, int> name_to_code_;

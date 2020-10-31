@@ -17,7 +17,9 @@ class GamePadConfigProcessor : public KeyboardConfigProcessor {
   KeyBindings getDefaultBindings() override;
 
   ProgramFlowSignal processFrame(const KeyEvents& key_events) override;
-};
 
+ private:
+  void renderWaitForControllerScreen() const;
+};
 }  // namespace tetris_clone
 

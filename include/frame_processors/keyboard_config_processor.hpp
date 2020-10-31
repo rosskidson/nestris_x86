@@ -26,7 +26,6 @@ class KeyboardConfigProcessor : public FrameProcessorInterface {
 
   void renderKeyboardConfigScreen() const;
 
-  std::unique_ptr<PixelDrawingInterface> drawer_;
   std::shared_ptr<sound::SoundPlayer> sample_player_;
   std::shared_ptr<SpriteProvider> sprite_provider_;
   KeyBindings key_bindings_;
@@ -38,7 +37,10 @@ class KeyboardConfigProcessor : public FrameProcessorInterface {
 
  protected:
   virtual KeyBindings getDefaultBindings();
-  std::unique_ptr<InputInterface> keyboard_input_;
+  void clearScreen() const;
+
+  std::unique_ptr<PixelDrawingInterface> drawer_;
+  std::unique_ptr<InputInterface> input_ptr_;
 };
 
 }  // namespace tetris_clone
