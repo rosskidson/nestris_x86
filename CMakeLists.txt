@@ -68,6 +68,7 @@ add_executable(tetris
         src/olc_drawer.cpp
         src/olc_keyboard.cpp
         src/olc_gamepad.cpp
+        src/olc_sprite_encoder.cpp
         src/game_renderer.cpp
         src/frame_processors/game_processor.cpp
         src/frame_processors/level_screen_processor.cpp
@@ -81,7 +82,7 @@ add_executable(tetris
 target_link_libraries(tetris olc ${TETRIS_LIBS})
 
 
-add_executable(olc_sprite_gen src/olc_sprite_gen.cpp)
+add_executable(olc_sprite_gen src/olc_sprite_gen.cpp src/olc_sprite_encoder.cpp)
 target_link_libraries(olc_sprite_gen ${OLC_LIBS})
 
 add_executable(testbed src/boilerplate.cpp)

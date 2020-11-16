@@ -2,18 +2,40 @@
 #include "assets.hpp"
 
 #include <filesystem>
+#include <olc_sprite_encoder.hpp>
 #include <sstream>
 #include <stdexcept>
 
+#include "../images.hpp"
 #include "utils/logging.hpp"
 
 namespace tetris_clone {
 
 namespace fs = std::filesystem;
 
+/** TODO::
+ *
+ * Test compiling the 4MB header before proceeding.
+ *
+ * Make a asset provider class. Provides a variant given a asset group and asset name.
+ * The asset provider may be initialized by filesystem or file header
+ *     (undecided if this should be inheritence based or not)
+ *
+ * Asset provider will replace statefulness in sound player and replace SpriteLoader
+ * This decouples sprite and sound modules from the filesystem.
+ *
+ * Also: Make an interface for DataEncoder.
+ * The main interface will be encodeToString and encodeFromString
+ * Use variants to handle different data types.
+ *
+ */
+
 namespace {
-bool spriteValid(const olc::Sprite &sprite) {
-  return sprite.height > 0 && sprite.width > 0;
+bool spriteValid(const olc::Sprite *sprite) {
+  if(sprite == nullptr) {
+    return false;
+  }
+  return sprite->height > 0 && sprite->width > 0;
 }
 }  // namespace
 
@@ -31,32 +53,17 @@ const std::vector<std::pair<std::string, std::string>> SAMPLES{
     {"level_up.wav", "level_up"},
     {"top_out.wav", "top_out"}};
 
-const std::vector<std::pair<std::string, std::string>> SPRITES{
-    {"basic-field-empty.png", "basic-field-empty"},
-    {"basic-field-empty-black.png", "basic-field-empty-black"},
-    {"basic-field-flash.png", "basic-field-flash"},
-    {"a-type-background.png", "a-type-background"},
-    {"options-background.png", "options-background"},
-    {"levels-screen.png", "levels-screen"},
-    {"controller.png", "controller"},
-    {"are-on.png", "are-on"},
-    {"are-off.png", "are-off"},
-    {"das-meter.png", "das-meter"},
-    {"l0-counts.png", "l0-counts"},
-    {"l1-counts.png", "l1-counts"},
-    {"l2-counts.png", "l2-counts"},
-    {"l3-counts.png", "l3-counts"},
-    {"l4-counts.png", "l4-counts"},
-    {"l5-counts.png", "l5-counts"},
-    {"l6-counts.png", "l6-counts"},
-    {"l7-counts.png", "l7-counts"},
-    {"l8-counts.png", "l8-counts"},
-    {"l9-counts.png", "l9-counts"}};
 // clang-format on
 
 SpriteProvider::SpriteProvider(const std::string &path) {
-  if(not loadSprites(path) ) {
+   if(not loadSprites(path) ) {
     throw std::runtime_error("Failed initializing SpriteProvider with path `" + path + "`");
+  }
+}
+
+SpriteProvider::SpriteProvider() {
+   if(not loadSprites() ) {
+    throw std::runtime_error("Failed initializing SpriteProvider from header.");
   }
 }
 
@@ -76,8 +83,20 @@ bool SpriteProvider::loadSprites(const std::string &path) {
       continue;
     }
     sprite_map_[name] = std::make_unique<olc::Sprite>(filepath.string());
-    if (not spriteValid(*sprite_map_.at(name))) {
+    if (not spriteValid(sprite_map_.at(name).get())) {
       LOG_ERROR("Failed loading `" << filepath << "`.");
+      return false;
+    }
+  }
+  return true;
+}
+
+bool SpriteProvider::loadSprites() {
+  OlcSpriteEncoder decoder{};
+  for (const auto &[id, code] : images::images) {
+    sprite_map_[id] = decoder.stringToSprite(code);
+    if (not spriteValid(sprite_map_.at(id).get())) {
+      LOG_ERROR("Failed loading `" << id << "`.");
       return false;
     }
   }

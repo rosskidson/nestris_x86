@@ -12,9 +12,11 @@ namespace tetris_clone {
 
 class SpriteProvider {
  public:
+  SpriteProvider();
   SpriteProvider(const std::string& path);
 
   bool loadSprites(const std::string &path);
+  bool loadSprites();
 
   olc::Sprite *getSprite(const std::string &sprite_name) const;
 

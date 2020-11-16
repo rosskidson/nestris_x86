@@ -52,7 +52,7 @@ KeyEvents TetrisClone::getKeyEvents() {
 
 TetrisClone::TetrisClone()
     : sample_player_{std::make_shared<sound::SoundPlayer>()},
-      sprite_provider_{std::make_shared<SpriteProvider>("./assets/images/")},
+      sprite_provider_{std::make_shared<SpriteProvider>()},
       keyboard_input_{std::make_unique<OlcKeyboard>(*this)},
       keyboard_key_bindings_{getDefaultKeyBindings(*keyboard_input_)},
       gamepad_input_{std::make_unique<OlcGamePad>()},
