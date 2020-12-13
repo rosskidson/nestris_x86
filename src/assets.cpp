@@ -2,11 +2,11 @@
 #include "assets.hpp"
 
 #include <filesystem>
-#include <olc_sprite_encoder.hpp>
 #include <sstream>
 #include <stdexcept>
 
-#include "../images.hpp"
+#include "assets_cpp/images.hpp"
+#include "data_encoders/olc_sprite_encoder.hpp"
 #include "utils/logging.hpp"
 
 namespace tetris_clone {
@@ -32,7 +32,7 @@ namespace fs = std::filesystem;
 
 namespace {
 bool spriteValid(const olc::Sprite *sprite) {
-  if(sprite == nullptr) {
+  if (sprite == nullptr) {
     return false;
   }
   return sprite->height > 0 && sprite->width > 0;
@@ -56,13 +56,13 @@ const std::vector<std::pair<std::string, std::string>> SAMPLES{
 // clang-format on
 
 SpriteProvider::SpriteProvider(const std::string &path) {
-   if(not loadSprites(path) ) {
+  if (not loadSprites(path)) {
     throw std::runtime_error("Failed initializing SpriteProvider with path `" + path + "`");
   }
 }
 
 SpriteProvider::SpriteProvider() {
-   if(not loadSprites() ) {
+  if (not loadSprites()) {
     throw std::runtime_error("Failed initializing SpriteProvider from header.");
   }
 }

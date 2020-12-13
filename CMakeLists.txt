@@ -60,6 +60,8 @@ SET(TETRIS_LIBS
 add_library(olc olc/olcPixelGameEngine.cpp)
 target_link_libraries(olc ${OLC_LIBS})
 
+add_library(assets_lib src/assets_cpp/images.cpp)
+
 add_executable(tetris
         src/assets.cpp
         src/drawing_utils.cpp
@@ -79,11 +81,11 @@ add_executable(tetris
         src/tetris.cpp)
 
 
-target_link_libraries(tetris olc ${TETRIS_LIBS})
+target_link_libraries(tetris olc assets_lib ${TETRIS_LIBS})
 
 
-add_executable(olc_sprite_gen src/olc_sprite_gen.cpp src/olc_sprite_encoder.cpp)
-target_link_libraries(olc_sprite_gen ${OLC_LIBS})
+#add_executable(olc_sprite_gen src/olc_sprite_gen.cpp src/olc_sprite_encoder.cpp)
+#target_link_libraries(olc_sprite_gen ${OLC_LIBS})
 
 add_executable(testbed src/boilerplate.cpp)
 target_link_libraries(testbed olc ${OLC_LIBS})

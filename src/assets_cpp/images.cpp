@@ -1,7 +1,4 @@
-#pragma once
-
-#include <map>
-#include <string>
+#include "images.hpp"
 
 namespace images {
 const std::map<std::string, std::string> images

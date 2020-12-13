@@ -1,51 +1,15 @@
-#include "olc_sprite_encoder.hpp"
+#include "data_encoders/olc_sprite_encoder.hpp"
 
 #include <olcPixelGameEngine.h>
 
-#include <iterator>
-#include <sstream>
 #include <deque>
 #include <iostream>
+#include <iterator>
 #include <map>
 #include <memory>
+#include <sstream>
 
-class OlcSpriteEncoder::Base64Converter {
- public:
-  Base64Converter()
-      : base_64_chars_{"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_"},
-        char_to_num_{} {
-    int idx = 0;
-    for (const auto& character : base_64_chars_) {
-      char_to_num_[character] = idx++;
-    }
-  }
-
-  std::string encodeNumber(const long num) {
-    if(num == 0) {
-      return std::string(1, base_64_chars_[0]);
-    }
-    auto tmp_num = num;
-    std::deque<char> encoded_num;
-    while (tmp_num > 0) {
-      encoded_num.push_front(base_64_chars_[tmp_num % 64]);
-      tmp_num /= 64;
-    }
-    return {encoded_num.begin(), encoded_num.end()};
-  }
-
-  long decodeNumber(const std::string& code) {
-    long return_value = 0;
-    for (const auto character : code) {
-      return_value *= 64;
-      return_value += char_to_num_.at(character);
-    }
-    return return_value;
-  }
-
- private:
-  std::string base_64_chars_;
-  std::map<char, int> char_to_num_;
-};
+#include "utils/base64_converter.hpp"
 
 std::unique_ptr<olc::Sprite> createSprite(const std::vector<long>& data) {
   const int width = data.at(0);
@@ -67,8 +31,18 @@ std::unique_ptr<olc::Sprite> createSprite(const std::vector<long>& data) {
 OlcSpriteEncoder::OlcSpriteEncoder() : base64_conv_(std::make_unique<Base64Converter>()) {}
 OlcSpriteEncoder::~OlcSpriteEncoder() = default;
 
+std::any OlcSpriteEncoder::stringToObj(const std::string& encoded_str) const {
+ //std::move(stringToSprite(encoded_str));
+  auto a = std::make_unique<int>(5);
+  std::any b = std::move(a);
+  return std::move(stringToSprite(encoded_str));
+}
+
+std::vector<std::string> OlcSpriteEncoder::objToString(const std::any& object,
+                                                       const int max_line_len) const {}
+
 std::vector<long> OlcSpriteEncoder::decodeString(const std::string& sprite_encoded,
-                                                 const char token) {
+                                                 const char token) const {
   std::vector<long> return_value;
   std::string current_word{};
   for (const auto c : sprite_encoded) {
@@ -89,21 +63,20 @@ std::vector<long> OlcSpriteEncoder::decodeString(const std::string& sprite_encod
   return return_value;
 }
 
-std::unique_ptr<olc::Sprite> OlcSpriteEncoder::stringToSprite(const std::string& sprite_str) {
+std::unique_ptr<olc::Sprite> OlcSpriteEncoder::stringToSprite(const std::string& sprite_str) const {
   const auto tokenize_data = decodeString(sprite_str);
   return createSprite(tokenize_data);
 }
 
 std::vector<std::string> OlcSpriteEncoder::spriteToString(const olc::Sprite& sprite,
-                                                          const int max_line_len) {
+                                                          const int max_line_len) const {
   std::stringstream stream;
   std::vector<std::string> return_val;
-  Base64Converter converter{};
-  stream << converter.encodeNumber(sprite.width) << ",";
-  stream << converter.encodeNumber(sprite.height) << ",";
+  stream << base64_conv_->encodeNumber(sprite.width) << ",";
+  stream << base64_conv_->encodeNumber(sprite.height) << ",";
   const auto* p = sprite.GetData();
   for (int i = 0; i < sprite.height * sprite.width; ++i) {
-    stream << converter.encodeNumber(p[i].n) << ",";
+    stream << base64_conv_->encodeNumber(p[i].n) << ",";
     if (stream.str().length() > max_line_len) {
       return_val.push_back(stream.str());
       stream.str("");

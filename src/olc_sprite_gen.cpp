@@ -10,15 +10,25 @@
 #define OLC_PGE_APPLICATION
 #include "olcPixelGameEngine.h"
 
-void writeBinaryHeader(const std::string resource_name, const std::string& filename,
-                       const std::map<std::string, std::unique_ptr<olc::Sprite>>& sprites) {
-  OlcSpriteEncoder sprite_encoder{};
-  const std::string indent = "  ";
-  std::ofstream ofs(filename);
+void writeBinaryHeader(const std::string resource_name, const std::string& filename_base) {
+  std::ofstream ofs(filename_base + ".hpp");
   ofs << "#pragma once" << std::endl;
   ofs << std::endl;
   ofs << "#include <map>" << std::endl;
   ofs << "#include <string>" << std::endl;
+  ofs << std::endl;
+  ofs << "namespace " << resource_name << " {" << std::endl;
+  ofs << "const extern std::map<std::string, std::string> " << resource_name << ";" << std::endl;
+  ofs << "} // namespace " << resource_name << std::endl;
+}
+
+void writeBinarySource(const std::string resource_name, const std::string& filename_base,
+                           const std::map<std::string, std::unique_ptr<olc::Sprite>>& sprites) {
+  OlcSpriteEncoder sprite_encoder{};
+  const std::string indent = "  ";
+  std::ofstream ofs(filename_base + ".cpp");
+  ofs << "#include \"" << filename_base + ".hpp" << "\"";
+  ofs << std::endl;
   ofs << std::endl;
   ofs << "namespace " << resource_name << " {" << std::endl;
   ofs << "const std::map<std::string, std::string> " << resource_name << std::endl;
@@ -41,6 +51,13 @@ void writeBinaryHeader(const std::string resource_name, const std::string& filen
 
   ofs << indent << "}; // std::map<std::string, std::string> " << resource_name << std::endl;
   ofs << "} // namespace " << resource_name << std::endl;
+
+}
+
+void writeBinaryCppFiles(const std::string resource_name, const std::string& filename_base,
+                           const std::map<std::string, std::unique_ptr<olc::Sprite>>& sprites) {
+  writeBinaryHeader(resource_name, filename_base);
+  writeBinarySource(resource_name, filename_base, sprites);
 }
 
 class MinimalImpl : public olc::PixelGameEngine {
@@ -49,14 +66,14 @@ class MinimalImpl : public olc::PixelGameEngine {
   bool OnUserUpdate(float fElapsedTime) override { return true; }
 };
 
-bool spriteValid(const olc::Sprite &sprite) {
+bool spriteValid(const olc::Sprite& sprite) {
   return sprite.height > 0 && sprite.width > 0;
 }
 
-std::map<std::string, std::unique_ptr<olc::Sprite>> loadSprites(const std::string &path) {
+std::map<std::string, std::unique_ptr<olc::Sprite>> loadSprites(const std::string& path) {
   namespace fs = std::filesystem;
   std::map<std::string, std::unique_ptr<olc::Sprite>> sprite_map;
-  for (const auto &dir_itr : fs::directory_iterator(fs::current_path() / fs::path(path))) {
+  for (const auto& dir_itr : fs::directory_iterator(fs::current_path() / fs::path(path))) {
     const auto filepath = fs::path(dir_itr);
     const auto extension = filepath.extension();
     const auto name = filepath.stem();
@@ -75,15 +92,15 @@ std::map<std::string, std::unique_ptr<olc::Sprite>> loadSprites(const std::strin
 int main() {
   MinimalImpl imp{};
   imp.Construct(10, 10, 8, 8);
-  //olc::Sprite test_sprite("assets/images/levels-screen.png");
-  //OlcSpriteEncoder encoder;
-  //encoder.spriteToString(test_sprite);
+  // olc::Sprite test_sprite("assets/images/levels-screen.png");
+  // OlcSpriteEncoder encoder;
+  // encoder.spriteToString(test_sprite);
   // if (not test_sprite.GetData()) {
   //  std::cout << "Failed loading sprite." << std::endl;
   //  return -1;
   //}
 
   const auto sprite_map = loadSprites("./assets/images");
-  writeBinaryHeader("images", "images.hpp", sprite_map);
+  writeBinaryCppFiles("images", "images", sprite_map);
 }
 
