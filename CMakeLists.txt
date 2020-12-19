@@ -47,6 +47,10 @@ if(APPLE)
             PNG::PNG
             ${OPENGL_LIBRARIES}
         )
+
+    SET(GAMEPAD_CPPS "src/frame_processors/gamepad_config_processor_mac.cpp")
+else()
+    SET(GAMEPAD_CPPS "src/frame_processors/gamepad_config_processor.cpp src/olc_gamepad.cpp")
 endif()
 
 # end of OS specific
@@ -69,16 +73,18 @@ add_executable(tetris
         src/main.cpp
         src/olc_drawer.cpp
         src/olc_keyboard.cpp
-        src/olc_gamepad.cpp
+        #src/olc_gamepad.cpp
         src/olc_sprite_encoder.cpp
         src/game_renderer.cpp
         src/frame_processors/game_processor.cpp
         src/frame_processors/level_screen_processor.cpp
         src/frame_processors/option_screen_processor.cpp
         src/frame_processors/keyboard_config_processor.cpp
-        src/frame_processors/gamepad_config_processor.cpp
+        #src/frame_processors/gamepad_config_processor.cpp
         src/sound.cpp
-        src/tetris.cpp)
+        src/tetris.cpp
+        ${GAMEPAD_CPPS}
+        )
 
 
 target_link_libraries(tetris olc assets_lib ${TETRIS_LIBS})
@@ -87,5 +93,5 @@ target_link_libraries(tetris olc assets_lib ${TETRIS_LIBS})
 #add_executable(olc_sprite_gen src/olc_sprite_gen.cpp src/olc_sprite_encoder.cpp)
 #target_link_libraries(olc_sprite_gen ${OLC_LIBS})
 
-add_executable(testbed src/boilerplate.cpp)
-target_link_libraries(testbed olc ${OLC_LIBS})
+#add_executable(testbed src/boilerplate.cpp)
+#target_link_libraries(testbed olc ${OLC_LIBS})

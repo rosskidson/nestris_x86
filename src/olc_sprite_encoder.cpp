@@ -33,9 +33,9 @@ OlcSpriteEncoder::~OlcSpriteEncoder() = default;
 
 std::any OlcSpriteEncoder::stringToObj(const std::string& encoded_str) const {
  //std::move(stringToSprite(encoded_str));
-  auto a = std::make_unique<int>(5);
-  std::any b = std::move(a);
-  return std::move(stringToSprite(encoded_str));
+  //auto a = std::make_unique<int>(5);
+  //std::any b = std::move(a);
+  return stringToSprite(encoded_str).get();
 }
 
 std::vector<std::string> OlcSpriteEncoder::objToString(const std::any& object,
