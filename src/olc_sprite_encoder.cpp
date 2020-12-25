@@ -32,14 +32,14 @@ OlcSpriteEncoder::OlcSpriteEncoder() : base64_conv_(std::make_unique<Base64Conve
 OlcSpriteEncoder::~OlcSpriteEncoder() = default;
 
 std::any OlcSpriteEncoder::stringToObj(const std::string& encoded_str) const {
- //std::move(stringToSprite(encoded_str));
-  //auto a = std::make_unique<int>(5);
-  //std::any b = std::move(a);
-  return stringToSprite(encoded_str).get();
+  return std::shared_ptr<olc::Sprite>(stringToSprite(encoded_str));
 }
 
 std::vector<std::string> OlcSpriteEncoder::objToString(const std::any& object,
-                                                       const int max_line_len) const {}
+                                                       const int max_line_len) const {
+  const auto& sprite = std::any_cast<std::shared_ptr<olc::Sprite>>(object);
+  return spriteToString(*sprite, max_line_len);
+}
 
 std::vector<long> OlcSpriteEncoder::decodeString(const std::string& sprite_encoded,
                                                  const char token) const {
