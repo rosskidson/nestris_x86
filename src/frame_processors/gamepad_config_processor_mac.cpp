@@ -29,9 +29,11 @@ void GamePadConfigProcessor::renderWaitForControllerScreen() const {
   KeyboardConfigProcessor::clearScreen();
   const pdi::Coords detect_msg_coords{30, 80};
   drawer_->drawString(detect_msg_coords + pdi::Coords{0, 00}, " NO CONTROLLER SUPPORT");
-  drawer_->drawString(detect_msg_coords + pdi::Coords{0, 30}, "       ON MacOS");
-  drawer_->drawString(detect_msg_coords + pdi::Coords{0, 40}, "  YOU CAN INSTEAD USE A");
-  drawer_->drawString(detect_msg_coords + pdi::Coords{0, 50}, "   JOYSTICK REMAPPER");
+  drawer_->drawString(detect_msg_coords + pdi::Coords{0, 10}, "       ON MacOS");
+  drawer_->drawString(detect_msg_coords + pdi::Coords{0, 30}, "A WORKAROUND IS TO USE A");
+  drawer_->drawString(detect_msg_coords + pdi::Coords{0, 40}, "   JOYSTICK REMAPPER     ");
+  drawer_->drawString(detect_msg_coords + pdi::Coords{0, 50}, " e.g. joystickmapper.com ");
+
 }
 
 }  // namespace tetris_clone
