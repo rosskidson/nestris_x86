@@ -76,7 +76,8 @@ TetrisClone::TetrisClone()
       single_frame_{NTSC_frame_ns} {
   sAppName = "TetrisClone";
 
-  if (not loadSoundAssets("./assets/sounds/", *sample_player_)) {
+  //if (not loadSoundAssets("./assets/sounds/", *sample_player_)) {
+  if (not loadSoundAssets(*sample_player_)) {
     throw std::runtime_error("Failed loading sound samples.");
   }
 }
@@ -188,36 +189,43 @@ void TetrisClone::sleepUntilNextFrame() {
 /**
  * TODO:
  *
+ * Must do:
+ * - Asset loading from binary
  * - Add a/b buttons for navigating menu
+ * - If layout unchanged, add A,B,C etc for maxout
+ * - Press down hold between blocks?
+ * - Remove full path from logging
+ * - Full test on linux/mac/windows
+ *
+ *
+ * Like to have:
  * - Restructure layout for
  *     -ARE box
  *     -7 digit score
  *     -tetromino hold
  *     -wall charge signal
  *     -DAS chain counter
- * - Asset loading from binary
+ * - Wall charge animation/signal
+ * - Das chain counter/animation
  * - Press down scoring
+ * - Different randoms (uniform, 7-bag, nestris double-pick)
  * - Hard drop
  * - Statistics mode
- * - Hold
  * - Remove magic numbers in game_logic (entry delay, line clear frame numbers)
- * - Press down hold between blocks?
  * - precise timing checks:
  *    - line clear sfx
  *    - delay between death and death sound
  *    - delay between death and end animation
  *    - end animation speed
- * - Remove full path from logging
- * - timing overrun errors in the menu on macos
  *
- * IDEAS::
- * - Wall charge animation/signal
- * - Das chain counter/animation
+ * More ambitious:
  * - Interface for random generator: allow a tetromino set loader
  *      (don't forget the rand() in line clear)
  * - Record all inputs, implement a replay functionality
+ * - Hold
  *
- * REFACTOR:
+ * Bugs:
+ * - timing overrun errors in the menu on macos
  */
 
 }  // namespace tetris_clone

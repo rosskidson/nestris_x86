@@ -10,7 +10,7 @@ std::unique_ptr<Mix_Chunk> createMixChunk(const std::vector<long>& data) {
   auto ret_val = std::make_unique<Mix_Chunk>();
   ret_val->allocated = 1;
   ret_val->alen = data[0];
-  ret_val->volume = data[2];
+  ret_val->volume = data[1];
   ret_val->abuf = new Uint8[ret_val->alen];
   auto* payload = ret_val->abuf;
   int i = 0;
