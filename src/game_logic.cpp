@@ -108,8 +108,11 @@ void processKeyEvents(const KeyEvents &key_events, const sound::SoundPlayer &sam
 
   if (key_events.at(KeyAction::Down).held) {
     auto &gr = state.gravity_counter;
-    gr = gr > 2 ? 2 : gr;
+    gr = (gr > 2) && not state.press_down_lock ? 2 : gr;
+  } else {
+    state.press_down_lock = false;
   }
+
   if (key_events.at(KeyAction::RotateClockwise).pressed) {
     if (updateStateOnNoCollision(state.grid, 0, 0, 1, state.active_tetromino)) {
       sample_player.playSample("tetromino_rotate");

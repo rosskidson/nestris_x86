@@ -46,6 +46,7 @@ struct GameState {
   std::array<int, 7> tetromino_counts;  // Ordered according to enum.
   bool topped_out;
   bool paused;
+  bool press_down_lock;
 };
 
 inline bool entryDelay(const GameState<>& state) {

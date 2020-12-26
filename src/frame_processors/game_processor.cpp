@@ -87,6 +87,7 @@ void GameProcessor::doGravityStep(const KeyEvents& key_events) {
   const bool tetromino_locked = applyGravity(gravity_provider_, state_);
   if (tetromino_locked) {
     sample_player_->playSample("tetromino_lock");
+    state_.press_down_lock = true;
     auto lines_cleared = checkForLineClears(state_);
     if (not lines_cleared.empty()) {
       updateEntryDelayForLineClear(state_.entry_delay_counter);

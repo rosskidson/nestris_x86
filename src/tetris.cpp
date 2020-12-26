@@ -192,7 +192,6 @@ void TetrisClone::sleepUntilNextFrame() {
  * Must do:
  * - Add a/b buttons for navigating menu
  * - If layout unchanged, add A,B,C etc for maxout
- * - Press down hold between blocks?
  * - Full test on linux/mac/windows
  *
  *
