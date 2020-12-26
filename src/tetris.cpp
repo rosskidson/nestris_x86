@@ -193,8 +193,14 @@ void TetrisClone::sleepUntilNextFrame() {
  * - Add a/b buttons for navigating menu
  * - If layout unchanged, add A,B,C etc for maxout
  * - Press down hold between blocks?
- * - Remove full path from logging
  * - Full test on linux/mac/windows
+ *
+ *
+ * Very much like to have:
+ * - 7 digit score
+ * - wall charge signal
+ * - DAS chain counter
+ * - Different randoms (uniform, 7-bag, nestris double-pick)
  *
  *
  * Like to have:
@@ -204,19 +210,12 @@ void TetrisClone::sleepUntilNextFrame() {
  *     -tetromino hold
  *     -wall charge signal
  *     -DAS chain counter
- * - Wall charge animation/signal
- * - Das chain counter/animation
+ *     -long bar drought
  * - Press down scoring
- * - Different randoms (uniform, 7-bag, nestris double-pick)
  * - Hard drop
- * - Statistics mode
- * - Remove magic numbers in game_logic (entry delay, line clear frame numbers)
- * - precise timing checks:
- *    - line clear sfx
- *    - delay between death and death sound
- *    - delay between death and end animation
- *    - end animation speed
- * - compress binary data
+ * - Statistics mode (long bar drought, tetris rate, burn)
+ * - Compress binary data
+ *
  *
  * More ambitious:
  * - Interface for random generator: allow a tetromino set loader
@@ -224,11 +223,15 @@ void TetrisClone::sleepUntilNextFrame() {
  * - Record all inputs, implement a replay functionality
  * - Hold
  *
+ *
  * Bugs:
  * - timing overrun errors in the menu on macos
  *
- * Refactor:
+ *
+ * Refactor/code improvements:
  * - make an asset provider that returns anys for sounds and images
+ * - Remove magic numbers in game_logic (entry delay, line clear frame numbers)
+ * - Remove std::rand() in line clear
  */
 
 }  // namespace tetris_clone
