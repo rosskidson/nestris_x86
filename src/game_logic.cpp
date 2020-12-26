@@ -73,7 +73,7 @@ void processKeyEvents(const KeyEvents &key_events, const sound::SoundPlayer &sam
   auto move_check_wall_charge = [&sample_player, &das_processor](GameState<> &state,
                                                                  const int direction) {
     if (updateStateOnNoCollision(state.grid, direction, 0, 0, state.active_tetromino)) {
-      sample_player.playSample("move");
+      sample_player.playSample("tetromino_move");
     } else {
       das_processor.fullyChargeDas(state.das_counter);
     }
@@ -112,12 +112,12 @@ void processKeyEvents(const KeyEvents &key_events, const sound::SoundPlayer &sam
   }
   if (key_events.at(KeyAction::RotateClockwise).pressed) {
     if (updateStateOnNoCollision(state.grid, 0, 0, 1, state.active_tetromino)) {
-      sample_player.playSample("rotate");
+      sample_player.playSample("tetromino_rotate");
     }
   }
   if (key_events.at(KeyAction::RotateAntiClockwise).pressed) {
     if (updateStateOnNoCollision(state.grid, 0, 0, -1, state.active_tetromino)) {
-      sample_player.playSample("rotate");
+      sample_player.playSample("tetromino_rotate");
     }
   }
   if (key_events.at(KeyAction::Start).pressed) {

@@ -25,5 +25,6 @@ class SpriteProvider {
 };
 
 bool loadSoundAssets(const std::string &path, sound::SoundPlayer &sample_player);
+bool loadSoundAssets(sound::SoundPlayer &sample_player);
 
 }  // namespace tetris_clone

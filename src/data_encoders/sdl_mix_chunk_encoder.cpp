@@ -2,69 +2,50 @@
 
 #include <SDL_mixer.h>
 
-#include <deque>
-#include <iostream>
 #include <iterator>
-#include <map>
 #include <memory>
-#include <sstream>
+#include <utils/logging.hpp>
 
-#include "utils/base64_converter.hpp"
-
-SdlMixChunkEncoder::SdlMixChunkEncoder() : base64_conv_(std::make_unique<Base64Converter>()) {}
-SdlMixChunkEncoder::~SdlMixChunkEncoder() = default;
-
-std::any SdlMixChunkEncoder::stringToObj(const std::string& encoded_str) const {
-  return stringToChunk(encoded_str).release();
-}
-
-std::vector<std::string> SdlMixChunkEncoder::objToString(const std::any& object,
-                                                       const int max_line_len) const {
-  const auto* sprite = std::any_cast<Mix_Chunk*>(object);
-  return chunkToString(*sprite, max_line_len);
-}
-
-std::vector<long> OlcSpriteEncoder::decodeString(const std::string& sprite_encoded,
-                                                 const char token) const {
-  std::vector<long> return_value;
-  std::string current_word{};
-  for (const auto c : sprite_encoded) {
-    if (c == token) {
-      if (current_word.empty()) {
-        std::cerr << "[WARNING]: Empty b64 word" << std::endl;
-        continue;
-      }
-      return_value.push_back(base64_conv_->decodeNumber(current_word));
-      current_word.clear();
-    } else {
-      current_word.push_back(c);
-    }
+std::unique_ptr<Mix_Chunk> createMixChunk(const std::vector<long>& data) {
+  auto ret_val = std::make_unique<Mix_Chunk>();
+  ret_val->allocated = 1;
+  ret_val->alen = data[0];
+  ret_val->volume = data[2];
+  ret_val->abuf = new Uint8[ret_val->alen];
+  auto* payload = ret_val->abuf;
+  int i = 0;
+  for (auto itr = std::next(data.begin(), 2); itr != data.end(); ++itr) {
+    payload[i++] = *itr;
   }
-  if (not current_word.empty()) {
-    return_value.push_back(base64_conv_->decodeNumber(current_word));
-  }
-  return return_value;
+  return ret_val;
 }
 
-std::unique_ptr<olc::Sprite> OlcSpriteEncoder::stringToSprite(const std::string& sprite_str) const {
-  const auto tokenize_data = decodeString(sprite_str);
-  return createSprite(tokenize_data);
+std::vector<long> mixChunkToData(const Mix_Chunk& mix_chunk, const int max_line_len) {
+  std::vector<long> ret_val;
+  ret_val.reserve(mix_chunk.allocated + 2);
+  ret_val.push_back(mix_chunk.alen);
+  ret_val.push_back(mix_chunk.volume);
+  const auto* data = mix_chunk.abuf;
+  for (int i = 0; i < mix_chunk.alen; ++i) {
+    ret_val.push_back(data[i]);
+  }
+  return ret_val;
 }
 
-std::vector<std::string> OlcSpriteEncoder::spriteToString(const olc::Sprite& sprite,
-                                                          const int max_line_len) const {
-  std::stringstream stream;
-  std::vector<std::string> return_val;
-  stream << base64_conv_->encodeNumber(sprite.width) << ",";
-  stream << base64_conv_->encodeNumber(sprite.height) << ",";
-  const auto* p = sprite.GetData();
-  for (int i = 0; i < sprite.height * sprite.width; ++i) {
-    stream << base64_conv_->encodeNumber(p[i].n) << ",";
-    if (stream.str().length() > max_line_len) {
-      return_val.push_back(stream.str());
-      stream.str("");
-    }
+SdlMixChunkEncoder::SdlMixChunkEncoder() {}
+
+std::any SdlMixChunkEncoder::dataToObj(const std::vector<long>& data) const {
+  return createMixChunk(data).release();
+}
+
+std::vector<long> SdlMixChunkEncoder::objToData(const std::any& object,
+                                                const int max_line_len) const {
+  Mix_Chunk* chunk_ptr;
+  try {
+    chunk_ptr = std::any_cast<Mix_Chunk*>(object);
+  } catch (const std::bad_any_cast& e) {
+    LOG_ERROR("Failed std::any_cast in SdlMixChunkEncoder::objToData");
+    throw;
   }
-  return_val.push_back(stream.str());
-  return return_val;
+  return mixChunkToData(*chunk_ptr, max_line_len);
 }

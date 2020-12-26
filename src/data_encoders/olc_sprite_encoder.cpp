@@ -2,7 +2,9 @@
 
 #include <olcPixelGameEngine.h>
 
+#include <iterator>
 #include <memory>
+#include <utils/logging.hpp>
 
 std::unique_ptr<olc::Sprite> createSprite(const std::vector<long>& data) {
   const int width = data.at(0);
@@ -21,6 +23,18 @@ std::unique_ptr<olc::Sprite> createSprite(const std::vector<long>& data) {
   return sprite_ptr;
 }
 
+std::vector<long> spriteToData(const olc::Sprite& sprite, const int max_line_len) {
+  std::vector<long> data;
+  data.reserve(sprite.height * sprite.width + 2);
+  data.push_back(sprite.width);
+  data.push_back(sprite.height);
+  const auto* p = sprite.GetData();
+  for (int i = 0; i < sprite.height * sprite.width; ++i) {
+    data.push_back(p[i].n);
+  }
+  return data;
+}
+
 OlcSpriteEncoder::OlcSpriteEncoder() {}
 
 std::any OlcSpriteEncoder::dataToObj(const std::vector<long>& data) const {
@@ -28,16 +42,13 @@ std::any OlcSpriteEncoder::dataToObj(const std::vector<long>& data) const {
 }
 
 std::vector<long> OlcSpriteEncoder::objToData(const std::any& object,
-                                                       const int max_line_len) const {
-  const auto* sprite_ptr = std::any_cast<olc::Sprite*>(object);
-  const auto& sprite = *sprite_ptr;
-  std::vector<long> data;
-  data.reserve(sprite.height * sprite.width + 2);
-  data.push_back(sprite.width);
-  data.push_back(sprite.height);
-  const auto* p = sprite.GetData();
-  for(int i = 0; i < sprite.height * sprite.width; ++i) {
-    data.push_back(p[i].n);
+                                              const int max_line_len) const {
+  olc::Sprite* sprite_ptr;
+  try {
+    sprite_ptr = std::any_cast<olc::Sprite*>(object);
+  } catch (std::bad_any_cast& e) {
+    LOG_ERROR("Failed std::any_cast in OlcSpriteEncoder::objToData");
+    throw;
   }
-  return data;
+  return spriteToData(*sprite_ptr, max_line_len);
 }

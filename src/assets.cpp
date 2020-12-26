@@ -1,11 +1,14 @@
 
 #include "assets.hpp"
 
+#include <SDL_mixer.h>
+
 #include <filesystem>
 #include <sstream>
 #include <stdexcept>
 
 #include "assets_cpp/images.hpp"
+#include "assets_cpp/sounds.hpp"
 #include "data_encoders/data_encoder_factory.hpp"
 #include "utils/logging.hpp"
 
@@ -41,9 +44,9 @@ bool spriteValid(const olc::Sprite *sprite) {
 
 // clang-format off
 const std::vector<std::pair<std::string, std::string>> SAMPLES{
-    {"tetromino_move.wav", "move"},
-    {"tetromino_lock.wav", "lock"},
-    {"tetromino_rotate.wav", "rotate"},
+    {"tetromino_move.wav", "tetromino_move"},
+    {"tetromino_lock.wav", "tetromino_lock"},
+    {"tetromino_rotate.wav", "tetromino_rotate"},
     {"tetris.wav", "tetris"},
     {"line_clear.wav", "line_clear"},
     {"menu_blip.wav", "menu_blip"},
@@ -111,6 +114,19 @@ bool loadSoundAssets(const std::string &path, sound::SoundPlayer &sample_player)
   }
 
   return ret;
+}
+
+bool loadSoundAssets(sound::SoundPlayer &sample_player) {
+  const auto decoder = getDataToStringEncoder(DataEncoderEnum::SdlMixChunk);
+  for (const auto &[id, code] : sounds::sounds) {
+    const auto raw_ptr = std::any_cast<Mix_Chunk *>(decoder.stringToObj(code));
+    const auto success = sample_player.loadWavFromMemory(std::unique_ptr<Mix_Chunk>(raw_ptr), id);
+    if (not success) {
+      LOG_ERROR("Failed loading sound `" << id << "`");
+      return false;
+    }
+  }
+  return true;
 }
 
 }  // namespace tetris_clone

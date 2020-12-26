@@ -1,11 +1,14 @@
 
+#include <SDL_mixer.h>
+
+#include <data_encoders/data_encoder_factory.hpp>
 #include <filesystem>
 #include <fstream>
 #include <ios>
 #include <iostream>
 #include <memory>
-#include <data_encoders/olc_sprite_encoder.hpp>
 #include <string>
+#include <utils/logging.hpp>
 
 #define OLC_PGE_APPLICATION
 #include "olcPixelGameEngine.h"
@@ -22,12 +25,15 @@ void writeBinaryHeader(const std::string resource_name, const std::string& filen
   ofs << "} // namespace " << resource_name << std::endl;
 }
 
+template <typename DataPointer>
 void writeBinarySource(const std::string resource_name, const std::string& filename_base,
-                           const std::map<std::string, std::unique_ptr<olc::Sprite>>& sprites) {
-  OlcSpriteEncoder sprite_encoder{};
+                       const DataEncoderEnum& data_encoder_type,
+                       const std::map<std::string, DataPointer>& data_map) {
+  const auto encoder = getDataToStringEncoder(data_encoder_type);
   const std::string indent = "  ";
   std::ofstream ofs(filename_base + ".cpp");
-  ofs << "#include \"" << filename_base + ".hpp" << "\"";
+  ofs << "#include \"" << filename_base + ".hpp"
+      << "\"";
   ofs << std::endl;
   ofs << std::endl;
   ofs << "namespace " << resource_name << " {" << std::endl;
@@ -35,8 +41,8 @@ void writeBinarySource(const std::string resource_name, const std::string& filen
   ofs << indent << "{" << std::endl;
 
   bool first_element = true;
-  for (const auto& [name, sprite] : sprites) {
-    const auto sprite_text = sprite_encoder.spriteToString(*sprite);
+  for (const auto& [name, data_ptr] : data_map) {
+    const auto sprite_text = encoder.objToString(data_ptr.get());
     if (first_element) {
       first_element = false;
     } else {
@@ -51,13 +57,14 @@ void writeBinarySource(const std::string resource_name, const std::string& filen
 
   ofs << indent << "}; // std::map<std::string, std::string> " << resource_name << std::endl;
   ofs << "} // namespace " << resource_name << std::endl;
-
 }
 
+template <typename DataPointer>
 void writeBinaryCppFiles(const std::string resource_name, const std::string& filename_base,
-                           const std::map<std::string, std::unique_ptr<olc::Sprite>>& sprites) {
+                         const DataEncoderEnum& data_encoder_type,
+                         const std::map<std::string, DataPointer>& data_map) {
   writeBinaryHeader(resource_name, filename_base);
-  writeBinarySource(resource_name, filename_base, sprites);
+  writeBinarySource(resource_name, filename_base, data_encoder_type, data_map);
 }
 
 class MinimalImpl : public olc::PixelGameEngine {
@@ -82,25 +89,45 @@ std::map<std::string, std::unique_ptr<olc::Sprite>> loadSprites(const std::strin
     }
     sprite_map[name] = std::make_unique<olc::Sprite>(filepath.string());
     if (not spriteValid(*sprite_map.at(name))) {
-      std::cerr << "Failed loading `" << filepath << "`." << std::endl;
+      LOG_ERROR("Failed loading `" << filepath << "`.");
       continue;
     }
   }
   return sprite_map;
 }
 
+std::map<std::string, std::unique_ptr<Mix_Chunk>> loadSounds(const std::string& path) {
+  const int result = Mix_OpenAudio(44100, AUDIO_S16SYS, 2, 512);
+  if (result < 0) {
+    throw std::runtime_error("Failed to initialize SDL sound mixer.");
+  }
+  namespace fs = std::filesystem;
+  std::map<std::string, std::unique_ptr<Mix_Chunk>> sounds_map;
+  for (const auto& dir_itr : fs::directory_iterator(fs::current_path() / fs::path(path))) {
+    const auto filepath = fs::path(dir_itr);
+    const auto extension = filepath.extension();
+    const auto name = filepath.stem();
+    if (extension != ".WAV" and extension != ".wav") {
+      continue;
+    }
+    auto raw_ptr = Mix_LoadWAV(filepath.c_str());
+    if (raw_ptr == nullptr) {
+      LOG_ERROR("Failed loading `" << filepath.string() << "`.");
+      continue;
+    }
+    sounds_map[name] = std::unique_ptr<Mix_Chunk>(raw_ptr);
+  }
+  return sounds_map;
+}
+
 int main() {
   MinimalImpl imp{};
   imp.Construct(10, 10, 8, 8);
-  // olc::Sprite test_sprite("assets/images/levels-screen.png");
-  // OlcSpriteEncoder encoder;
-  // encoder.spriteToString(test_sprite);
-  // if (not test_sprite.GetData()) {
-  //  std::cout << "Failed loading sprite." << std::endl;
-  //  return -1;
-  //}
 
   const auto sprite_map = loadSprites("./assets/images");
-  writeBinaryCppFiles("images", "images", sprite_map);
+  writeBinaryCppFiles("images", "images", DataEncoderEnum::OlcSprite, sprite_map);
+
+  const auto sounds_map = loadSounds("./assets/sounds");
+  writeBinaryCppFiles("sounds", "sounds", DataEncoderEnum::SdlMixChunk, sounds_map);
 }
 
