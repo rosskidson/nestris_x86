@@ -6,7 +6,7 @@
 #include <stdexcept>
 
 #include "assets_cpp/images.hpp"
-#include "data_encoders/olc_sprite_encoder.hpp"
+#include "data_encoders/data_encoder_factory.hpp"
 #include "utils/logging.hpp"
 
 namespace tetris_clone {
@@ -92,7 +92,7 @@ bool SpriteProvider::loadSprites(const std::string &path) {
 }
 
 bool SpriteProvider::loadSprites() {
-  OlcSpriteEncoder decoder{};
+  const auto decoder = getDataToStringEncoder(DataEncoderEnum::OlcSprite);
   for (const auto &[id, code] : images::images) {
     const auto raw_ptr = std::any_cast<olc::Sprite *>(decoder.stringToObj(code));
     sprite_map_[id] = std::unique_ptr<olc::Sprite>{raw_ptr};

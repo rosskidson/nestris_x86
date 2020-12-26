@@ -64,7 +64,10 @@ add_library(assets_lib src/assets_cpp/images.cpp)
 add_executable(tetris
         src/assets.cpp
         src/drawing_utils.cpp
+        src/data_encoders/data_encoder_factory.cpp
+        src/data_encoders/data_to_string_encoder.cpp
         src/data_encoders/olc_sprite_encoder.cpp
+        #src/data_encoders/sdl_mix_chunk_encoder.cpp
         src/drawers/olc_drawer.cpp
         src/frame_processors/game_processor.cpp
         src/frame_processors/level_screen_processor.cpp
@@ -83,8 +86,8 @@ add_executable(tetris
 
 target_link_libraries(tetris olc assets_lib ${TETRIS_LIBS})
 
-add_executable(olc_sprite_gen src/tools/olc_sprite_gen.cpp src/data_encoders/olc_sprite_encoder.cpp)
-target_link_libraries(olc_sprite_gen ${OLC_LIBS})
+#add_executable(olc_sprite_gen src/tools/olc_sprite_gen.cpp src/data_encoders/olc_sprite_encoder.cpp)
+#target_link_libraries(olc_sprite_gen ${OLC_LIBS})
 
 if(NOT APPLE)
   add_executable(testbed src/tools/button_tester.cpp)
