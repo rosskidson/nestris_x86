@@ -48,12 +48,11 @@ if(APPLE)
             ${OPENGL_LIBRARIES}
         )
 
-    SET(GAMEPAD_CPPS src/frame_processors/gamepad_config_processor_mac.cpp src/olc_gamepad_mac.cpp)
+    SET(GAMEPAD_CPPS src/frame_processors/gamepad_config_processor_mac.cpp src/input_devices/olc_gamepad_mac.cpp)
 else()
-    SET(GAMEPAD_CPPS src/frame_processors/gamepad_config_processor.cpp src/olc_gamepad.cpp)
+    SET(GAMEPAD_CPPS src/frame_processors/gamepad_config_processor.cpp src/input_devices/olc_gamepad.cpp)
 endif()
 
-# end of OS specific
 
 
 SET(TETRIS_LIBS
@@ -69,18 +68,18 @@ add_library(assets_lib src/assets_cpp/images.cpp)
 add_executable(tetris
         src/assets.cpp
         src/drawing_utils.cpp
-        src/game_logic.cpp
-        src/main.cpp
-        src/olc_drawer.cpp
-        src/olc_keyboard.cpp
-        #src/olc_gamepad.cpp
-        src/olc_sprite_encoder.cpp
-        src/game_renderer.cpp
+        src/data_encoders/olc_sprite_encoder.cpp
+        src/drawers/olc_drawer.cpp
         src/frame_processors/game_processor.cpp
         src/frame_processors/level_screen_processor.cpp
         src/frame_processors/option_screen_processor.cpp
         src/frame_processors/keyboard_config_processor.cpp
         #src/frame_processors/gamepad_config_processor.cpp
+        src/game_logic.cpp
+        src/game_renderer.cpp
+        src/input_devices/olc_keyboard.cpp
+        src/main.cpp
+        #src/olc_gamepad.cpp
         src/sound.cpp
         src/tetris.cpp
         ${GAMEPAD_CPPS}
@@ -89,9 +88,10 @@ add_executable(tetris
 
 target_link_libraries(tetris olc assets_lib ${TETRIS_LIBS})
 
+add_executable(olc_sprite_gen src/tools/olc_sprite_gen.cpp src/data_encoders/olc_sprite_encoder.cpp)
+target_link_libraries(olc_sprite_gen ${OLC_LIBS})
 
-#add_executable(olc_sprite_gen src/olc_sprite_gen.cpp src/olc_sprite_encoder.cpp)
-#target_link_libraries(olc_sprite_gen ${OLC_LIBS})
-
-#add_executable(testbed src/boilerplate.cpp)
-#target_link_libraries(testbed olc ${OLC_LIBS})
+if(NOT APPLE)
+  add_executable(testbed src/tools/button_tester.cpp)
+  target_link_libraries(testbed olc ${OLC_LIBS})
+endif()

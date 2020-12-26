@@ -4,7 +4,7 @@
 #include <ios>
 #include <iostream>
 #include <memory>
-#include <olc_sprite_encoder.hpp>
+#include <data_encoders/olc_sprite_encoder.hpp>
 #include <string>
 
 #define OLC_PGE_APPLICATION
