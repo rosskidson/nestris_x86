@@ -48,9 +48,9 @@ if(APPLE)
             ${OPENGL_LIBRARIES}
         )
 
-    SET(GAMEPAD_CPPS "src/frame_processors/gamepad_config_processor_mac.cpp")
+    SET(GAMEPAD_CPPS src/frame_processors/gamepad_config_processor_mac.cpp src/olc_gamepad_mac.cpp)
 else()
-    SET(GAMEPAD_CPPS "src/frame_processors/gamepad_config_processor.cpp src/olc_gamepad.cpp")
+    SET(GAMEPAD_CPPS src/frame_processors/gamepad_config_processor.cpp src/olc_gamepad.cpp)
 endif()
 
 # end of OS specific
