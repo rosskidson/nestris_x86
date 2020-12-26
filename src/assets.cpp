@@ -94,7 +94,8 @@ bool SpriteProvider::loadSprites(const std::string &path) {
 bool SpriteProvider::loadSprites() {
   OlcSpriteEncoder decoder{};
   for (const auto &[id, code] : images::images) {
-    sprite_map_[id] = std::any_cast<std::unique_ptr<olc::Sprite>>(decoder.stringToObj(code));
+    const auto raw_ptr = std::any_cast<olc::Sprite *>(decoder.stringToObj(code));
+    sprite_map_[id] = std::unique_ptr<olc::Sprite>{raw_ptr};
     if (not spriteValid(sprite_map_.at(id).get())) {
       LOG_ERROR("Failed loading `" << id << "`.");
       return false;
