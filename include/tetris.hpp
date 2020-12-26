@@ -4,18 +4,18 @@
 #include <memory>
 
 #include "assets.hpp"
-#include "frame_processor_interface.hpp"
+#include "frame_processors/frame_processor_interface.hpp"
 #include "frame_processors/game_processor.hpp"
-#include "frame_processors/keyboard_config_processor.hpp"
 #include "frame_processors/gamepad_config_processor.hpp"
+#include "frame_processors/keyboard_config_processor.hpp"
 #include "frame_processors/level_screen_processor.hpp"
 #include "frame_processors/option_screen_processor.hpp"
 #include "game_states.hpp"
+#include "input_devices/input_interface.hpp"
 #include "key_defines.hpp"
-#include "utils/logging.hpp"
 #include "olcPixelGameEngine.h"
-#include "input_interface.hpp"
 #include "sound.hpp"
+#include "utils/logging.hpp"
 
 namespace tetris_clone {
 

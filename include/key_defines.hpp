@@ -3,7 +3,7 @@
 #include <map>
 #include <array>
 
-#include "input_interface.hpp"
+#include "input_devices/input_interface.hpp"
 
 namespace tetris_clone {
 

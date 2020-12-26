@@ -1,6 +1,6 @@
 #pragma once
 
-#include "pixel_drawing_interface.hpp"
+#include "drawers/pixel_drawing_interface.hpp"
 
 namespace tetris_clone {
 // clang-format off

@@ -1,6 +1,4 @@
-#include "olc_drawer.hpp"
-
-#include "pixel_drawing_interface.hpp"
+#include "drawers/olc_drawer.hpp"
 
 namespace tetris_clone {
 using pdi = PixelDrawingInterface;

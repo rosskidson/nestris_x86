@@ -1,4 +1,4 @@
-#include "olc_keyboard.hpp"
+#include "input_devices/olc_keyboard.hpp"
 
 namespace tetris_clone {
 

@@ -1,14 +1,13 @@
 #include <string>
 
-#include "olc_gamepad.hpp"
+#include "input_devices/olc_gamepad.hpp"
 
 namespace tetris_clone {
 
 const std::map<std::string, int> name_to_code_{};
 const std::map<int, std::string> code_to_name_{};
 
-class OlcGamePad::Impl {
-};
+class OlcGamePad::Impl {};
 
 OlcGamePad::OlcGamePad() : pimpl_{} {}
 

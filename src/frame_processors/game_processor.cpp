@@ -7,7 +7,7 @@
 #include "game_logic.hpp"
 #include "gravity.hpp"
 #include "key_defines.hpp"
-#include "pixel_drawing_interface.hpp"
+#include "drawers/pixel_drawing_interface.hpp"
 #include "sound.hpp"
 #include "utils/logging.hpp"
 

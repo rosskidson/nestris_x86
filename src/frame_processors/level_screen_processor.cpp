@@ -2,8 +2,7 @@
 #include "frame_processors/level_screen_processor.hpp"
 
 #include "drawing_utils.hpp"
-#include "frame_processor_interface.hpp"
-#include "pixel_drawing_interface.hpp"
+#include "drawers/pixel_drawing_interface.hpp"
 
 namespace tetris_clone {
 

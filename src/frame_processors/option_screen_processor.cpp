@@ -6,7 +6,7 @@
 #include "das.hpp"
 #include "drawing_utils.hpp"
 #include "option.hpp"
-#include "pixel_drawing_interface.hpp"
+#include "drawers/pixel_drawing_interface.hpp"
 #include "tetris_type.hpp"
 #include "utils/logging.hpp"
 

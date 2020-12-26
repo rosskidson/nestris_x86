@@ -5,9 +5,9 @@
 
 #include "assets.hpp"
 #include "das.hpp"
+#include "drawers/pixel_drawing_interface.hpp"
 #include "game_states.hpp"
 #include "key_defines.hpp"
-#include "pixel_drawing_interface.hpp"
 #include "tetromino.hpp"
 
 namespace tetris_clone {

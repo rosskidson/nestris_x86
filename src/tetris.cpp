@@ -6,14 +6,14 @@
 #include <thread>  //sleep until
 
 #include "assets.hpp"
+#include "drawers/olc_drawer.hpp"
 #include "frame_processors/game_processor.hpp"
 #include "frame_processors/keyboard_config_processor.hpp"
 #include "frame_processors/level_screen_processor.hpp"
 #include "frame_processors/option_screen_processor.hpp"
+#include "input_devices/olc_gamepad.hpp"
+#include "input_devices/olc_keyboard.hpp"
 #include "key_defines.hpp"
-#include "olc_drawer.hpp"
-#include "olc_gamepad.hpp"
-#include "olc_keyboard.hpp"
 #include "option.hpp"
 #include "utils/logging.hpp"
 
@@ -38,7 +38,7 @@ KeyEvent getButtonState(const bool button_old_state, const bool button_new_state
 }
 
 KeyEvents TetrisClone::getKeyEvents() {
-  dynamic_cast<OlcGamePad&>(*gamepad_input_).detectAndInit();
+  dynamic_cast<OlcGamePad &>(*gamepad_input_).detectAndInit();
   KeyEvents ret_val{};
   for (const auto &[action, key] : keyboard_key_bindings_) {
     const auto new_keyboard_state = keyboard_input_->getKeyState(key);
@@ -86,7 +86,6 @@ bool TetrisClone::OnUserCreate() {
     LOG_ERROR("Screen size must be set to 256x225 for this application.");
     return false;
   }
-
 
   this->SetPixelMode(olc::Pixel::MASK);
   frame_end_ = Clock::now() + single_frame_;

@@ -1,9 +1,9 @@
-#include "olc_gamepad.hpp"
+#include "input_devices/olc_gamepad.hpp"
 
 #include <string>
 
-#include "utils/logging.hpp"
 #include "Contributions/olcPGEX_Gamepad.h"
+#include "utils/logging.hpp"
 
 namespace tetris_clone {
 

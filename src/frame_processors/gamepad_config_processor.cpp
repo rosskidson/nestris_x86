@@ -2,7 +2,7 @@
 #include "frame_processors/gamepad_config_processor.hpp"
 
 #include "olc_gamepad.hpp"
-#include "pixel_drawing_interface.hpp"
+#include "drawers/pixel_drawing_interface.hpp"
 #include "utils/logging.hpp"
 
 namespace tetris_clone {

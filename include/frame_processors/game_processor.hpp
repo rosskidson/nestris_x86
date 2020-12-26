@@ -4,11 +4,11 @@
 
 #include "assets.hpp"
 #include "das.hpp"
+#include "drawers/pixel_drawing_interface.hpp"
 #include "frame_processor_interface.hpp"
 #include "game_renderer.hpp"
 #include "game_states.hpp"
 #include "gravity.hpp"
-#include "pixel_drawing_interface.hpp"
 #include "sound.hpp"
 #include "tetris_type.hpp"
 

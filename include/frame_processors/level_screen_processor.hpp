@@ -3,8 +3,8 @@
 #include <memory>
 
 #include "assets.hpp"
+#include "drawers/pixel_drawing_interface.hpp"
 #include "frame_processor_interface.hpp"
-#include "pixel_drawing_interface.hpp"
 #include "sound.hpp"
 
 namespace tetris_clone {
