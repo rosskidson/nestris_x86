@@ -20,6 +20,7 @@ class GamePadConfigProcessor : public KeyboardConfigProcessor {
 
  private:
   void renderWaitForControllerScreen() const;
+  void renderMacOsSupportUnavailable() const;
 };
 }  // namespace tetris_clone
 

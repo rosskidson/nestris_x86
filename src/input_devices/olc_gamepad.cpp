@@ -2,11 +2,26 @@
 
 #include <string>
 
-#include "Contributions/olcPGEX_Gamepad.h"
 #include "utils/logging.hpp"
+
+#if not __APPLE__
+#include "Contributions/olcPGEX_Gamepad.h"
+#endif
 
 namespace tetris_clone {
 
+#if __APPLE__
+// Define dummy impl.
+class OlcGamePad::Impl {
+ public:
+  bool detectAndInit() { return false; }
+  bool getKeyState(const KeyCode key_code) const { return false; }
+  InputInterface::KeyCode getPressedKey() const { return getNullKey(); }
+  std::string keyCodeToStr(const KeyCode key_code) const { return "Invalid key"; }
+  InputInterface::KeyCode lookupKeyCode(const std::string& key_name) const { return getNullKey(); }
+  InputInterface::KeyCode getNullKey() const { return -1; }
+};
+#else
 namespace {
 // clang-format off
 // copy pasted from olc source code and formatted to strings.
@@ -113,7 +128,11 @@ class OlcGamePad::Impl {
   olc::GamePad* gamepad_ptr_;
 };
 
+#endif  // #if else __APPLE__
+
 OlcGamePad::OlcGamePad() : pimpl_{std::make_unique<OlcGamePad::Impl>()} {}
+
+OlcGamePad::~OlcGamePad() = default;
 
 bool OlcGamePad::detectAndInit() {
   return pimpl_->detectAndInit();

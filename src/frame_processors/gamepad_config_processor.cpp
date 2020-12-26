@@ -1,8 +1,8 @@
 
 #include "frame_processors/gamepad_config_processor.hpp"
 
-#include "olc_gamepad.hpp"
 #include "drawers/pixel_drawing_interface.hpp"
+#include "input_devices/olc_gamepad.hpp"
 #include "utils/logging.hpp"
 
 namespace tetris_clone {
@@ -27,7 +27,11 @@ ProgramFlowSignal GamePadConfigProcessor::processFrame(const KeyEvents& key_even
     return ProgramFlowSignal::EndProgram;
   }
   if (not gamepad_raw_ptr->detectAndInit()) {
+#if __APPLE__
+    renderMacOsSupportUnavailable();
+#else
     renderWaitForControllerScreen();
+#endif
     if (key_events.at(KeyAction::Start).pressed) {
       return ProgramFlowSignal::OptionsScreen;
     } else {
@@ -44,6 +48,17 @@ void GamePadConfigProcessor::renderWaitForControllerScreen() const {
   drawer_->drawString(detect_msg_coords + pdi::Coords{0, 30}, "   PRESS ANY KEY ON");
   drawer_->drawString(detect_msg_coords + pdi::Coords{0, 40}, "   THE CONTROLLER TO");
   drawer_->drawString(detect_msg_coords + pdi::Coords{0, 50}, "      ACTIVATE...");
+}
+
+void GamePadConfigProcessor::renderMacOsSupportUnavailable() const {
+  KeyboardConfigProcessor::clearScreen();
+  const pdi::Coords detect_msg_coords{30, 80};
+  drawer_->drawString(detect_msg_coords + pdi::Coords{0, 00}, " NO CONTROLLER SUPPORT");
+  drawer_->drawString(detect_msg_coords + pdi::Coords{0, 10}, "       ON MacOS");
+  drawer_->drawString(detect_msg_coords + pdi::Coords{0, 30}, "A WORKAROUND IS TO USE A");
+  drawer_->drawString(detect_msg_coords + pdi::Coords{0, 40}, "   JOYSTICK REMAPPER     ");
+  drawer_->drawString(detect_msg_coords + pdi::Coords{0, 50}, " e.g. joystickmapper.com ");
+
 }
 
 }  // namespace tetris_clone
