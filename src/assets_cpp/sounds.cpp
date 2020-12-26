@@ -7010,6 +7010,7 @@ const std::map<std::string, std::string> sounds
      "D5,D_,D7,D_,C,A,C,A,D-,D_,D9,D_,D9,D_,D-,D_,C,A,B,A,D7,D_,D8,D_,B,A,B,A,D9,D_,D9,"
      "D_,A,A,D_,D_,D-,D_,D-,D_,D-,D_,A,A,B,A,D-,D_,D7,D_,D-,D_,C,A,D_,D_,D7,D_,D_,D_,D,"
      "A,D_,D_,D6,D_,D9,D_,E,A,A,A,D5,D_,D-,D_,D,A,D_,D_,D7,D_,D-,D_,A,A,A,A,A,A,D8,D_,D7,"
+     "D_,C,A,D,A,D8,D_,D6,D_,D_,D_,C,A,A,A,D8,D_,"
     }
     ,
     {"line_clear",
@@ -12785,6 +12786,7 @@ const std::map<std::string, std::string> sounds
      "D9,D_,D6,D_,D8,D_,A,A,D_,D_,D7,D_,D7,D_,A,A,D-,D_,D7,D_,D9,D_,D-,D_,D-,D_,D8,D_,D9,"
      "D_,A,A,D8,D_,D6,D_,D_,D_,A,A,D6,D_,D7,D_,A,A,D9,D_,D-,D_,A,A,D6,D_,D6,D_,B,A,A,A,"
      "D5,D_,D6,D_,A,A,B,A,D8,D_,D6,D_,D_,D_,A,A,D6,D_,D7,D_,B,A,D-,D_,D5,D_,D-,D_,B,A,D8,"
+     "D_,D6,D_,D-,D_,A,A,D9,D_,D6,D_,D8,D_,A,A,"
     }
     ,
     {"menu_blip",
@@ -14618,6 +14620,7 @@ const std::map<std::string, std::string> sounds
      "D_,D6,D_,D-,D_,A,A,D9,D_,D7,D_,D8,D_,D-,D_,D_,D_,D9,D_,D8,D_,D_,D_,D-,D_,D5,D_,D8,"
      "D_,A,A,D9,D_,D6,D_,D8,D_,D_,D_,D_,D_,D-,D_,D8,D_,D7,D_,D9,D_,D_,D_,D-,D_,D9,D_,D8,"
      "D_,D8,D_,D_,D_,D_,D_,D7,D_,D7,D_,A,A,D_,D_,D6,D_,D9,D_,B,A,D9,D_,D5,D_,D9,D_,A,A,"
+     "D9,D_,D-,D_,"
     }
     ,
     {"menu_select_01",
@@ -16778,6 +16781,7 @@ const std::map<std::string, std::string> sounds
      "D_,A,A,B,A,D9,D_,D-,D_,A,A,D-,D_,D-,D_,D_,D_,D_,D_,D-,D_,D-,D_,D_,D_,D-,D_,D-,D_,"
      "A,A,D_,D_,D9,D_,D-,D_,A,A,A,A,D9,D_,D8,D_,A,A,C,A,D9,D_,D8,D_,C,A,D_,D_,D6,D_,D_,"
      "D_,C,A,D_,D_,D-,D_,D9,D_,D9,D_,C,A,C,A,D7,D_,D7,D_,B,A,B,A,D-,D_,D-,D_,D8,D_,D-,D_,"
+     "E,A,A,A,D5,D_,D9,D_,E,A,A,A,D7,D_,D9,D_,A,A,D_,D_,D-,D_,B,A,D9,D_,"
     }
     ,
     {"menu_select_02",
@@ -19480,6 +19484,7 @@ const std::map<std::string, std::string> sounds
      "A,B,A,D7,D_,D5,D_,D_,D_,A,A,D9,D_,D8,D_,D7,D_,D8,D_,D_,D_,A,A,D9,D_,D7,D_,D9,D_,D-,"
      "D_,D-,D_,D-,D_,D6,D_,D7,D_,B,A,D_,D_,D6,D_,D8,D_,B,A,D-,D_,D6,D_,D-,D_,D-,D_,D6,D_,"
      "D9,D_,D,A,D9,D_,D2,D_,D_,D_,F,A,D7,D_,D3,D_,D_,D_,A,A,D7,D_,D8,D_,D_,D_,D_,D_,D8,"
+     "D_,D9,D_,"
     }
     ,
     {"pause",
@@ -22374,6 +22379,7 @@ const std::map<std::string, std::string> sounds
      "D_,D_,D6,D_,D9,D_,B,A,D8,D_,D5,D_,D_,D_,B,A,D7,D_,D6,D_,D9,D_,A,A,D_,D_,D7,D_,D8,"
      "D_,D_,D_,D-,D_,D7,D_,D8,D_,D_,D_,D9,D_,D9,D_,D_,D_,D8,D_,D7,D_,A,A,D_,D_,D5,D_,D7,"
      "D_,C,A,B,A,D4,D_,D5,D_,C,A,B,A,D6,D_,D6,D_,D_,D_,D_,D_,D8,D_,D-,D_,D-,D_,D7,D_,D9,"
+     "D_,A,A,D-,D_,D6,D_,D7,D_,B,A,D_,D_,D5,D_,D8,D_,B,A,D-,D_,D6,D_,D-,D_,"
     }
     ,
     {"tetris",
@@ -28453,6 +28459,7 @@ const std::map<std::string, std::string> sounds
      "D_,D-,D_,D9,D_,D7,D_,D8,D_,D_,D_,D-,D_,D8,D_,D8,D_,D-,D_,D_,D_,D-,D_,D8,D_,D7,D_,"
      "D-,D_,D_,D_,D8,D_,D7,D_,D-,D_,A,A,D9,D_,D8,D_,D9,D_,D8,D_,D_,D_,A,A,D5,D_,D5,D_,C,"
      "A,D,A,D5,D_,D4,D_,B,A,A,A,D6,D_,D7,D_,A,A,D_,D_,D6,D_,D9,D_,B,A,D9,D_,D6,D_,D8,D_,"
+     "D_,D_,D-,D_,D9,D_,D9,D_,D7,D_,D_,D_,A,A,"
     }
     ,
     {"tetromino_lock",
@@ -30557,6 +30564,7 @@ const std::map<std::string, std::string> sounds
      "D_,D7,D_,D8,D_,A,A,B,A,D9,D_,D8,D_,D-,D_,D_,D_,A,A,D9,D_,D7,D_,D_,D_,B,A,D9,D_,D7,"
      "D_,A,A,B,A,D7,D_,D7,D_,A,A,B,A,D-,D_,D8,D_,D9,D_,D-,D_,D_,D_,A,A,D9,D_,D7,D_,D_,D_,"
      "A,A,D-,D_,D-,D_,D9,D_,D9,D_,D_,D_,A,A,D9,D_,D8,D_,D_,D_,D_,D_,D-,D_,D-,D_,D-,D_,D-,"
+     "D_,D9,D_,D-,D_,A,A,D-,D_,D8,D_,D-,D_,D_,D_,D_,D_,D-,D_,D8,D_,D9,D_,A,A,A,A,"
     }
     ,
     {"tetromino_move",
@@ -32037,6 +32045,7 @@ const std::map<std::string, std::string> sounds
      "D7,D_,A,A,C,A,D9,D_,D6,D_,D_,D_,A,A,D8,D_,D-,D_,A,A,D9,D_,D9,D_,A,A,D-,D_,D8,D_,D_,"
      "D_,D-,D_,D8,D_,A,A,A,A,D8,D_,D9,D_,A,A,D-,D_,D9,D_,D-,D_,D8,D_,D-,D_,B,A,D_,D_,D9,"
      "D_,D9,D_,D-,D_,D-,D_,D_,D_,D-,D_,D7,D_,D-,D_,B,A,D_,D_,D8,D_,D8,D_,D_,D_,B,A,D9,D_,"
+     "D6,D_,"
     }
     ,
     {"tetromino_rotate",
@@ -34791,6 +34800,7 @@ const std::map<std::string, std::string> sounds
      "D9,D_,D7,D_,D9,D_,A,A,D9,D_,D7,D_,D_,D_,D-,D_,D8,D_,D-,D_,D9,D_,D7,D_,D_,D_,D_,D_,"
      "D5,D_,D8,D_,C,A,D-,D_,D6,D_,D9,D_,D_,D_,D8,D_,D9,D_,D_,D_,D7,D_,D7,D_,B,A,B,A,D5,"
      "D_,D5,D_,C,A,B,A,D4,D_,D6,D_,B,A,D_,D_,D6,D_,D9,D_,A,A,D8,D_,D8,D_,D_,D_,D-,D_,D7,"
+     "D_,D7,D_,A,A,D_,D_,D7,D_,D7,D_,D-,D_,B,A,D8,D_,"
     }
     ,
     {"top_out",
@@ -43550,6 +43560,7 @@ const std::map<std::string, std::string> sounds
      "D_,D8,D_,D9,D_,C,A,C,A,D7,D_,D6,D_,C,A,E,A,D7,D_,D6,D_,C,A,B,A,D8,D_,D_,D_,D_,D_,"
      "D9,D_,A,A,A,A,D8,D_,D_,D_,B,A,D9,D_,D-,D_,B,A,D9,D_,D8,D_,A,A,A,A,D_,D_,D-,D_,D8,"
      "D_,A,A,E,A,D9,D_,D5,D_,D-,D_,C,A,C,A,D9,D_,D5,D_,A,A,E,A,D-,D_,D8,D_,D-,D_,D_,D_,"
+     "D-,D_,D_,D_,B,A,"
     }
   }; // std::map<std::string, std::string> sounds
 } // namespace sounds

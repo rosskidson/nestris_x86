@@ -11,7 +11,7 @@ std::unique_ptr<olc::Sprite> createSprite(const std::vector<long>& data) {
   const int height = data.at(1);
   if (data.size() != (width * height) + 2) {
     std::cerr << "[ERROR]: Sprite size does not match meta information"
-              << "Width: " << width << " Height: " << height << " Num_Pixels: " << width * height
+              << " Width: " << width << " Height: " << height << " Num_Pixels: " << width * height
               << " Actual pixels " << (int)data.size() - 2 << std::endl;
     return nullptr;
   }

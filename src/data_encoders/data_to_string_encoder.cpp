@@ -31,14 +31,15 @@ std::vector<std::string> DataToStringEncoder::encodeString(const std::vector<lon
       stream.str("");
     }
   }
+  return_val.push_back(stream.str());
   return return_val;
 }
 
-std::vector<long> DataToStringEncoder::decodeString(const std::string& sprite_encoded,
+std::vector<long> DataToStringEncoder::decodeString(const std::string& string_encoded,
                                                     const char token) const {
   std::vector<long> return_value;
   std::string current_word{};
-  for (const auto c : sprite_encoded) {
+  for (const auto c : string_encoded) {
     if (c == token) {
       if (current_word.empty()) {
         std::cerr << "[WARNING]: Empty b64 word" << std::endl;

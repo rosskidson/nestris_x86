@@ -16,23 +16,6 @@ namespace tetris_clone {
 
 namespace fs = std::filesystem;
 
-/** TODO::
- *
- * Test compiling the 4MB header before proceeding.
- *
- * Make a asset provider class. Provides a variant given a asset group and asset name.
- * The asset provider may be initialized by filesystem or file header
- *     (undecided if this should be inheritence based or not)
- *
- * Asset provider will replace statefulness in sound player and replace SpriteLoader
- * This decouples sprite and sound modules from the filesystem.
- *
- * Also: Make an interface for DataEncoder.
- * The main interface will be encodeToString and encodeFromString
- * Use variants to handle different data types.
- *
- */
-
 namespace {
 bool spriteValid(const olc::Sprite *sprite) {
   if (sprite == nullptr) {

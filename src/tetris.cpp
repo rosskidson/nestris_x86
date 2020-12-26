@@ -190,7 +190,6 @@ void TetrisClone::sleepUntilNextFrame() {
  * TODO:
  *
  * Must do:
- * - Asset loading from binary
  * - Add a/b buttons for navigating menu
  * - If layout unchanged, add A,B,C etc for maxout
  * - Press down hold between blocks?
@@ -217,6 +216,7 @@ void TetrisClone::sleepUntilNextFrame() {
  *    - delay between death and death sound
  *    - delay between death and end animation
  *    - end animation speed
+ * - compress binary data
  *
  * More ambitious:
  * - Interface for random generator: allow a tetromino set loader
@@ -226,6 +226,9 @@ void TetrisClone::sleepUntilNextFrame() {
  *
  * Bugs:
  * - timing overrun errors in the menu on macos
+ *
+ * Refactor:
+ * - make an asset provider that returns anys for sounds and images
  */
 
 }  // namespace tetris_clone
