@@ -40,9 +40,10 @@ KeyEvent getButtonState(const bool button_old_state, const bool button_new_state
 KeyEvents TetrisClone::getKeyEvents() {
   dynamic_cast<OlcGamePad &>(*gamepad_input_).detectAndInit();
   KeyEvents ret_val{};
-  for (const auto &[action, key] : keyboard_key_bindings_) {
-    const auto new_keyboard_state = keyboard_input_->getKeyState(key);
-    const auto new_gamepad_state = gamepad_input_->getKeyState(gamepad_key_bindings_.at(action));
+  for (const auto &[action, keyboard_key] : keyboard_key_bindings_) {
+    const auto &gamepad_key = gamepad_key_bindings_.at(action);
+    const auto new_keyboard_state = keyboard_input_->getKeyState(keyboard_key);
+    const auto new_gamepad_state = gamepad_input_->getKeyState(gamepad_key);
     const auto new_key_state = new_gamepad_state | new_keyboard_state;
     ret_val[action] = getButtonState(key_states_.at(action), new_key_state);
     key_states_[action] = new_key_state;
@@ -76,7 +77,7 @@ TetrisClone::TetrisClone()
       single_frame_{NTSC_frame_ns} {
   sAppName = "TetrisClone";
 
-  //if (not loadSoundAssets("./assets/sounds/", *sample_player_)) {
+  // if (not loadSoundAssets("./assets/sounds/", *sample_player_)) {
   if (not loadSoundAssets(*sample_player_)) {
     throw std::runtime_error("Failed loading sound samples.");
   }

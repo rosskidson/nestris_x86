@@ -74,7 +74,7 @@ class OlcGamePad::Impl {
   }
 
   bool detectAndInit() {
-    if (gamepad_ptr_->valid) {
+    if (gamepad_ptr_ && gamepad_ptr_->valid) {
       return true;
     }
     for (auto& gamepad : gamepads_) {
@@ -89,7 +89,7 @@ class OlcGamePad::Impl {
   }
 
   bool getKeyState(const KeyCode key_code) const {
-    if (not gamepad_ptr_->valid) {
+    if (not gamepad_ptr_ || not gamepad_ptr_->valid) {
       return false;
     }
     gamepad_ptr_->poll();

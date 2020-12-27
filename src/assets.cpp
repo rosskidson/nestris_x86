@@ -78,6 +78,7 @@ bool SpriteProvider::loadSprites(const std::string &path) {
 }
 
 bool SpriteProvider::loadSprites() {
+  LOG_INFO("Loading sprites...");
   const auto decoder = getDataToStringEncoder(DataEncoderEnum::OlcSprite);
   for (const auto &[id, code] : images::images) {
     const auto raw_ptr = std::any_cast<olc::Sprite *>(decoder.stringToObj(code));
@@ -100,6 +101,7 @@ bool loadSoundAssets(const std::string &path, sound::SoundPlayer &sample_player)
 }
 
 bool loadSoundAssets(sound::SoundPlayer &sample_player) {
+  LOG_INFO("Loading sounds...");
   const auto decoder = getDataToStringEncoder(DataEncoderEnum::SdlMixChunk);
   for (const auto &[id, code] : sounds::sounds) {
     const auto raw_ptr = std::any_cast<Mix_Chunk *>(decoder.stringToObj(code));
