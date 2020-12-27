@@ -35,7 +35,8 @@ ProgramFlowSignal KeyboardConfigProcessor::processKeyEvents(const KeyEvents& key
     sample_player_->playSample("menu_blip");
     selector_idx_ = selector_idx_ < 2 ? selector_idx_ + 1 : 0;
   }
-  if (key_events.at(KeyAction::Start).pressed) {
+  if (key_events.at(KeyAction::RotateClockwise).pressed ||
+      key_events.at(KeyAction::Start).pressed) {
     sample_player_->playSample("menu_select_02");
     if (selector_idx_ == 0) {
       key_bindings_ = {};

@@ -4,9 +4,9 @@
 #include <memory>
 
 #include "das.hpp"
+#include "drawers/pixel_drawing_interface.hpp"
 #include "drawing_utils.hpp"
 #include "option.hpp"
-#include "drawers/pixel_drawing_interface.hpp"
 #include "tetris_type.hpp"
 #include "utils/logging.hpp"
 
@@ -81,8 +81,6 @@ OptionScreenProcessor::OptionScreenProcessor(
   // Missing options_:
   //  HOLD
   //  STATSTICS MODE
-  //  CONFIGURE KEYBOARD
-  //  CONFIGURE CONTROLLER
 
   for (const auto& name : option_order_) {
     if (not options_.count(name)) {
@@ -98,15 +96,28 @@ OptionScreenProcessor::OptionScreenProcessor(
 
 ProgramFlowSignal OptionScreenProcessor::processKeyEvents(const KeyEvents& key_events) {
   auto& current_idx = selected_index_;
-  if (key_events.at(KeyAction::Start).pressed) {
-    sample_player_->playSample("menu_select_02");
+  if (key_events.at(KeyAction::RotateClockwise).pressed ||
+      key_events.at(KeyAction::Start).pressed) {
     if (option_order_.at(selected_index_) == "configure_keyboard") {
+      sample_player_->playSample("menu_select_02");
       return ProgramFlowSignal::KeyboardConfigScreen;
     } else if (option_order_.at(selected_index_) == "configure_controller") {
+      sample_player_->playSample("menu_select_02");
       return ProgramFlowSignal::ControllerConfigScreen;
-    } else {
-      return ProgramFlowSignal::LevelSelectorScreen;
     }
+  }
+
+  if (key_events.at(KeyAction::RotateClockwise).pressed) {
+    sample_player_->playSample("menu_blip");
+    getSelectedOption().selectNextOptionWrapAround();
+  }
+  if (key_events.at(KeyAction::Start).pressed) {
+    sample_player_->playSample("menu_select_02");
+    return ProgramFlowSignal::LevelSelectorScreen;
+  }
+  if (key_events.at(KeyAction::RotateAntiClockwise).pressed) {
+    sample_player_->playSample("menu_blip");
+    return ProgramFlowSignal::LevelSelectorScreen;
   }
   if (key_events.at(KeyAction::Up).pressed) {
     sample_player_->playSample("menu_blip");

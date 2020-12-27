@@ -1,8 +1,8 @@
 
 #include "frame_processors/level_screen_processor.hpp"
 
-#include "drawing_utils.hpp"
 #include "drawers/pixel_drawing_interface.hpp"
+#include "drawing_utils.hpp"
 
 namespace tetris_clone {
 
@@ -14,10 +14,17 @@ ProgramFlowSignal LevelScreenProcessor::processKeyEvents(const KeyEvents& key_ev
       options_selected_ = false;
       return ProgramFlowSignal::FrameSuccess;
     }
-    if (key_events.at(KeyAction::Start).pressed) {
+    if (key_events.at(KeyAction::RotateClockwise).pressed ||
+        key_events.at(KeyAction::Start).pressed) {
       sample_player_->playSample("menu_select_02");
       return ProgramFlowSignal::OptionsScreen;
     }
+  }
+
+  if (key_events.at(KeyAction::Start).pressed) {
+    sample_player_->playSample("menu_select_01");
+    plus_ten_levels_ = (key_events.at(KeyAction::RotateClockwise).held);
+    return ProgramFlowSignal::StartGame;
   }
 
   if (key_events.at(KeyAction::Left).pressed && level > 0) {
@@ -41,11 +48,6 @@ ProgramFlowSignal LevelScreenProcessor::processKeyEvents(const KeyEvents& key_ev
     level -= 5;
   }
 
-  if (key_events.at(KeyAction::Start).pressed) {
-    sample_player_->playSample("menu_select_01");
-    plus_ten_levels_ = (key_events.at(KeyAction::RotateClockwise).held);
-    return ProgramFlowSignal::StartGame;
-  }
   return ProgramFlowSignal::FrameSuccess;
 }
 
@@ -70,7 +72,7 @@ void LevelScreenProcessor::renderMenu() const {
 
   drawer_->drawString(157, 80, "OPTIONS");
 
-  drawer_->drawString(72, 153, "JDMFX  1357428 30");
+  drawer_->drawString(72, 153, "JDMFX  1439173 30");
   drawer_->drawString(72, 169, "KORYAN 1273120 29");
   drawer_->drawString(72, 185, "JONAS  1245200 29");
 

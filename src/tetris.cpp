@@ -77,9 +77,14 @@ TetrisClone::TetrisClone()
       single_frame_{NTSC_frame_ns} {
   sAppName = "TetrisClone";
 
-  // if (not loadSoundAssets("./assets/sounds/", *sample_player_)) {
-  if (not loadSoundAssets(*sample_player_)) {
-    throw std::runtime_error("Failed loading sound samples.");
+  if (LOAD_FROM_BINARY) {
+    if (not loadSoundAssets(*sample_player_)) {
+      throw std::runtime_error("Failed loading sound samples.");
+    }
+  } else {
+    if (not loadSoundAssets("./assets/sounds/", *sample_player_)) {
+      throw std::runtime_error("Failed loading sound samples.");
+    }
   }
 }
 
@@ -163,7 +168,8 @@ void TetrisClone::processProgramFlowSignal(const ProgramFlowSignal &signal) {
 void TetrisClone::sleepUntilNextFrame() {
   if (Clock::now() > frame_end_) {
     LOG_ERROR(
-        "Runtime error: Game code is not finishing in time. The game will not run at the intended "
+        "Runtime error: Game code is not finishing in time. The game will not run at the "
+        "intended "
         "frequency.");
     const auto now_us =
         std::chrono::duration_cast<std::chrono::microseconds>(Clock::now().time_since_epoch());
@@ -188,29 +194,29 @@ void TetrisClone::sleepUntilNextFrame() {
 }
 
 /**
+ * Modern Statistics on left, plan:
+ * - BRN
+ * - TRT
+ * - Drought
+ * - Score/Lines
+ * - DAS Chain
+ * - Wall Charge
+ * - ARE
+ */
+
+/**
  * TODO:
  *
  * Must do:
- * - Add a/b buttons for navigating menu
- * - If layout unchanged, add A,B,C etc for maxout
  * - Full test on linux/mac/windows
  *
- *
  * Very much like to have:
- * - 7 digit score
  * - wall charge signal
  * - DAS chain counter
  * - Different randoms (uniform, 7-bag, nestris double-pick)
  *
  *
  * Like to have:
- * - Restructure layout for
- *     -ARE box
- *     -7 digit score
- *     -tetromino hold
- *     -wall charge signal
- *     -DAS chain counter
- *     -long bar drought
  * - Press down scoring
  * - Hard drop
  * - Statistics mode (long bar drought, tetris rate, burn)

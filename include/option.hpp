@@ -17,8 +17,17 @@ class OptionInterface {
   virtual bool prevOptionAvailable() const = 0;
   virtual void selectNextOption() = 0;
   virtual void selectPrevOption() = 0;
+  virtual void selectFirstOption() = 0;
+  virtual void selectLastOption() = 0;
   virtual std::string getSelectedOptionText() const = 0;
   std::string getDisplayName() { return display_name_; }
+  void selectNextOptionWrapAround() {
+    if (not this->nextOptionAvailable()) {
+      selectFirstOption();
+    } else {
+      selectNextOption();
+    }
+  }
 
  private:
   std::string display_name_;
@@ -32,6 +41,8 @@ class BoolOption : public OptionInterface {
   bool prevOptionAvailable() const override { return option_value_; }
   void selectNextOption() override { option_value_ = true; }
   void selectPrevOption() override { option_value_ = false; }
+  void selectFirstOption() override { option_value_ = false; }
+  void selectLastOption() override { option_value_ = true; }
   std::string getSelectedOptionText() const override { return option_value_ ? "ON" : "OFF"; }
   bool getSelectedOption() const { return option_value_; }
   void setOption(const bool value) { option_value_ = value; }
@@ -60,6 +71,8 @@ class StringOption : public OptionInterface {
       --selected_option_idx_;
     }
   }
+  void selectFirstOption() override { selected_option_idx_ = 0; }
+  void selectLastOption() override { selected_option_idx_ = options_.size() - 1; }
   std::string getSelectedOptionText() const override { return options_.at(selected_option_idx_); }
   std::string getSelectedOption() const { return getSelectedOptionText(); };
   void setOption(const std::string& value) {
@@ -100,6 +113,8 @@ class IntOption : public OptionInterface {
       --value_;
     }
   }
+  void selectFirstOption() override { value_ = min_value_; }
+  void selectLastOption() override { value_ = max_value_; }
   std::string getSelectedOptionText() const override { return std::to_string(value_); }
   int getSelectedOption() const { return value_; }
   void setOption(const int value) {
@@ -129,6 +144,8 @@ class DummyOption : public OptionInterface {
   bool prevOptionAvailable() const override { return false; }
   void selectNextOption() override {}
   void selectPrevOption() override {}
+  void selectFirstOption() override {}
+  void selectLastOption() override {}
   std::string getSelectedOptionText() const override { return {}; }
 };
 

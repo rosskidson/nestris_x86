@@ -66,8 +66,8 @@ void GameRenderer::renderText(const GameState<> &state) const {
   constexpr pdi::Coords score_pos{192, 56};
   constexpr pdi::Coords level_pos{208, 160};
   drawNumber(*drawer_, lines_pos, state.lines, 3);
-  drawNumber(*drawer_, high_score_pos, state.high_score, 6);
-  drawNumber(*drawer_, score_pos, state.score, 6);
+  drawNumber(*drawer_, high_score_pos, state.high_score, 7);
+  drawNumber(*drawer_, score_pos, state.score, 7);
   drawNumber(*drawer_, level_pos, state.level, 2);
 
   constexpr pdi::Coords tetromino_counter_start{48, 88};

@@ -48,8 +48,14 @@ SpriteProvider::SpriteProvider(const std::string &path) {
 }
 
 SpriteProvider::SpriteProvider() {
-  if (not loadSprites()) {
-    throw std::runtime_error("Failed initializing SpriteProvider from header.");
+  if (LOAD_FROM_BINARY) {
+    if (not loadSprites()) {
+      throw std::runtime_error("Failed initializing SpriteProvider from header.");
+    }
+  } else {
+    if (not loadSprites("./assets/images/")) {
+      throw std::runtime_error("Failed initializing SpriteProvider from header.");
+    }
   }
 }
 

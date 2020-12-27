@@ -8,6 +8,8 @@
 #include "sound.hpp"
 #include "olcPixelGameEngine.h"
 
+constexpr bool LOAD_FROM_BINARY = true;
+
 namespace tetris_clone {
 
 class SpriteProvider {
