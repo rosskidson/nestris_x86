@@ -43,7 +43,7 @@ void updateScoreAndLevel(const int line_clears, const sound::SoundPlayer &sound_
 
 int getEntryDelayFromLockHeight(const int height);
 
-bool applyGravity(const Gravity &gravity_provider, GameState<> &state);
+bool applyGravity(const KeyEvents &key_events, const Gravity &gravity_provider, GameState<> &state);
 
 bool updateTopOutState(const KeyEvents &key_events, int &top_out_frame_counter, GameState<> &state);
 
@@ -51,5 +51,7 @@ int linesToClearFromStartingLevel(const int level);
 
 void animateLineClear(const sound::SoundPlayer &sample_player, GameState<> &state,
                       LineClearAnimationInfo &line_clear_info);
+
+void addPressDownScore(GameState<> &state);
 
 }  // namespace tetris_clone

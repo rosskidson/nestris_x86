@@ -194,14 +194,6 @@ void TetrisClone::sleepUntilNextFrame() {
 }
 
 /**
- * Modern Statistics on left, plan:
- * - BRN
- * - TRT
- * - Drought
- * - Score/Lines
- * - DAS Chain
- * - Wall Charge
- * - ARE
  */
 
 /**
@@ -209,17 +201,22 @@ void TetrisClone::sleepUntilNextFrame() {
  *
  * Must do:
  * - Full test on linux/mac/windows
+ * - rename all tetris_clone etc to nestris_x86
  *
  * Very much like to have:
- * - wall charge signal
- * - DAS chain counter
+ * - Modern Statistics on left, as follows:
+ *   - BRN
+ *   - TRT
+ *   - Drought
+ *   - Score/Lines
+ *   - DAS Chain
+ *   - ARE
+ *   - wall charge signal
  * - Different randoms (uniform, 7-bag, nestris double-pick)
  *
  *
  * Like to have:
- * - Press down scoring
  * - Hard drop
- * - Statistics mode (long bar drought, tetris rate, burn)
  * - Compress binary data
  *
  *

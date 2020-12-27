@@ -111,6 +111,7 @@ void processKeyEvents(const KeyEvents &key_events, const sound::SoundPlayer &sam
     gr = (gr > 2) && not state.press_down_lock ? 2 : gr;
   } else {
     state.press_down_lock = false;
+    state.press_down_counter = 0;
   }
 
   if (key_events.at(KeyAction::RotateClockwise).pressed) {
@@ -181,8 +182,14 @@ int getEntryDelayFromLockHeight(const int height) {
   return height * -0.5 + 19;
 }
 
-bool applyGravity(const Gravity &gravity_provider, GameState<> &state) {
+bool applyGravity(const KeyEvents &key_events, const Gravity &gravity_provider,
+                  GameState<> &state) {
   if (--state.gravity_counter == 0) {
+    // Apply press down scoring.
+    if(key_events.at(KeyAction::Down).held) {
+      auto &down = state.press_down_counter;
+      down = ++down > 15 ? 10 : down;
+    }
     state.gravity_counter = gravity_provider.getGravity(state.level);
     if (not updateStateOnNoCollision(state.grid, 0, 1, 0, state.active_tetromino)) {
       state.entry_delay_counter = getEntryDelayFromLockHeight(state.active_tetromino.y);
@@ -261,6 +268,11 @@ void animateLineClear(const sound::SoundPlayer &sample_player, GameState<> &stat
       clearLine(row, state);
     }
   }
+}
+
+void addPressDownScore(GameState<> &state) {
+  state.score += state.press_down_counter;
+  state.press_down_counter = 0;
 }
 
 }  // namespace tetris_clone

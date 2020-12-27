@@ -47,6 +47,7 @@ struct GameState {
   bool topped_out;
   bool paused;
   bool press_down_lock;
+  int press_down_counter;
 };
 
 inline bool entryDelay(const GameState<>& state) {
