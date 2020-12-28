@@ -9,6 +9,8 @@
 
 class Base64Converter;
 
+namespace data_encoding {
+
 class DataToStringEncoder {
  public:
   DataToStringEncoder(std::unique_ptr<DataEncoder>&& data_encoder);
@@ -29,3 +31,4 @@ class DataToStringEncoder {
   std::unique_ptr<Base64Converter> base64_conv_;
 };
 
+}

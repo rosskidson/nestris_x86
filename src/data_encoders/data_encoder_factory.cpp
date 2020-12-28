@@ -6,6 +6,8 @@
 #include "data_encoders/olc_sprite_encoder.hpp"
 #include "data_encoders/sdl_mix_chunk_encoder.hpp"
 
+namespace data_encoding {
+
 DataToStringEncoder getDataToStringEncoder(const DataEncoderEnum& encoder) {
   switch (encoder) {
     case (DataEncoderEnum::OlcSprite):
@@ -15,4 +17,6 @@ DataToStringEncoder getDataToStringEncoder(const DataEncoderEnum& encoder) {
   }
   throw std::runtime_error("Missing case in data encoder factory encoder.");
   return DataToStringEncoder{{}};
+}
+
 }

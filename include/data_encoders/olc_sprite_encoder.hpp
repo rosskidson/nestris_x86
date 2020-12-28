@@ -5,6 +5,8 @@
 
 #include "data_encoders/data_encoder_interface.hpp"
 
+namespace data_encoding {
+
 class OlcSpriteEncoder : public DataEncoder {
  public:
   OlcSpriteEncoder();
@@ -15,3 +17,5 @@ class OlcSpriteEncoder : public DataEncoder {
   // Expects std::any to be an olc::Sprite*
   std::vector<long> objToData(const std::any& object, const int max_line_len = 80) const override;
 };
+
+}

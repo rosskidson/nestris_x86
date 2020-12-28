@@ -3,6 +3,7 @@
 #include <any>
 #include <vector>
 
+namespace data_encoding {
 class DataEncoder {
  public:
   virtual ~DataEncoder() = default;
@@ -10,3 +11,5 @@ class DataEncoder {
   virtual std::vector<long> objToData(const std::any& object,
                                       const int max_line_len = 80) const = 0;
 };
+
+}

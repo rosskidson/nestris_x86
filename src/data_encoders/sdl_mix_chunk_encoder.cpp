@@ -6,6 +6,8 @@
 #include <memory>
 #include <utils/logging.hpp>
 
+namespace data_encoding {
+
 std::unique_ptr<Mix_Chunk> createMixChunk(const std::vector<long>& data) {
   auto ret_val = std::make_unique<Mix_Chunk>();
   ret_val->allocated = 1;
@@ -49,3 +51,5 @@ std::vector<long> SdlMixChunkEncoder::objToData(const std::any& object,
   }
   return mixChunkToData(*chunk_ptr, max_line_len);
 }
+
+}  // namespace data_encoding

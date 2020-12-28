@@ -8,6 +8,8 @@
 class Mix_Chunk;
 class Base64Converter;
 
+namespace data_encoding {
+
 class SdlMixChunkEncoder : public DataEncoder {
  public:
   SdlMixChunkEncoder();
@@ -17,5 +19,6 @@ class SdlMixChunkEncoder : public DataEncoder {
 
   // Expects std::any to be a Mix_Chunk*
   std::vector<long> objToData(const std::any& object, const int max_line_len = 80) const override;
-
 };
+
+}  // namespace data_encoding

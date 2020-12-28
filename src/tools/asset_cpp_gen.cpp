@@ -13,6 +13,8 @@
 #define OLC_PGE_APPLICATION
 #include "olcPixelGameEngine.h"
 
+using data_encoding::DataEncoderEnum;
+
 void writeBinaryHeader(const std::string resource_name, const std::string& filename_base) {
   std::ofstream ofs(filename_base + ".hpp");
   ofs << "#pragma once" << std::endl;
@@ -29,7 +31,7 @@ template <typename DataPointer>
 void writeBinarySource(const std::string resource_name, const std::string& filename_base,
                        const DataEncoderEnum& data_encoder_type,
                        const std::map<std::string, DataPointer>& data_map) {
-  const auto encoder = getDataToStringEncoder(data_encoder_type);
+  const auto encoder = data_encoding::getDataToStringEncoder(data_encoder_type);
   const std::string indent = "  ";
   std::ofstream ofs(filename_base + ".cpp");
   ofs << "#include \"" << filename_base + ".hpp"

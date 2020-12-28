@@ -15,6 +15,7 @@
 namespace nestris_x86 {
 
 namespace fs = std::filesystem;
+using data_encoding::DataEncoderEnum;
 
 namespace {
 bool spriteValid(const olc::Sprite *sprite) {
@@ -85,7 +86,7 @@ bool SpriteProvider::loadSprites(const std::string &path) {
 
 bool SpriteProvider::loadSprites() {
   LOG_INFO("Loading sprites...");
-  const auto decoder = getDataToStringEncoder(DataEncoderEnum::OlcSprite);
+  const auto decoder = data_encoding::getDataToStringEncoder(DataEncoderEnum::OlcSprite);
   for (const auto &[id, code] : images::images) {
     const auto raw_ptr = std::any_cast<olc::Sprite *>(decoder.stringToObj(code));
     sprite_map_[id] = std::unique_ptr<olc::Sprite>{raw_ptr};
@@ -108,7 +109,7 @@ bool loadSoundAssets(const std::string &path, sound::SoundPlayer &sample_player)
 
 bool loadSoundAssets(sound::SoundPlayer &sample_player) {
   LOG_INFO("Loading sounds...");
-  const auto decoder = getDataToStringEncoder(DataEncoderEnum::SdlMixChunk);
+  const auto decoder = data_encoding::getDataToStringEncoder(DataEncoderEnum::SdlMixChunk);
   for (const auto &[id, code] : sounds::sounds) {
     const auto raw_ptr = std::any_cast<Mix_Chunk *>(decoder.stringToObj(code));
     const auto success = sample_player.loadWavFromMemory(std::unique_ptr<Mix_Chunk>(raw_ptr), id);

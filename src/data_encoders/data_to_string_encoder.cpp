@@ -6,6 +6,8 @@
 
 #include "utils/base64_converter.hpp"
 
+namespace data_encoding {
+
 DataToStringEncoder::DataToStringEncoder(std::unique_ptr<DataEncoder>&& data_encoder)
     : data_encoder_{std::move(data_encoder)}, base64_conv_(std::make_unique<Base64Converter>()) {}
 
@@ -55,4 +57,6 @@ std::vector<long> DataToStringEncoder::decodeString(const std::string& string_en
     return_value.push_back(base64_conv_->decodeNumber(current_word));
   }
   return return_value;
+}
+
 }

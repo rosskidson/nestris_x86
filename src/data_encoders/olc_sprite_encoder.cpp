@@ -6,6 +6,8 @@
 #include <memory>
 #include <utils/logging.hpp>
 
+namespace data_encoding {
+
 std::unique_ptr<olc::Sprite> createSprite(const std::vector<long>& data) {
   const int width = data.at(0);
   const int height = data.at(1);
@@ -52,3 +54,5 @@ std::vector<long> OlcSpriteEncoder::objToData(const std::any& object,
   }
   return spriteToData(*sprite_ptr, max_line_len);
 }
+
+}  // namespace data_encoding
