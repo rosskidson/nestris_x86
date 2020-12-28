@@ -5,7 +5,7 @@
 #include "olcPixelGameEngine.h"
 #include "pixel_drawing_interface.hpp"
 
-namespace tetris_clone {
+namespace nestris_x86 {
 
 class OlcDrawer : public PixelDrawingInterface {
  public:
@@ -40,4 +40,4 @@ inline olc::Pixel toOlcPix(const PixelDrawingInterface::Color& color) {
 }
 
 
-}  // namespace tetris_clone
+}  // namespace nestris_x86

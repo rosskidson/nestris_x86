@@ -17,7 +17,7 @@
 #include "sound.hpp"
 #include "utils/logging.hpp"
 
-namespace tetris_clone {
+namespace nestris_x86 {
 
 using Clock = std::chrono::high_resolution_clock;
 using Duration_ns = std::chrono::duration<int, std::nano>;
@@ -55,4 +55,4 @@ class TetrisClone : public olc::PixelGameEngine {
   Duration_ns single_frame_;
 };
 
-}  // namespace tetris_clone
+}  // namespace nestris_x86

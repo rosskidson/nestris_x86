@@ -9,7 +9,7 @@
 #include "game_logic.hpp"
 #include "utils/logging.hpp"
 
-namespace tetris_clone {
+namespace nestris_x86 {
 using pdi = PixelDrawingInterface;
 
 bool spriteValid(const olc::Sprite &sprite) {
@@ -238,4 +238,4 @@ void GameRenderer::renderGameState(const GameState<> &state, const bool render_c
   }
 }
 
-}  // namespace tetris_clone
+}  // namespace nestris_x86

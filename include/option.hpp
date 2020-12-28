@@ -7,7 +7,7 @@
 
 #include "utils/logging.hpp"
 
-namespace tetris_clone {
+namespace nestris_x86 {
 
 class OptionInterface {
  public:
@@ -149,4 +149,4 @@ class DummyOption : public OptionInterface {
   std::string getSelectedOptionText() const override { return {}; }
 };
 
-}  // namespace tetris_clone
+}  // namespace nestris_x86

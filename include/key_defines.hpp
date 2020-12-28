@@ -5,7 +5,7 @@
 
 #include "input_devices/input_interface.hpp"
 
-namespace tetris_clone {
+namespace nestris_x86 {
 
 struct KeyEvent {
   bool pressed{};
@@ -67,4 +67,4 @@ inline KeyBindings getDefaultGamePadBindings(const InputInterface &key_input) {
   return key_bindings;
 }
 
-}  // namespace tetris_clone
+}  // namespace nestris_x86

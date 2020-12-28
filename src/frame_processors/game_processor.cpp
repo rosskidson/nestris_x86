@@ -11,7 +11,7 @@
 #include "sound.hpp"
 #include "utils/logging.hpp"
 
-namespace tetris_clone {
+namespace nestris_x86 {
 
 constexpr int GRAVITY_FIRST_FRAME = 100;
 
@@ -134,4 +134,4 @@ ProgramFlowSignal GameProcessor::processFrame(const KeyEvents& key_events) {
   return ProgramFlowSignal::FrameSuccess;
 }
 
-};  // namespace tetris_clone
+};  // namespace nestris_x86

@@ -6,7 +6,7 @@
 #include "key_defines.hpp"
 #include "sound.hpp"
 
-namespace tetris_clone {
+namespace nestris_x86 {
 
 int getGravity(const int level);
 
@@ -54,4 +54,4 @@ void animateLineClear(const sound::SoundPlayer &sample_player, GameState<> &stat
 
 void addPressDownScore(GameState<> &state);
 
-}  // namespace tetris_clone
+}  // namespace nestris_x86

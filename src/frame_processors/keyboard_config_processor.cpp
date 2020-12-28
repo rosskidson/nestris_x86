@@ -4,7 +4,7 @@
 #include "drawing_utils.hpp"
 #include "utils/logging.hpp"
 
-namespace tetris_clone {
+namespace nestris_x86 {
 
 using pdi = PixelDrawingInterface;
 
@@ -124,4 +124,4 @@ KeyBindings KeyboardConfigProcessor::getKeyBindings() const {
   return key_bindings_;
 }
 
-}  // namespace tetris_clone
+}  // namespace nestris_x86

@@ -12,7 +12,7 @@
 #include "data_encoders/data_encoder_factory.hpp"
 #include "utils/logging.hpp"
 
-namespace tetris_clone {
+namespace nestris_x86 {
 
 namespace fs = std::filesystem;
 
@@ -120,4 +120,4 @@ bool loadSoundAssets(sound::SoundPlayer &sample_player) {
   return true;
 }
 
-}  // namespace tetris_clone
+}  // namespace nestris_x86

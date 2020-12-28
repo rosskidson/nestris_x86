@@ -9,7 +9,7 @@
 #include "option.hpp"
 #include "sound.hpp"
 
-namespace tetris_clone {
+namespace nestris_x86 {
 
 class OptionScreenProcessor : public FrameProcessorInterface {
  public:
@@ -62,4 +62,4 @@ class OptionScreenProcessor : public FrameProcessorInterface {
   std::unique_ptr<std::atomic_int> frame_counter_;
 };
 
-}  // namespace tetris_clone
+}  // namespace nestris_x86

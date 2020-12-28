@@ -1,6 +1,7 @@
 #include "data_encoders/data_encoder_factory.hpp"
 
 #include <iostream>
+#include <stdexcept>
 
 #include "data_encoders/olc_sprite_encoder.hpp"
 #include "data_encoders/sdl_mix_chunk_encoder.hpp"
@@ -12,5 +13,6 @@ DataToStringEncoder getDataToStringEncoder(const DataEncoderEnum& encoder) {
     case (DataEncoderEnum::SdlMixChunk):
       return DataToStringEncoder{std::make_unique<SdlMixChunkEncoder>()};
   }
-  std::cout << "swtich statement failed." << std::endl;
+  throw std::runtime_error("Missing case in data encoder factory encoder.");
+  return DataToStringEncoder{{}};
 }

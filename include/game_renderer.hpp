@@ -10,7 +10,7 @@
 #include "key_defines.hpp"
 #include "tetromino.hpp"
 
-namespace tetris_clone {
+namespace nestris_x86 {
 class GameRenderer {
  public:
   GameRenderer(std::unique_ptr<PixelDrawingInterface> &&drawer,
@@ -60,4 +60,4 @@ class GameRenderer {
   bool background_rendered_;
 };
 
-}  // namespace tetris_clone
+}  // namespace nestris_x86

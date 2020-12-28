@@ -10,7 +10,7 @@
 #include "tetris_type.hpp"
 #include "utils/logging.hpp"
 
-namespace tetris_clone {
+namespace nestris_x86 {
 
 namespace {
 
@@ -235,4 +235,4 @@ ProgramFlowSignal OptionScreenProcessor::processFrame(const KeyEvents& key_event
   return signal;
 }
 
-}  // namespace tetris_clone
+}  // namespace nestris_x86

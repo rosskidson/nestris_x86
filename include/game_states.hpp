@@ -7,7 +7,7 @@
 #include "key_defines.hpp"
 #include "tetromino.hpp"
 
-namespace tetris_clone {
+namespace nestris_x86 {
 
 template <int W = 10, int H = 20>
 // clang-format off
@@ -59,4 +59,4 @@ struct LineClearAnimationInfo {
   int animation_frame{};
 };
 
-}  // namespace tetris_clone
+}  // namespace nestris_x86

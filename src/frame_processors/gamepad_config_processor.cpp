@@ -5,7 +5,7 @@
 #include "input_devices/olc_gamepad.hpp"
 #include "utils/logging.hpp"
 
-namespace tetris_clone {
+namespace nestris_x86 {
 
 using pdi = PixelDrawingInterface;
 
@@ -61,4 +61,4 @@ void GamePadConfigProcessor::renderMacOsSupportUnavailable() const {
 
 }
 
-}  // namespace tetris_clone
+}  // namespace nestris_x86

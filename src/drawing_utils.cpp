@@ -5,7 +5,7 @@
 #include <iomanip>
 #include <sstream>
 
-namespace tetris_clone {
+namespace nestris_x86 {
 using pdi = PixelDrawingInterface;
 
 // TODO:: Add max out logic
@@ -39,4 +39,4 @@ void drawTriangleSelector(const PixelDrawingInterface& drawer, const int x, cons
     }
   }
 }
-}  // namespace tetris_clone
+}  // namespace nestris_x86

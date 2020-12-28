@@ -4,7 +4,7 @@
 
 #include "tetris_type.hpp"
 
-namespace tetris_clone {
+namespace nestris_x86 {
 
 const std::vector<int> NTSC_GRAVITY{48, 43, 38, 33, 28, 23, 18, 13, 8, 6, 5, 5, 5, 4, 4,
                                     4,  3,  3,  3,  2,  2,  2,  2,  2, 2, 2, 2, 2, 2};
@@ -32,4 +32,4 @@ class Gravity {
   std::vector<int> level_gravity_values_;
 };
 
-}  // namespace tetris_clone
+}  // namespace nestris_x86

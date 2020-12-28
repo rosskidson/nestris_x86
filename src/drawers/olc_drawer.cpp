@@ -1,6 +1,6 @@
 #include "drawers/olc_drawer.hpp"
 
-namespace tetris_clone {
+namespace nestris_x86 {
 using pdi = PixelDrawingInterface;
 
 OlcDrawer::OlcDrawer(olc::PixelGameEngine& pixel_game_engine)
@@ -43,4 +43,4 @@ void OlcDrawer::fillRect(const int x, const int y, const int width, const int he
                          const pdi::Color& color) const {
   olc_engine_ref_.FillRect(x, y, width, height, toOlcPix(color));
 }
-}  // namespace tetris_clone
+}  // namespace nestris_x86

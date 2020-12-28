@@ -8,7 +8,7 @@
 #include "Contributions/olcPGEX_Gamepad.h"
 #endif
 
-namespace tetris_clone {
+namespace nestris_x86 {
 
 #if __APPLE__
 // Define dummy impl.
@@ -158,4 +158,4 @@ InputInterface::KeyCode OlcGamePad::getNullKey() const {
   return pimpl_->getNullKey();
 }
 
-}  // namespace tetris_clone
+}  // namespace nestris_x86

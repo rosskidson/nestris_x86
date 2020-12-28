@@ -1,6 +1,6 @@
 #include "input_devices/olc_keyboard.hpp"
 
-namespace tetris_clone {
+namespace nestris_x86 {
 
 // copy pasted from olc source code and formatted to strings.
 // clang-format off
@@ -64,4 +64,4 @@ InputInterface::KeyCode OlcKeyboard::getNullKey() const {
   return 0;
 }
 
-}  // namespace tetris_clone
+}  // namespace nestris_x86

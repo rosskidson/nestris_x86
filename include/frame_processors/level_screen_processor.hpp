@@ -7,7 +7,7 @@
 #include "frame_processor_interface.hpp"
 #include "sound.hpp"
 
-namespace tetris_clone {
+namespace nestris_x86 {
 
 class LevelScreenProcessor : public FrameProcessorInterface {
  public:
@@ -34,4 +34,4 @@ class LevelScreenProcessor : public FrameProcessorInterface {
   std::unique_ptr<std::atomic_int> frame_counter_;
 };
 
-}  // namespace tetris_clone
+}  // namespace nestris_x86

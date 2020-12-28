@@ -1,6 +1,6 @@
 #pragma once
 
-namespace tetris_clone {
+namespace nestris_x86 {
 
 class Das {
  public:
@@ -26,4 +26,4 @@ class Das {
   int das_full_charge_;
   int das_min_charge_;
 };
-}  // namespace tetris_clone
+}  // namespace nestris_x86

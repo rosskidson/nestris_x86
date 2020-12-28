@@ -6,7 +6,7 @@
 #include "input_interface.hpp"
 #include "olcPixelGameEngine.h"
 
-namespace tetris_clone {
+namespace nestris_x86 {
 
 class OlcGamePad : public InputInterface {
  public:
@@ -26,4 +26,4 @@ class OlcGamePad : public InputInterface {
   std::unique_ptr<Impl> pimpl_;
 };
 
-}  // namespace tetris_clone
+}  // namespace nestris_x86

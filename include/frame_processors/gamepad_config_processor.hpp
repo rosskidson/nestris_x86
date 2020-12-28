@@ -5,7 +5,7 @@
 
 #include "keyboard_config_processor.hpp"
 
-namespace tetris_clone {
+namespace nestris_x86 {
 
 class GamePadConfigProcessor : public KeyboardConfigProcessor {
  public:
@@ -22,5 +22,5 @@ class GamePadConfigProcessor : public KeyboardConfigProcessor {
   void renderWaitForControllerScreen() const;
   void renderMacOsSupportUnavailable() const;
 };
-}  // namespace tetris_clone
+}  // namespace nestris_x86
 

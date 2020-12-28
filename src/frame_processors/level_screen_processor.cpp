@@ -4,7 +4,7 @@
 #include "drawers/pixel_drawing_interface.hpp"
 #include "drawing_utils.hpp"
 
-namespace tetris_clone {
+namespace nestris_x86 {
 
 ProgramFlowSignal LevelScreenProcessor::processKeyEvents(const KeyEvents& key_events) {
   auto& level = level_;
@@ -123,4 +123,4 @@ int LevelScreenProcessor::getSelectedLevel() const {
   return level_ + (plus_ten_levels_ ? 10 : 0);
 }
 
-}  // namespace tetris_clone
+}  // namespace nestris_x86

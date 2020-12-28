@@ -3,7 +3,7 @@
 #include <any>
 #include <string>
 
-namespace tetris_clone {
+namespace nestris_x86 {
 
 class PixelDrawingInterface {
  public:
@@ -90,4 +90,4 @@ inline PixelDrawingInterface::Coords operator+(const PixelDrawingInterface::Coor
   return {lhs.x + rhs.x, lhs.y + rhs.y};
 }
 
-}  // namespace tetris_clone
+}  // namespace nestris_x86

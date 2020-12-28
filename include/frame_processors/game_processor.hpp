@@ -12,7 +12,7 @@
 #include "sound.hpp"
 #include "tetris_type.hpp"
 
-namespace tetris_clone {
+namespace nestris_x86 {
 
 struct GameOptions {
   enum class StatisticsMode { classic, ctwc };
@@ -60,4 +60,4 @@ class GameProcessor : public FrameProcessorInterface {
   int top_out_frame_counter_;
 };
 
-}  // namespace tetris_clone
+}  // namespace nestris_x86

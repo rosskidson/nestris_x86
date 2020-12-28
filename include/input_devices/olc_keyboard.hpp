@@ -6,7 +6,7 @@
 #include "input_interface.hpp"
 #include "olcPixelGameEngine.h"
 
-namespace tetris_clone {
+namespace nestris_x86 {
 
 class OlcKeyboard : public InputInterface {
  public:
@@ -31,4 +31,4 @@ class OlcKeyboard : public InputInterface {
   const static std::array<std::string, 85> key_names;
 };
 
-}  // namespace tetris_clone
+}  // namespace nestris_x86

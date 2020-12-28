@@ -2,7 +2,7 @@
 
 #include <string>
 
-namespace tetris_clone {
+namespace nestris_x86 {
 
 class InputInterface {
  public:
@@ -19,4 +19,4 @@ class InputInterface {
   virtual KeyCode getNullKey() const = 0;
 };
 
-}  // namespace tetris_clone
+}  // namespace nestris_x86

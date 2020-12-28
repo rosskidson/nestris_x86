@@ -2,7 +2,7 @@
 
 #include "key_defines.hpp"
 
-namespace tetris_clone {
+namespace nestris_x86 {
 
 enum class ProgramFlowSignal {
   FrameSuccess,            // The frame processor intends to run again on the next frame.

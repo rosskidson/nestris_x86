@@ -8,7 +8,7 @@
 #include "frame_processor_interface.hpp"
 #include "sound.hpp"
 
-namespace tetris_clone {
+namespace nestris_x86 {
 
 class KeyboardConfigProcessor : public FrameProcessorInterface {
  public:
@@ -43,5 +43,5 @@ class KeyboardConfigProcessor : public FrameProcessorInterface {
   std::unique_ptr<InputInterface> input_ptr_;
 };
 
-}  // namespace tetris_clone
+}  // namespace nestris_x86
 

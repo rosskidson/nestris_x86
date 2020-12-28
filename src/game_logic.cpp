@@ -3,7 +3,7 @@
 #include "game_states.hpp"
 #include "gravity.hpp"
 
-namespace tetris_clone {
+namespace nestris_x86 {
 
 constexpr int LINES_PER_LEVEL = 10;
 const std::vector<int> line_scores{0, 40, 100, 300, 1200};
@@ -275,4 +275,4 @@ void addPressDownScore(GameState<> &state) {
   state.press_down_counter = 0;
 }
 
-}  // namespace tetris_clone
+}  // namespace nestris_x86

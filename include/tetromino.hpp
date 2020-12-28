@@ -3,7 +3,7 @@
 #include <tuple>
 #include <vector>
 
-namespace tetris_clone {
+namespace nestris_x86 {
 
 enum class Tetromino { T, J, Z, Square, S, L, Line };
 
@@ -91,4 +91,4 @@ inline std::tuple<int, int> getStartOffsets(const Tetromino &tetromino) {
   }
 }
 
-}  // namespace tetris_clone
+}  // namespace nestris_x86

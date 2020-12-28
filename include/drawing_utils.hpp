@@ -2,7 +2,7 @@
 
 #include "drawers/pixel_drawing_interface.hpp"
 
-namespace tetris_clone {
+namespace nestris_x86 {
 // clang-format off
 void drawNumber(const PixelDrawingInterface& drawer,
                 const int x,
@@ -25,4 +25,4 @@ void drawTriangleSelector(const PixelDrawingInterface& drawer,
                           const bool right);
 // clang-format off
 
-}  // namespace tetris_clone
+}  // namespace nestris_x86

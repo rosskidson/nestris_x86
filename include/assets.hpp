@@ -10,7 +10,7 @@
 
 constexpr bool LOAD_FROM_BINARY = true;
 
-namespace tetris_clone {
+namespace nestris_x86 {
 
 class SpriteProvider {
  public:
@@ -29,4 +29,4 @@ class SpriteProvider {
 bool loadSoundAssets(const std::string &path, sound::SoundPlayer &sample_player);
 bool loadSoundAssets(sound::SoundPlayer &sample_player);
 
-}  // namespace tetris_clone
+}  // namespace nestris_x86

@@ -17,7 +17,7 @@
 #include "option.hpp"
 #include "utils/logging.hpp"
 
-namespace tetris_clone {
+namespace nestris_x86 {
 
 constexpr int NTSC_frame_ns = (1.0 / NTSC_FREQUENCY) * 1e9;
 
@@ -201,7 +201,7 @@ void TetrisClone::sleepUntilNextFrame() {
  *
  * Must do:
  * - Full test on linux/mac/windows
- * - rename all tetris_clone etc to nestris_x86
+ * - rename all nestris_x86 etc to nestris_x86
  *
  * Very much like to have:
  * - Modern Statistics on left, as follows:
@@ -237,4 +237,4 @@ void TetrisClone::sleepUntilNextFrame() {
  * - Remove std::rand() in line clear
  */
 
-}  // namespace tetris_clone
+}  // namespace nestris_x86
