@@ -225,7 +225,8 @@ void GameRenderer::renderTreyVisionStatistics(const GameState<> &state,
   drawer_->drawSprite(get_coords(2, 0), sprite_provider_->getSprite("long-bar-drought"));
   drawNumber(*drawer_, get_coords(2, 1), statistics.getLongBarDrought(), 3);
 
-  drawer_->drawString(get_coords(3, 0), "DAS:");
+  drawer_->drawString(get_coords(4, 0), "DAS");
+  drawer_->drawString(get_coords(5, 0), "CHAIN");
   auto get_das_chain_color = [](const int das_chain) {
     if(das_chain < 4) {
       return pdi::RED();
@@ -240,14 +241,15 @@ void GameRenderer::renderTreyVisionStatistics(const GameState<> &state,
     }
   };
   const auto das_chain = statistics.getDasChain();
-  drawNumber(*drawer_, get_coords(3, 1), das_chain, 3, get_das_chain_color(das_chain));
+  drawNumber(*drawer_, get_coords(4, 1), das_chain, 3, get_das_chain_color(das_chain));
 
-  constexpr pdi::Coords entry_delay_pos{193, 129};
   const auto are_sprite = entryDelay(state) ? "button-on" : "button-off";
-  drawer_->drawSprite(get_coords(5, 0) + pdi::Coords{-2,-1}, sprite_provider_->getSprite(are_sprite));
-  drawer_->drawString(get_coords(5, 0), "ENTRY DL");
+  drawer_->drawSprite(get_coords(7, 0) + pdi::Coords{-3,-1}, sprite_provider_->getSprite(are_sprite));
+  drawer_->drawString(get_coords(7, 0) + pdi::Coords{-1, 0}, "ENTRY DL", pdi::BLACK());
 
-
+  const auto wall_charge_sprite = state.viz_wall_charge_frame_count > 0 ? "button-on" : "button-off";
+  drawer_->drawSprite(get_coords(8, 0) + pdi::Coords{-3,-1}, sprite_provider_->getSprite(wall_charge_sprite));
+  drawer_->drawString(get_coords(8, 0) + pdi::Coords{-1, 0}, "WALL CHR", pdi::BLACK());
 }
 
 void GameRenderer::renderGameState(const GameState<> &state, const Statistics &stats,

@@ -203,16 +203,7 @@ void TetrisClone::sleepUntilNextFrame() {
  * - Full test on linux/mac/windows
  *
  * Very much like to have:
- * - Modern Statistics on left, as follows:
- *   - BRN
- *   - TRT
- *   - Drought
- *   - Score/Lines
- *   - DAS Chain
- *   - ARE
- *   - wall charge signal
  * - Different randoms (uniform, 7-bag, nestris double-pick)
- *
  *
  * Like to have:
  * - Hard drop

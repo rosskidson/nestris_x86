@@ -76,13 +76,14 @@ bool updateStateOnNoCollision(const GameState<>::Grid &grid, const int tetromino
 }
 
 void processKeyEvents(const KeyEvents &key_events, const sound::SoundPlayer &sample_player,
-                      const Das &das_processor, GameState<> &state, Statistics& stats) {
+                      const Das &das_processor, GameState<> &state) {
   auto move_check_wall_charge = [&sample_player, &das_processor](GameState<> &state,
                                                                  const int direction) {
     if (updateStateOnNoCollision(state.grid, direction, 0, 0, state.active_tetromino)) {
       sample_player.playSample("tetromino_move");
     } else {
       das_processor.fullyChargeDas(state.das_counter);
+      state.viz_wall_charge_frame_count = 30;
     }
   };
 

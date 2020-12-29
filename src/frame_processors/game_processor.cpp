@@ -69,6 +69,7 @@ GameState<> GameProcessor::getNewState(const int level) {
   state.next_tetromino = getRandomTetromino();
   state.gravity_counter = GRAVITY_FIRST_FRAME;
   state.lines_until_next_level = linesToClearFromStartingLevel(state.level);
+  state.viz_wall_charge_frame_count = 0;
   return state;
 }
 
@@ -86,8 +87,8 @@ void GameProcessor::doGravityStep(const KeyEvents& key_events) {
     }
   }
 
-  processKeyEvents(key_events, *sample_player_, das_processor_, state_, statistics_);
-  if(not das_processor_.dasSoftlyCharged(state_.das_counter)) {
+  processKeyEvents(key_events, *sample_player_, das_processor_, state_);
+  if (not das_processor_.dasSoftlyCharged(state_.das_counter)) {
     statistics_.dasResetSignal();
   }
 
@@ -139,6 +140,8 @@ ProgramFlowSignal GameProcessor::processFrame(const KeyEvents& key_events) {
   }
   renderer_.renderGameState(state_, statistics_, show_controls_, show_das_bar_, statistics_mode_,
                             key_events, das_processor_);
+
+  state_.viz_wall_charge_frame_count = std::max(state_.viz_wall_charge_frame_count - 1, 0);
   return ProgramFlowSignal::FrameSuccess;
 }
 
