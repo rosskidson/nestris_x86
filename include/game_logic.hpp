@@ -20,6 +20,8 @@ bool outOfBounds(const Container &container, int x, int y) {
     return false;
 }
 
+int getScoreForLineClear(const int level, const int lines_cleared);
+
 GameState<>::Grid addTetrominoToGrid(const GameState<>::Grid &grid,
                                      const TetrominoState &tetromino);
 

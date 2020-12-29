@@ -10,6 +10,7 @@
 #include "game_states.hpp"
 #include "gravity.hpp"
 #include "sound.hpp"
+#include "statistics.hpp"
 #include "tetris_type.hpp"
 
 namespace nestris_x86 {
@@ -49,6 +50,7 @@ class GameProcessor : public FrameProcessorInterface {
   GameRenderer renderer_;
   std::shared_ptr<sound::SoundPlayer> sample_player_;
   GameState<> state_;
+  Statistics statistics_;
   std::random_device real_rng_;
   std::uniform_int_distribution<int> random_generator_;
   Das das_processor_;

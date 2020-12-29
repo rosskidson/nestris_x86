@@ -8,6 +8,7 @@
 #include "drawers/pixel_drawing_interface.hpp"
 #include "game_states.hpp"
 #include "key_defines.hpp"
+#include "statistics.hpp"
 #include "tetromino.hpp"
 
 namespace nestris_x86 {
@@ -17,9 +18,10 @@ class GameRenderer {
                const std::shared_ptr<SpriteProvider> &sprite_provider,
                const std::string &sprites_path);
 
-  void renderGameState(const GameState<> &state, const bool render_controls,
-                       const bool render_das_bar, const bool render_entry_delay,
-                       const KeyEvents &key_events, const Das &das_processor);
+  void renderGameState(const GameState<> &state, const Statistics &stats,
+                       const bool render_controls, const bool render_das_bar,
+                       const bool render_entry_delay, const KeyEvents &key_events,
+                       const Das &das_processor);
 
   void renderPaused() const;
 
@@ -45,7 +47,7 @@ class GameRenderer {
   olc::Sprite *getBlockSprite(const int level, const int color) const;
 
   void renderBackground();
-  void renderText(const GameState<> &state) const;
+  void renderText(const GameState<> &state, const Statistics& stats) const;
   void renderNextTetromino(const Tetromino &next_tetromino, const int level) const;
   void renderDasBar(const int das_counter, const Das &das_processor,
                     const PixelDrawingInterface::Coords &das_box_pos) const;

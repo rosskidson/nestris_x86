@@ -84,6 +84,7 @@ add_executable(tetris
         src/input_devices/olc_gamepad.cpp
         src/main.cpp
         src/sound.cpp
+        src/statistics.cpp
         src/tetris.cpp
         )
 

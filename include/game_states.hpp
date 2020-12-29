@@ -25,7 +25,7 @@ struct GameState {
         next_tetromino{},
         score{},
         high_score{},
-        tetromino_counts{},
+        //tetromino_counts{},
         topped_out{},
         paused{} {}
   // clang-format on
@@ -43,7 +43,7 @@ struct GameState {
   Tetromino next_tetromino;
   int score;
   int high_score;
-  std::array<int, 7> tetromino_counts;  // Ordered according to enum.
+  //std::array<int, 7> tetromino_counts;  // Ordered according to enum.
   bool topped_out;
   bool paused;
   bool press_down_lock;

@@ -4,10 +4,10 @@
 #include <stdexcept>
 
 #include "assets.hpp"
+#include "drawers/pixel_drawing_interface.hpp"
 #include "game_logic.hpp"
 #include "gravity.hpp"
 #include "key_defines.hpp"
-#include "drawers/pixel_drawing_interface.hpp"
 #include "sound.hpp"
 #include "utils/logging.hpp"
 
@@ -22,6 +22,7 @@ GameProcessor::GameProcessor(const GameOptions& options,
     : renderer_(std::move(drawer), sprite_provider, "./assets/images"),
       sample_player_(sample_player),
       state_{},
+      statistics_{},
       real_rng_{},
       random_generator_{0, 6},
       das_processor_{options.das_full_charge, options.das_min_charge},
@@ -32,6 +33,7 @@ GameProcessor::GameProcessor(const GameOptions& options,
       line_clear_info_{},
       top_out_frame_counter_{} {
   state_ = getNewState(options.level);
+  statistics_.update(state_.active_tetromino.tetromino);
 }
 
 void GameProcessor::reset(const GameOptions& options) {
@@ -43,6 +45,8 @@ void GameProcessor::reset(const GameOptions& options) {
   line_clear_info_ = {};
   top_out_frame_counter_ = {};
   state_ = getNewState(options.level);
+  statistics_ = {};
+  statistics_.update(state_.active_tetromino.tetromino);
   renderer_.startNewGame();
 }
 
@@ -52,7 +56,7 @@ Tetromino GameProcessor::getRandomTetromino() {
 
 bool GameProcessor::spawnNewTetromino(GameState<>& state) {
   state.active_tetromino = {state.next_tetromino, 5, 0, 0};
-  state_.tetromino_counts[static_cast<int>(state_.active_tetromino.tetromino)]++;
+  // state_.tetromino_counts[static_cast<int>(state_.active_tetromino.tetromino)]++;
   state.next_tetromino = getRandomTetromino();
   state.spawn_new_tetromino = false;
   return not tetrominoCollision(state.grid, state.active_tetromino);
@@ -63,7 +67,6 @@ GameState<> GameProcessor::getNewState(const int level) {
   state.level = level;
   state.active_tetromino = {getRandomTetromino(), 5, 0, 0};
   state.next_tetromino = getRandomTetromino();
-  state.tetromino_counts[static_cast<int>(state.active_tetromino.tetromino)]++;
   state.gravity_counter = GRAVITY_FIRST_FRAME;
   state.lines_until_next_level = linesToClearFromStartingLevel(state.level);
   return state;
@@ -72,6 +75,7 @@ GameState<> GameProcessor::getNewState(const int level) {
 void GameProcessor::doGravityStep(const KeyEvents& key_events) {
   if (state_.spawn_new_tetromino) {
     const bool topped_out = not spawnNewTetromino(state_);
+    statistics_.update(state_.active_tetromino.tetromino);
     if (topped_out) {
       // Lock the active tetromino and move it off the grid. This is to stop the active
       // tetromino interfering with the 'curtain' animation.
@@ -110,6 +114,7 @@ void GameProcessor::doEntryDelayStep(const KeyEvents& key_events) {
   // When the animation is almost over, update the score.
   if (line_clear_info_.animation_frame == 4) {
     updateScoreAndLevel(line_clear_info_.rows.size(), *sample_player_, state_);
+    statistics_.update(line_clear_info_.rows.size(), state_.level);
   }
   --state_.entry_delay_counter;
 }
@@ -129,8 +134,8 @@ ProgramFlowSignal GameProcessor::processFrame(const KeyEvents& key_events) {
   } else {
     doGravityStep(key_events);
   }
-  renderer_.renderGameState(state_, show_controls_, show_das_bar_, show_entry_delay_, key_events,
-                            das_processor_);
+  renderer_.renderGameState(state_, statistics_, show_controls_, show_das_bar_, show_entry_delay_,
+                            key_events, das_processor_);
   return ProgramFlowSignal::FrameSuccess;
 }
 

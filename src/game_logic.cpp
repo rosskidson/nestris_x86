@@ -8,6 +8,13 @@ namespace nestris_x86 {
 constexpr int LINES_PER_LEVEL = 10;
 const std::vector<int> line_scores{0, 40, 100, 300, 1200};
 
+int getScoreForLineClear(const int level, const int lines_cleared) {
+  if (lines_cleared > 4) {
+    throw std::runtime_error("Too many simultaneous lines cleared to get a score.");
+  }
+  return level * line_scores[lines_cleared];
+}
+
 GameState<>::Grid addTetrominoToGrid(const GameState<>::Grid &grid,
                                      const TetrominoState &tetromino) {
   GameState<>::Grid grid_copy(grid);
@@ -168,7 +175,7 @@ void updateEntryDelayForLineClear(int &delay_counter) {
 
 void updateScoreAndLevel(const int line_clears, const sound::SoundPlayer &sound_player,
                          GameState<> &state) {
-  state.score += state.level * line_scores[line_clears];
+  state.score += getScoreForLineClear(state.level, line_clears);
   state.lines += line_clears;
   state.lines_until_next_level -= line_clears;
   if (state.lines_until_next_level <= 0) {
@@ -186,7 +193,7 @@ bool applyGravity(const KeyEvents &key_events, const Gravity &gravity_provider,
                   GameState<> &state) {
   if (--state.gravity_counter == 0) {
     // Apply press down scoring.
-    if(key_events.at(KeyAction::Down).held) {
+    if (key_events.at(KeyAction::Down).held) {
       auto &down = state.press_down_counter;
       down = ++down > 15 ? 10 : down;
     }

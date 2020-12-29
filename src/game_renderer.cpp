@@ -1,8 +1,8 @@
 #include "game_renderer.hpp"
 
 #include <memory>
-#include <sstream>
 #include <set>
+#include <sstream>
 
 #include "assets.hpp"
 #include "drawing_utils.hpp"
@@ -60,7 +60,7 @@ olc::Sprite *GameRenderer::getBlockSprite(const int level, const int color) cons
   throw;
 }
 
-void GameRenderer::renderText(const GameState<> &state) const {
+void GameRenderer::renderText(const GameState<> &state, const Statistics &stats) const {
   constexpr pdi::Coords lines_pos{152, 16};
   constexpr pdi::Coords high_score_pos{192, 32};
   constexpr pdi::Coords score_pos{192, 56};
@@ -73,7 +73,7 @@ void GameRenderer::renderText(const GameState<> &state) const {
   constexpr pdi::Coords tetromino_counter_start{48, 88};
   for (int i = 0; i < 7; ++i) {
     drawNumber(*drawer_, tetromino_counter_start.x, tetromino_counter_start.y + (i * 16),
-               state.tetromino_counts[i], 3, pdi::RED());
+               stats.getTetrominoCount(static_cast<Tetromino>(i)), 3, pdi::RED());
   }
 }
 
@@ -199,9 +199,10 @@ void GameRenderer::renderPaused() const {
   drawer_->drawString(paused_pos, "PAUSED", pdi::WHITE());
 }
 
-void GameRenderer::renderGameState(const GameState<> &state, const bool render_controls,
-                                   const bool render_das_bar, const bool render_entry_delay,
-                                   const KeyEvents &key_events, const Das &das_processor) {
+void GameRenderer::renderGameState(const GameState<> &state, const Statistics &stats,
+                                   const bool render_controls, const bool render_das_bar,
+                                   const bool render_entry_delay, const KeyEvents &key_events,
+                                   const Das &das_processor) {
   constexpr pdi::Coords grid_top_left{96, 40};
   constexpr pdi::Rect grid_size{80, 160};
   constexpr pdi::Coords counter_sprite_pos{13, 61};
@@ -223,7 +224,7 @@ void GameRenderer::renderGameState(const GameState<> &state, const bool render_c
                                               "l" + std::to_string(state.level % 10) + "-counts"));
   renderGrid(grid_top_left.x, grid_top_left.y, get_grid_for_render(state), state.level);
   renderNextTetromino(state.next_tetromino, state.level);
-  renderText(state);
+  renderText(state, stats);
   if (render_controls) {
     renderControls(state, key_events, controller_box_pos);
   }
