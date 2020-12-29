@@ -130,9 +130,9 @@ GameOptions menuOptionsToGameOptions(const OptionScreenProcessor::OptionMap &opt
   dasDelaysToCharges(das_initial_delay, das_repeat_delay, options.das_full_charge,
                      options.das_min_charge);
   options.gravity_type = getGravityOption(*option_map.at("gravity_mode"));
-  options.show_entry_delay = getBoolOption(*option_map.at("show_entry_delay"));
   options.show_das_bar = getBoolOption(*option_map.at("show_das_meter"));
   options.show_controls = getBoolOption(*option_map.at("show_controls"));
+  options.statistics_mode = fromString(getStringOption(*option_map.at("statistics_mode")));
   return options;
 }
 
@@ -201,7 +201,6 @@ void TetrisClone::sleepUntilNextFrame() {
  *
  * Must do:
  * - Full test on linux/mac/windows
- * - rename all nestris_x86 etc to nestris_x86
  *
  * Very much like to have:
  * - Modern Statistics on left, as follows:
@@ -218,6 +217,7 @@ void TetrisClone::sleepUntilNextFrame() {
  * Like to have:
  * - Hard drop
  * - Compress binary data
+ * - wall kick
  *
  *
  * More ambitious:

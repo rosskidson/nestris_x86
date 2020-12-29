@@ -7,6 +7,7 @@
 #include "assets.hpp"
 #include "drawing_utils.hpp"
 #include "game_logic.hpp"
+#include "statistics.hpp"
 #include "utils/logging.hpp"
 
 namespace nestris_x86 {
@@ -69,12 +70,6 @@ void GameRenderer::renderText(const GameState<> &state, const Statistics &stats)
   drawNumber(*drawer_, high_score_pos, state.high_score, 7);
   drawNumber(*drawer_, score_pos, state.score, 7);
   drawNumber(*drawer_, level_pos, state.level, 2);
-
-  constexpr pdi::Coords tetromino_counter_start{48, 88};
-  for (int i = 0; i < 7; ++i) {
-    drawNumber(*drawer_, tetromino_counter_start.x, tetromino_counter_start.y + (i * 16),
-               stats.getTetrominoCount(static_cast<Tetromino>(i)), 3, pdi::RED());
-  }
 }
 
 void GameRenderer::renderNextTetromino(const Tetromino &next_tetromino, const int level) const {
@@ -199,16 +194,70 @@ void GameRenderer::renderPaused() const {
   drawer_->drawString(paused_pos, "PAUSED", pdi::WHITE());
 }
 
+void GameRenderer::renderNesStatsics(const GameState<> &state, const Statistics &statistics) {
+  constexpr pdi::Coords tetromino_counter_start{48, 88};
+  constexpr pdi::Coords counter_sprite_pos{13, 61};
+
+  drawer_->drawSprite(counter_sprite_pos, sprite_provider_->getSprite(
+                                              "l" + std::to_string(state.level % 10) + "-counts"));
+
+  for (int i = 0; i < 7; ++i) {
+    drawNumber(*drawer_, tetromino_counter_start.x, tetromino_counter_start.y + (i * 16),
+               statistics.getTetrominoCount(static_cast<Tetromino>(i)), 3, pdi::RED());
+  }
+}
+
+void GameRenderer::renderTreyVisionStatistics(const GameState<> &state,
+                                              const Statistics &statistics) {
+  auto get_coords = [](const int row, const int col) -> pdi::Coords {
+    constexpr pdi::Coords top_left{18, 88};
+    const int column_offset = 40;
+    const int row_offset = 12;
+    return {top_left.x + (col * column_offset), top_left.y + (row * row_offset)};
+  };
+
+  drawer_->drawString(get_coords(0, 0), "BURN: ");
+  drawNumber(*drawer_, get_coords(0, 1), statistics.getBurnCount(), 3);
+
+  drawer_->drawString(get_coords(1, 0), "TRT: ");
+  drawNumber(*drawer_, get_coords(1, 1), statistics.getTetrisRate(state.score) * 100, 2);
+
+  drawer_->drawSprite(get_coords(2, 0), sprite_provider_->getSprite("long-bar-drought"));
+  drawNumber(*drawer_, get_coords(2, 1), statistics.getLongBarDrought(), 3);
+
+  drawer_->drawString(get_coords(3, 0), "DAS:");
+  auto get_das_chain_color = [](const int das_chain) {
+    if(das_chain < 4) {
+      return pdi::RED();
+    } else if(das_chain < 8) {
+      return pdi::Color{255, 132, 0, 255};
+    } else if(das_chain < 10) {
+      return pdi::YELLOW();
+    } else if(das_chain < 12) {
+      return pdi::Color{200, 255, 0, 255};
+    } else {
+      return pdi::GREEN();
+    }
+  };
+  const auto das_chain = statistics.getDasChain();
+  drawNumber(*drawer_, get_coords(3, 1), das_chain, 3, get_das_chain_color(das_chain));
+
+  constexpr pdi::Coords entry_delay_pos{193, 129};
+  const auto are_sprite = entryDelay(state) ? "button-on" : "button-off";
+  drawer_->drawSprite(get_coords(5, 0) + pdi::Coords{-2,-1}, sprite_provider_->getSprite(are_sprite));
+  drawer_->drawString(get_coords(5, 0), "ENTRY DL");
+
+
+}
+
 void GameRenderer::renderGameState(const GameState<> &state, const Statistics &stats,
                                    const bool render_controls, const bool render_das_bar,
-                                   const bool render_entry_delay, const KeyEvents &key_events,
-                                   const Das &das_processor) {
+                                   const StatisticsMode &statistics_mode,
+                                   const KeyEvents &key_events, const Das &das_processor) {
   constexpr pdi::Coords grid_top_left{96, 40};
   constexpr pdi::Rect grid_size{80, 160};
-  constexpr pdi::Coords counter_sprite_pos{13, 61};
   constexpr pdi::Coords das_box_pos{184, 175};
   constexpr pdi::Coords controller_box_pos{184, 196};
-  constexpr pdi::Coords entry_delay_pos{193, 129};
   auto get_grid_for_render = [](const GameState<> &state) {
     if (entryDelay(state)) {
       return state.grid;
@@ -220,8 +269,12 @@ void GameRenderer::renderGameState(const GameState<> &state, const Statistics &s
   // Clear the field.
   drawer_->fillRect(grid_top_left, grid_size, pdi::BLACK());
 
-  drawer_->drawSprite(counter_sprite_pos, sprite_provider_->getSprite(
-                                              "l" + std::to_string(state.level % 10) + "-counts"));
+  if (statistics_mode == StatisticsMode::Classic) {
+    renderNesStatsics(state, stats);
+  } else if (statistics_mode == StatisticsMode::TreyVision) {
+    renderTreyVisionStatistics(state, stats);
+  }
+
   renderGrid(grid_top_left.x, grid_top_left.y, get_grid_for_render(state), state.level);
   renderNextTetromino(state.next_tetromino, state.level);
   renderText(state, stats);
@@ -230,9 +283,6 @@ void GameRenderer::renderGameState(const GameState<> &state, const Statistics &s
   }
   if (render_das_bar) {
     renderDasBar(state.das_counter, das_processor, das_box_pos);
-  }
-  if (render_entry_delay) {
-    renderEntryDelay(entryDelay(state), entry_delay_pos);
   }
   if (state.paused) {
     renderPaused();

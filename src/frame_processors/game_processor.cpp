@@ -29,7 +29,7 @@ GameProcessor::GameProcessor(const GameOptions& options,
       gravity_provider_{options.gravity_type},
       show_controls_{options.show_controls},
       show_das_bar_{options.show_das_bar},
-      show_entry_delay_{options.show_entry_delay},
+      statistics_mode_{options.statistics_mode},
       line_clear_info_{},
       top_out_frame_counter_{} {
   state_ = getNewState(options.level);
@@ -41,7 +41,7 @@ void GameProcessor::reset(const GameOptions& options) {
   gravity_provider_ = Gravity{options.gravity_type};
   show_controls_ = options.show_controls;
   show_das_bar_ = options.show_das_bar;
-  show_entry_delay_ = options.show_entry_delay;
+  statistics_mode_ = options.statistics_mode;
   line_clear_info_ = {};
   top_out_frame_counter_ = {};
   state_ = getNewState(options.level);
@@ -86,7 +86,10 @@ void GameProcessor::doGravityStep(const KeyEvents& key_events) {
     }
   }
 
-  processKeyEvents(key_events, *sample_player_, das_processor_, state_);
+  processKeyEvents(key_events, *sample_player_, das_processor_, state_, statistics_);
+  if(not das_processor_.dasSoftlyCharged(state_.das_counter)) {
+    statistics_.dasResetSignal();
+  }
 
   const bool tetromino_locked = applyGravity(key_events, gravity_provider_, state_);
   if (tetromino_locked) {
@@ -134,7 +137,7 @@ ProgramFlowSignal GameProcessor::processFrame(const KeyEvents& key_events) {
   } else {
     doGravityStep(key_events);
   }
-  renderer_.renderGameState(state_, statistics_, show_controls_, show_das_bar_, show_entry_delay_,
+  renderer_.renderGameState(state_, statistics_, show_controls_, show_das_bar_, statistics_mode_,
                             key_events, das_processor_);
   return ProgramFlowSignal::FrameSuccess;
 }

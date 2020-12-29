@@ -8,7 +8,7 @@ namespace nestris_x86 {
 constexpr int LINES_PER_LEVEL = 10;
 const std::vector<int> line_scores{0, 40, 100, 300, 1200};
 
-int getScoreForLineClear(const int level, const int lines_cleared) {
+int getScoreForLineClear(const int lines_cleared, const int level) {
   if (lines_cleared > 4) {
     throw std::runtime_error("Too many simultaneous lines cleared to get a score.");
   }
@@ -76,7 +76,7 @@ bool updateStateOnNoCollision(const GameState<>::Grid &grid, const int tetromino
 }
 
 void processKeyEvents(const KeyEvents &key_events, const sound::SoundPlayer &sample_player,
-                      const Das &das_processor, GameState<> &state) {
+                      const Das &das_processor, GameState<> &state, Statistics& stats) {
   auto move_check_wall_charge = [&sample_player, &das_processor](GameState<> &state,
                                                                  const int direction) {
     if (updateStateOnNoCollision(state.grid, direction, 0, 0, state.active_tetromino)) {
@@ -175,7 +175,7 @@ void updateEntryDelayForLineClear(int &delay_counter) {
 
 void updateScoreAndLevel(const int line_clears, const sound::SoundPlayer &sound_player,
                          GameState<> &state) {
-  state.score += getScoreForLineClear(state.level, line_clears);
+  state.score += getScoreForLineClear(line_clears, state.level);
   state.lines += line_clears;
   state.lines_until_next_level -= line_clears;
   if (state.lines_until_next_level <= 0) {

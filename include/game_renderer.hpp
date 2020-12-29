@@ -20,7 +20,7 @@ class GameRenderer {
 
   void renderGameState(const GameState<> &state, const Statistics &stats,
                        const bool render_controls, const bool render_das_bar,
-                       const bool render_entry_delay, const KeyEvents &key_events,
+                       const StatisticsMode &statistics_mode, const KeyEvents &key_events,
                        const Das &das_processor);
 
   void renderPaused() const;
@@ -46,8 +46,11 @@ class GameRenderer {
 
   olc::Sprite *getBlockSprite(const int level, const int color) const;
 
+  void renderNesStatsics(const GameState<> &state, const Statistics &statistics);
+  void renderTreyVisionStatistics(const GameState<> &state, const Statistics &statistics);
+
   void renderBackground();
-  void renderText(const GameState<> &state, const Statistics& stats) const;
+  void renderText(const GameState<> &state, const Statistics &stats) const;
   void renderNextTetromino(const Tetromino &next_tetromino, const int level) const;
   void renderDasBar(const int das_counter, const Das &das_processor,
                     const PixelDrawingInterface::Coords &das_box_pos) const;

@@ -5,6 +5,7 @@
 #include "gravity.hpp"
 #include "key_defines.hpp"
 #include "sound.hpp"
+#include "statistics.hpp"
 
 namespace nestris_x86 {
 
@@ -20,7 +21,7 @@ bool outOfBounds(const Container &container, int x, int y) {
     return false;
 }
 
-int getScoreForLineClear(const int level, const int lines_cleared);
+int getScoreForLineClear(const int lines_cleared, const int level);
 
 GameState<>::Grid addTetrominoToGrid(const GameState<>::Grid &grid,
                                      const TetrominoState &tetromino);
@@ -32,7 +33,7 @@ bool updateStateOnNoCollision(const GameState<>::Grid &grid, const int tetromino
                               TetrominoState &tetromino);
 
 void processKeyEvents(const KeyEvents &key_events, const sound::SoundPlayer &sample_player,
-                      const Das &das_processor, GameState<> &state);
+                      const Das &das_processor, GameState<> &state, Statistics& stats);
 
 void clearLine(const int row, GameState<> &state);
 

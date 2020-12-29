@@ -18,6 +18,9 @@ class Das {
   inline bool dasFullyCharged(const int das_counter) const {
     return das_counter >= das_full_charge_;
   }
+  inline bool dasSoftlyCharged(const int das_counter) const {
+    return das_counter >= das_min_charge_;
+  }
 
   inline int getFullDasChargeCount() const { return das_full_charge_; }
   inline int getMinDasChargeCount() const { return das_min_charge_; }

@@ -43,7 +43,7 @@ struct GameState {
   Tetromino next_tetromino;
   int score;
   int high_score;
-  //std::array<int, 7> tetromino_counts;  // Ordered according to enum.
+  // std::array<int, 7> tetromino_counts;  // Ordered according to enum.
   bool topped_out;
   bool paused;
   bool press_down_lock;
@@ -58,5 +58,18 @@ struct LineClearAnimationInfo {
   std::vector<int> rows;
   int animation_frame{};
 };
+
+enum class StatisticsMode { Classic, TreyVision };
+
+inline StatisticsMode fromString(const std::string& statistics_mode) {
+  if (statistics_mode == "NES") {
+    return StatisticsMode::Classic;
+  } else if (statistics_mode == "TREY V") {
+    return StatisticsMode::TreyVision;
+  } else {
+    throw std::runtime_error("Invalid statistics mode `" + statistics_mode + "`.");
+  }
+  return StatisticsMode::Classic;
+}
 
 }  // namespace nestris_x86

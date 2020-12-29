@@ -32,6 +32,7 @@ void Statistics::update(const int lines_cleared, const int level) {
 void Statistics::update(const Tetromino& new_tetromino) {
   tetromino_counts_[new_tetromino]++;
   long_bar_drought_ = (new_tetromino == Tetromino::Line) ? 0 : long_bar_drought_ + 1;
+  das_chain_counter_++;
 }
 
 void Statistics::dasResetSignal() {
@@ -43,7 +44,7 @@ int Statistics::getTetrominoCount(const Tetromino& tetromino) const {
 }
 
 double Statistics::getTetrisRate(const int current_score) const {
-  return score_from_tetrises_ / current_score;
+  return (double)score_from_tetrises_ / std::max(1, current_score);
 }
 
 double Statistics::getBurnCount() const {

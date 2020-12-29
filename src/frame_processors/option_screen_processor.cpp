@@ -55,11 +55,13 @@ OptionScreenProcessor::OptionScreenProcessor(
   options_["hard_drop"] = std::make_unique<BoolOption>("HARD DROP", false);
   options_["wall_kick"] = std::make_unique<BoolOption>("WALL KICK", false);
 
+  options_["statistics_mode"] =
+      std::make_unique<StringOption>("STATISTICS", std::vector<std::string>{"NES", "TREY V"});
   options_["show_das_meter"] = std::make_unique<BoolOption>("SHOW DAS METER", false);
-  options_["show_das_chain"] = std::make_unique<BoolOption>("SHOW DAS CHAIN", false);
-  options_["show_wall_charges"] = std::make_unique<BoolOption>("SHOW WALL CHARGES", false);
-  options_["show_entry_delay"] = std::make_unique<BoolOption>("SHOW ENTRY DELAY", false);
   options_["show_controls"] = std::make_unique<BoolOption>("SHOW CONTROLS", false);
+
+  //options_["show_wall_charges"] = std::make_unique<BoolOption>("SHOW WALL CHARGES", false);
+  //options_["show_entry_delay"] = std::make_unique<BoolOption>("SHOW ENTRY DELAY", false);
 
   option_order_ = std::vector<std::string>({
       "configure_keyboard",
@@ -71,11 +73,9 @@ OptionScreenProcessor::OptionScreenProcessor(
       "gravity_mode",
       "hard_drop",
       "wall_kick",
+      "statistics_mode",
       "show_das_meter",
-      "show_das_chain",
-      "show_wall_charges",
-      "show_entry_delay",
-      "show_controls",
+      "show_controls"
   });
 
   // Missing options_:

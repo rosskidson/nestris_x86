@@ -83,7 +83,7 @@ class PixelDrawingInterface {
   inline void fillRect(const Coords& coords, const Rect& size, const Color& color = WHITE()) const {
     fillRect(coords.x, coords.y, size.width, size.height, color);
   }
-};
+};  // namespace nestris_x86
 
 inline PixelDrawingInterface::Coords operator+(const PixelDrawingInterface::Coords& lhs,
                                                const PixelDrawingInterface::Coords& rhs) {

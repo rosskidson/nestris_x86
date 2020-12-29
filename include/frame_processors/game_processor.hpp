@@ -16,8 +16,6 @@
 namespace nestris_x86 {
 
 struct GameOptions {
-  enum class StatisticsMode { classic, ctwc };
-
   int level{};
   int das_full_charge{Das::NTSC_FULL_CHARGE};
   int das_min_charge{Das::NTSC_MIN_CHARGE};
@@ -25,7 +23,6 @@ struct GameOptions {
   TetrisType gravity_type{TetrisType::NTSC};
   bool show_controls{true};
   bool show_das_bar{true};
-  bool show_entry_delay{true};
   StatisticsMode statistics_mode{};
 };
 
@@ -57,7 +54,7 @@ class GameProcessor : public FrameProcessorInterface {
   Gravity gravity_provider_;
   bool show_controls_;
   bool show_das_bar_;
-  bool show_entry_delay_;
+  StatisticsMode statistics_mode_;
   LineClearAnimationInfo line_clear_info_;
   int top_out_frame_counter_;
 };

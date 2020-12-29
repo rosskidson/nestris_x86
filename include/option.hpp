@@ -91,6 +91,9 @@ class StringOption : public OptionInterface {
   int selected_option_idx_;
   std::vector<std::string> options_;
 };
+inline std::string getStringOption(const OptionInterface& option) {
+  return dynamic_cast<const StringOption&>(option).getSelectedOption();
+}
 
 class IntOption : public OptionInterface {
  public:
