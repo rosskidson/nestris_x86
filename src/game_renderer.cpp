@@ -219,7 +219,7 @@ void GameRenderer::renderTreyVisionStatistics(const GameState<> &state,
   drawer_->drawString(get_coords(0, 0), "BURN: ");
   drawNumber(*drawer_, get_coords(0, 1), statistics.getBurnCount(), 3);
 
-  drawer_->drawString(get_coords(1, 0), "TRT: ");
+  drawer_->drawString(get_coords(1, 0), "TRT:   %");
   drawNumber(*drawer_, get_coords(1, 1), statistics.getTetrisRate(state.score) * 100, 2);
 
   drawer_->drawSprite(get_coords(2, 0), sprite_provider_->getSprite("long-bar-drought"));

@@ -203,7 +203,6 @@ void TetrisClone::sleepUntilNextFrame() {
  * Like to have:
  * - Hard drop
  * - Compress binary data
- * - wall kick
  *
  *
  * More ambitious:
