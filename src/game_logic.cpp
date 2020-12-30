@@ -98,6 +98,10 @@ bool rotateTetromino(const GameState<>::Grid &grid, const int rotation,
   }
 }
 
+void hardDrop(const GameState<>::Grid& grid, TetrominoState& tetromino) {
+  while(updateStateOnNoCollision(grid, 0, 1, 0, tetromino));
+}
+
 void processKeyEvents(const KeyEvents &key_events, const sound::SoundPlayer &sample_player,
                       const Das &das_processor, const bool wall_kick, GameState<> &state) {
   auto move_check_wall_charge = [&sample_player, &das_processor](GameState<> &state,
@@ -109,6 +113,11 @@ void processKeyEvents(const KeyEvents &key_events, const sound::SoundPlayer &sam
       state.viz_wall_charge_frame_count = 30;
     }
   };
+
+  if (key_events.at(KeyAction::Up).pressed) {
+    hardDrop(state.grid, state.active_tetromino);
+    state.gravity_counter = 0;
+  }
 
   if (key_events.at(KeyAction::Left).pressed) {
     das_processor.hardResetDas(state.das_counter);
@@ -212,7 +221,7 @@ int getEntryDelayFromLockHeight(const int height) {
 
 bool applyGravity(const KeyEvents &key_events, const Gravity &gravity_provider,
                   GameState<> &state) {
-  if (--state.gravity_counter == 0) {
+  if (--state.gravity_counter <= 0) {
     // Apply press down scoring.
     if (key_events.at(KeyAction::Down).held) {
       auto &down = state.press_down_counter;
