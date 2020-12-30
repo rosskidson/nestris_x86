@@ -33,7 +33,7 @@ bool updateStateOnNoCollision(const GameState<>::Grid &grid, const int tetromino
                               TetrominoState &tetromino);
 
 void processKeyEvents(const KeyEvents &key_events, const sound::SoundPlayer &sample_player,
-                      const Das &das_processor, GameState<> &state);
+                      const Das &das_processor, const bool wall_kick, GameState<> &state);
 
 void clearLine(const int row, GameState<> &state);
 

@@ -75,8 +75,31 @@ bool updateStateOnNoCollision(const GameState<>::Grid &grid, const int tetromino
   }
 }
 
+bool attemptWallKickRotate(const GameState<>::Grid &grid, const int tetromino_rotation_offset,
+                           TetrominoState &tetromino) {
+  if (updateStateOnNoCollision(grid, 0, 0, tetromino_rotation_offset, tetromino)) {
+    return true;
+  }
+  for (int i = 1; i <= 2; ++i) {
+    if (updateStateOnNoCollision(grid, i, 0, tetromino_rotation_offset, tetromino) ||
+        updateStateOnNoCollision(grid, -i, 0, tetromino_rotation_offset, tetromino)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+bool rotateTetromino(const GameState<>::Grid &grid, const int rotation,
+                     const bool wall_kick, TetrominoState &tetromino) {
+  if (wall_kick) {
+    return attemptWallKickRotate(grid, rotation, tetromino);
+  } else {
+    return updateStateOnNoCollision(grid, 0, 0, rotation, tetromino);
+  }
+}
+
 void processKeyEvents(const KeyEvents &key_events, const sound::SoundPlayer &sample_player,
-                      const Das &das_processor, GameState<> &state) {
+                      const Das &das_processor, const bool wall_kick, GameState<> &state) {
   auto move_check_wall_charge = [&sample_player, &das_processor](GameState<> &state,
                                                                  const int direction) {
     if (updateStateOnNoCollision(state.grid, direction, 0, 0, state.active_tetromino)) {
@@ -122,16 +145,13 @@ void processKeyEvents(const KeyEvents &key_events, const sound::SoundPlayer &sam
     state.press_down_counter = 0;
   }
 
-  if (key_events.at(KeyAction::RotateClockwise).pressed) {
-    if (updateStateOnNoCollision(state.grid, 0, 0, 1, state.active_tetromino)) {
-      sample_player.playSample("tetromino_rotate");
-    }
+  int rotation = 0;
+  rotation = key_events.at(KeyAction::RotateClockwise).pressed ? 1 : rotation;
+  rotation = key_events.at(KeyAction::RotateAntiClockwise).pressed ? -1 : rotation;
+  if (rotation != 0 && rotateTetromino(state.grid, rotation, wall_kick, state.active_tetromino)) {
+    sample_player.playSample("tetromino_rotate");
   }
-  if (key_events.at(KeyAction::RotateAntiClockwise).pressed) {
-    if (updateStateOnNoCollision(state.grid, 0, 0, -1, state.active_tetromino)) {
-      sample_player.playSample("tetromino_rotate");
-    }
-  }
+
   if (key_events.at(KeyAction::Start).pressed) {
     state.paused = true;
     sample_player.playSample("pause");

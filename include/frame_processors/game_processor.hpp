@@ -25,8 +25,9 @@ struct GameOptions {
   TetrisType gravity_type{TetrisType::NTSC};
   bool show_controls{true};
   bool show_das_bar{true};
+  bool wall_kick{false};
   StatisticsMode statistics_mode{};
-  RngType rng_type;
+  RngType rng_type{RngType::Nes};
 };
 
 class GameProcessor : public FrameProcessorInterface {
@@ -56,6 +57,7 @@ class GameProcessor : public FrameProcessorInterface {
   Gravity gravity_provider_;
   bool show_controls_;
   bool show_das_bar_;
+  bool wall_kick_;
   StatisticsMode statistics_mode_;
   LineClearAnimationInfo line_clear_info_;
   int top_out_frame_counter_;

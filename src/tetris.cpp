@@ -132,6 +132,7 @@ GameOptions menuOptionsToGameOptions(const OptionScreenProcessor::OptionMap &opt
   options.gravity_type = getGravityOption(*option_map.at("gravity_mode"));
   options.show_das_bar = getBoolOption(*option_map.at("show_das_meter"));
   options.show_controls = getBoolOption(*option_map.at("show_controls"));
+  options.wall_kick = getBoolOption(*option_map.at("wall_kick"));
   options.statistics_mode =
       statisticsModeFromString(getStringOption(*option_map.at("statistics_mode")));
   options.rng_type = rngTypeFromString(getStringOption(*option_map.at("rng_type")));
@@ -159,12 +160,6 @@ void TetrisClone::processProgramFlowSignal(const ProgramFlowSignal &signal) {
   } else if (signal == ProgramFlowSignal::ControllerConfigScreen) {
     active_processor_ = gamepad_config_processor_;
   }
-  // das_profile",
-  // hard_drop",
-  // wall_kick",
-  // show_das_chain",
-  // show_wall_charges",
-  // staistics mode",
 }
 
 void TetrisClone::sleepUntilNextFrame() {
