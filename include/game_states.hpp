@@ -60,7 +60,7 @@ struct LineClearAnimationInfo {
 
 enum class StatisticsMode { Classic, TreyVision };
 
-inline StatisticsMode fromString(const std::string& statistics_mode) {
+inline StatisticsMode statisticsModeFromString(const std::string& statistics_mode) {
   if (statistics_mode == "NES") {
     return StatisticsMode::Classic;
   } else if (statistics_mode == "TREY V") {

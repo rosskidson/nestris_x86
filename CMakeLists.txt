@@ -86,6 +86,7 @@ add_executable(tetris
         src/sound.cpp
         src/statistics.cpp
         src/tetris.cpp
+        src/tetromino_rng.cpp
         )
 
 

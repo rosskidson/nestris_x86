@@ -23,8 +23,7 @@ GameProcessor::GameProcessor(const GameOptions& options,
       sample_player_(sample_player),
       state_{},
       statistics_{},
-      real_rng_{},
-      random_generator_{0, 6},
+      tetromino_rng_{tetrominoRngFactory(RngType::Nes)},
       das_processor_{options.das_full_charge, options.das_min_charge},
       gravity_provider_{options.gravity_type},
       show_controls_{options.show_controls},
@@ -46,17 +45,17 @@ void GameProcessor::reset(const GameOptions& options) {
   top_out_frame_counter_ = {};
   state_ = getNewState(options.level);
   statistics_ = {};
+  tetromino_rng_ = tetrominoRngFactory(options.rng_type);
   statistics_.update(state_.active_tetromino.tetromino);
   renderer_.startNewGame();
 }
 
 Tetromino GameProcessor::getRandomTetromino() {
-  return Tetromino(random_generator_(real_rng_));
+  return tetromino_rng_->getRandomTetromino();
 }
 
 bool GameProcessor::spawnNewTetromino(GameState<>& state) {
   state.active_tetromino = {state.next_tetromino, 5, 0, 0};
-  // state_.tetromino_counts[static_cast<int>(state_.active_tetromino.tetromino)]++;
   state.next_tetromino = getRandomTetromino();
   state.spawn_new_tetromino = false;
   return not tetrominoCollision(state.grid, state.active_tetromino);

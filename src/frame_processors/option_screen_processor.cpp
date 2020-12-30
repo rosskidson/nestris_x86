@@ -60,27 +60,22 @@ OptionScreenProcessor::OptionScreenProcessor(
   options_["show_das_meter"] = std::make_unique<BoolOption>("SHOW DAS METER", false);
   options_["show_controls"] = std::make_unique<BoolOption>("SHOW CONTROLS", false);
 
-  //options_["show_wall_charges"] = std::make_unique<BoolOption>("SHOW WALL CHARGES", false);
-  //options_["show_entry_delay"] = std::make_unique<BoolOption>("SHOW ENTRY DELAY", false);
+  options_["rng_type"] =
+      std::make_unique<StringOption>("RNG TYPE", std::vector<std::string>{"NES", "UNIF", "7BAG"});
 
-  option_order_ = std::vector<std::string>({
-      "configure_keyboard",
-      "configure_controller",
-      "das_profile",
-      "refresh_frequency",
-      "das_initial_delay_frames",
-      "das_repeat_delay_frames",
-      "gravity_mode",
-      "hard_drop",
-      "wall_kick",
-      "statistics_mode",
-      "show_das_meter",
-      "show_controls"
-  });
-
-  // Missing options_:
-  //  HOLD
-  //  STATSTICS MODE
+  option_order_ = std::vector<std::string>({"configure_keyboard",        //
+                                            "configure_controller",      //
+                                            "das_profile",               //
+                                            "refresh_frequency",         //
+                                            "das_initial_delay_frames",  //
+                                            "das_repeat_delay_frames",   //
+                                            "gravity_mode",              //
+                                            "hard_drop",                 //
+                                            "wall_kick",                 //
+                                            "statistics_mode",           //
+                                            "show_das_meter",            //
+                                            "show_controls",             //
+                                            "rng_type"});                //
 
   for (const auto& name : option_order_) {
     if (not options_.count(name)) {
@@ -194,7 +189,7 @@ void OptionScreenProcessor::renderOptionScreen() const {
   constexpr int x_right_column = 180;
   constexpr int y_row_start = 40;
 
-  std::set<int> spacers{1, 6, 8};
+  std::set<int> spacers{1, 6, 8, 11};
   const auto row_locations =
       renderOptions(spacers, x_left_column, x_right_column, y_row_start, grey_out_das_options_);
   renderSelector(x_right_column - 5, row_locations);

@@ -132,7 +132,9 @@ GameOptions menuOptionsToGameOptions(const OptionScreenProcessor::OptionMap &opt
   options.gravity_type = getGravityOption(*option_map.at("gravity_mode"));
   options.show_das_bar = getBoolOption(*option_map.at("show_das_meter"));
   options.show_controls = getBoolOption(*option_map.at("show_controls"));
-  options.statistics_mode = fromString(getStringOption(*option_map.at("statistics_mode")));
+  options.statistics_mode =
+      statisticsModeFromString(getStringOption(*option_map.at("statistics_mode")));
+  options.rng_type = rngTypeFromString(getStringOption(*option_map.at("rng_type")));
   return options;
 }
 
@@ -202,8 +204,6 @@ void TetrisClone::sleepUntilNextFrame() {
  * Must do:
  * - Full test on linux/mac/windows
  *
- * Very much like to have:
- * - Different randoms (uniform, 7-bag, nestris double-pick)
  *
  * Like to have:
  * - Hard drop
@@ -212,10 +212,10 @@ void TetrisClone::sleepUntilNextFrame() {
  *
  *
  * More ambitious:
- * - Interface for random generator: allow a tetromino set loader
+ * - A tetromino set loader to make the game fully deterministic
  *      (don't forget the rand() in line clear)
  * - Record all inputs, implement a replay functionality
- * - Hold
+ * - Hold piece
  *
  *
  * Bugs:

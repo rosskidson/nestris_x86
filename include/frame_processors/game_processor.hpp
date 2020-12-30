@@ -1,6 +1,7 @@
 #pragma once
 
 #include <random>
+#include <stdexcept>
 
 #include "assets.hpp"
 #include "das.hpp"
@@ -12,6 +13,7 @@
 #include "sound.hpp"
 #include "statistics.hpp"
 #include "tetris_type.hpp"
+#include "tetromino_rng.hpp"
 
 namespace nestris_x86 {
 
@@ -24,6 +26,7 @@ struct GameOptions {
   bool show_controls{true};
   bool show_das_bar{true};
   StatisticsMode statistics_mode{};
+  RngType rng_type;
 };
 
 class GameProcessor : public FrameProcessorInterface {
@@ -48,8 +51,7 @@ class GameProcessor : public FrameProcessorInterface {
   std::shared_ptr<sound::SoundPlayer> sample_player_;
   GameState<> state_;
   Statistics statistics_;
-  std::random_device real_rng_;
-  std::uniform_int_distribution<int> random_generator_;
+  std::unique_ptr<TetrominoRNG> tetromino_rng_;
   Das das_processor_;
   Gravity gravity_provider_;
   bool show_controls_;
