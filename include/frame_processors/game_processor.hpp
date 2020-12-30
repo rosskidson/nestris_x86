@@ -26,6 +26,7 @@ struct GameOptions {
   bool show_controls{true};
   bool show_das_bar{true};
   bool wall_kick{false};
+  bool hard_drop{false};
   StatisticsMode statistics_mode{};
   RngType rng_type{RngType::Nes};
 };
@@ -58,6 +59,7 @@ class GameProcessor : public FrameProcessorInterface {
   bool show_controls_;
   bool show_das_bar_;
   bool wall_kick_;
+  bool hard_drop_;
   StatisticsMode statistics_mode_;
   LineClearAnimationInfo line_clear_info_;
   int top_out_frame_counter_;

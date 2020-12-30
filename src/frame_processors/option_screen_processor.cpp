@@ -52,7 +52,7 @@ OptionScreenProcessor::OptionScreenProcessor(
   options_["gravity_mode"] =
       std::make_unique<StringOption>("LEVEL GRAVITY", std::vector<std::string>{"NTSC", "PAL"});
 
-  options_["hard_drop"] = std::make_unique<BoolOption>("HARD DROP", false);
+  options_["hard_drop"] = std::make_unique<BoolOption>("HARD DROP [use up]", false);
   options_["wall_kick"] = std::make_unique<BoolOption>("WALL KICK", false);
 
   options_["statistics_mode"] =

@@ -132,6 +132,7 @@ GameOptions menuOptionsToGameOptions(const OptionScreenProcessor::OptionMap &opt
   options.gravity_type = getGravityOption(*option_map.at("gravity_mode"));
   options.show_das_bar = getBoolOption(*option_map.at("show_das_meter"));
   options.show_controls = getBoolOption(*option_map.at("show_controls"));
+  options.hard_drop = getBoolOption(*option_map.at("hard_drop"));
   options.wall_kick = getBoolOption(*option_map.at("wall_kick"));
   options.statistics_mode =
       statisticsModeFromString(getStringOption(*option_map.at("statistics_mode")));
@@ -201,7 +202,6 @@ void TetrisClone::sleepUntilNextFrame() {
  *
  *
  * Like to have:
- * - Hard drop
  * - Compress binary data
  *
  *

@@ -89,8 +89,8 @@ bool attemptWallKickRotate(const GameState<>::Grid &grid, const int tetromino_ro
   return false;
 }
 
-bool rotateTetromino(const GameState<>::Grid &grid, const int rotation,
-                     const bool wall_kick, TetrominoState &tetromino) {
+bool rotateTetromino(const GameState<>::Grid &grid, const int rotation, const bool wall_kick,
+                     TetrominoState &tetromino) {
   if (wall_kick) {
     return attemptWallKickRotate(grid, rotation, tetromino);
   } else {
@@ -98,12 +98,14 @@ bool rotateTetromino(const GameState<>::Grid &grid, const int rotation,
   }
 }
 
-void hardDrop(const GameState<>::Grid& grid, TetrominoState& tetromino) {
-  while(updateStateOnNoCollision(grid, 0, 1, 0, tetromino));
+void hardDrop(const GameState<>::Grid &grid, TetrominoState &tetromino) {
+  while (updateStateOnNoCollision(grid, 0, 1, 0, tetromino))
+    ;
 }
 
 void processKeyEvents(const KeyEvents &key_events, const sound::SoundPlayer &sample_player,
-                      const Das &das_processor, const bool wall_kick, GameState<> &state) {
+                      const Das &das_processor, const bool wall_kick, const bool hard_drop_enable,
+                      GameState<> &state) {
   auto move_check_wall_charge = [&sample_player, &das_processor](GameState<> &state,
                                                                  const int direction) {
     if (updateStateOnNoCollision(state.grid, direction, 0, 0, state.active_tetromino)) {
@@ -114,7 +116,7 @@ void processKeyEvents(const KeyEvents &key_events, const sound::SoundPlayer &sam
     }
   };
 
-  if (key_events.at(KeyAction::Up).pressed) {
+  if (key_events.at(KeyAction::Up).pressed && hard_drop_enable) {
     hardDrop(state.grid, state.active_tetromino);
     state.gravity_counter = 0;
   }

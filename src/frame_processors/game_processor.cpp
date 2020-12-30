@@ -29,6 +29,7 @@ GameProcessor::GameProcessor(const GameOptions& options,
       show_controls_{options.show_controls},
       show_das_bar_{options.show_das_bar},
       wall_kick_{options.wall_kick},
+      hard_drop_{options.hard_drop},
       statistics_mode_{options.statistics_mode},
       line_clear_info_{},
       top_out_frame_counter_{} {
@@ -42,6 +43,7 @@ void GameProcessor::reset(const GameOptions& options) {
   show_controls_ = options.show_controls;
   show_das_bar_ = options.show_das_bar;
   wall_kick_ = options.wall_kick;
+  hard_drop_ = options.hard_drop;
   statistics_mode_ = options.statistics_mode;
   line_clear_info_ = {};
   top_out_frame_counter_ = {};
@@ -88,7 +90,7 @@ void GameProcessor::doGravityStep(const KeyEvents& key_events) {
     }
   }
 
-  processKeyEvents(key_events, *sample_player_, das_processor_, wall_kick_, state_);
+  processKeyEvents(key_events, *sample_player_, das_processor_, wall_kick_, hard_drop_, state_);
   if (not das_processor_.dasSoftlyCharged(state_.das_counter)) {
     statistics_.dasResetSignal();
   }
