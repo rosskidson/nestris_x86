@@ -52,7 +52,7 @@ OptionScreenProcessor::OptionScreenProcessor(
   options_["gravity_mode"] =
       std::make_unique<StringOption>("LEVEL GRAVITY", std::vector<std::string>{"NTSC", "PAL"});
 
-  options_["hard_drop"] = std::make_unique<BoolOption>("HARD DROP [use up]", false);
+  options_["hard_drop"] = std::make_unique<BoolOption>("HARD DROP [key: ]", false);
   options_["wall_kick"] = std::make_unique<BoolOption>("WALL KICK", false);
 
   options_["statistics_mode"] =
@@ -154,6 +154,9 @@ std::vector<int> OptionScreenProcessor::renderOptions(const std::set<int>& space
     const int indent = (dynamic_cast<DummyOption*>(option.get())) ? 15 : 0;
     drawer_->drawString(left_column + indent, y_row, option->getDisplayName(), color);
     drawer_->drawString(right_column, y_row, option->getSelectedOptionText(), color);
+    if (name == "hard_drop") {
+      drawUpArrow(*drawer_, left_column + indent + (8 * 15 + 3), y_row);
+    }
     y_row += 10;
     if (spacers.count(counter++)) {
       y_row += 5;

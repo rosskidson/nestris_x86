@@ -39,4 +39,13 @@ void drawTriangleSelector(const PixelDrawingInterface& drawer, const int x, cons
     }
   }
 }
+
+void drawUpArrow(const PixelDrawingInterface& drawer, const int x, const int y) {
+  drawer.drawLine(x, y, x, y + 6);
+  drawer.drawLine(x - 1, y, x - 1, y + 6);
+  drawer.drawLine(x - 1, y, x - 4, y + 3);
+  drawer.drawLine(x, y, x + 3, y + 3);
+  drawer.drawLine(x - 1, y + 1, x - 3, y + 3);
+  drawer.drawLine(x, y + 1, x + 2, y + 3);
+}
 }  // namespace nestris_x86
