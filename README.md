@@ -26,7 +26,7 @@ This is a reimplementation of the original 1989 NES Tetris game using modern c++
 - Original music
 - High scores
 
-The features that are missing are not for any technical reason, I was simply focusing on what I wanted in the game and didn't consider these things important enough.  Feature requests or suggesstions are welcome. Simply make a issue on the project github page, or just email me directly: ross . kidson at gmail . com
+The features that are missing are not for any technical reason, I was simply focusing on what I wanted in the game and didn't consider these things important enough.  Feature requests or suggesstions are welcome. Simply make a issue on the project github page, or just email me directly: ross dot kidson at gmail dot com
 
 ### Input latency
 As mentioned already, there is no emulation taking place, and therefore no emulation lag. Input lag experienced will be due to usb polling and monitor response times, with the latter being the likely culprit. I am a DAS player capable of lvl 19 speeds and I have a PB of ~470K on a TV CRT/physical console setup. Comparing the TV with this software using a gaming monitor I found that the input lag is noticeable, however certainly very playable.  However when testing on an older non gaming monitor there was a noticeble difference.
@@ -72,4 +72,4 @@ My emulator of choice for development is fceux:
 - http://fceux.com/web/home.html
 
 ### Bugs, suggestions, feedback
-Open an issue or simply email me directly: ross . kidson @ gmail . com
+Open an issue or simply email me directly: ross dot kidson at gmail dot com
