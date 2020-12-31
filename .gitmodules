@@ -3,4 +3,4 @@
 	url = https://github.com/rosskidson/olcPixelGameEngine
 [submodule "olcPGEX_Gamepad"]
 	path = olcPGEX_Gamepad
-	url = https://github.com/gorbit99/olcPGEX_Gamepad
+	url = https://github.com/rosskidson/olcPGEX_Gamepad
