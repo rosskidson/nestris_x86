@@ -17,7 +17,7 @@ FIND_PACKAGE(SDL REQUIRED)
 FIND_PACKAGE(OpenGL REQUIRED)
 INCLUDE_DIRECTORIES(${SDL_INCLUDE_DIR} ${SDL_MIXER_INCLUDE_DIRS})
 #LINUX
-#sudo apt install libsdl - mixer1 .2 - dev libsdl1 .2 - dev
+#sudo apt install libsdl-mixer1.2-dev libsdl1.2-dev
 
 if(UNIX AND NOT APPLE)
     MESSAGE("Building for linux...")
