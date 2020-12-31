@@ -200,7 +200,6 @@ void TetrisClone::sleepUntilNextFrame() {
  * Must do:
  * - Full test on linux/mac/windows
  * - add 'made with olc'
- * - fork olc repo, make changes, use git subrepo
  *
  *
  *
