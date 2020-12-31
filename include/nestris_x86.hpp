@@ -22,9 +22,9 @@ namespace nestris_x86 {
 using Clock = std::chrono::high_resolution_clock;
 using Duration_ns = std::chrono::duration<int, std::nano>;
 
-class TetrisClone : public olc::PixelGameEngine {
+class NestrisX86 : public olc::PixelGameEngine {
  public:
-  TetrisClone();
+  NestrisX86();
 
   bool OnUserCreate() override;
 

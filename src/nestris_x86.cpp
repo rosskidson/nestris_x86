@@ -1,4 +1,4 @@
-#include "tetris.hpp"
+#include "nestris_x86.hpp"
 
 #include <chrono>
 #include <ctime>
@@ -37,7 +37,7 @@ KeyEvent getButtonState(const bool button_old_state, const bool button_new_state
   return event;
 }
 
-KeyEvents TetrisClone::getKeyEvents() {
+KeyEvents NestrisX86::getKeyEvents() {
   dynamic_cast<OlcGamePad &>(*gamepad_input_).detectAndInit();
   KeyEvents ret_val{};
   for (const auto &[action, keyboard_key] : keyboard_key_bindings_) {
@@ -51,7 +51,7 @@ KeyEvents TetrisClone::getKeyEvents() {
   return ret_val;
 }
 
-TetrisClone::TetrisClone()
+NestrisX86::NestrisX86()
     : sample_player_{std::make_shared<sound::SoundPlayer>()},
       sprite_provider_{std::make_shared<SpriteProvider>()},
       keyboard_input_{std::make_unique<OlcKeyboard>(*this)},
@@ -75,7 +75,7 @@ TetrisClone::TetrisClone()
       key_states_{initializeKeyStatesFromBindings(keyboard_key_bindings_)},
       frame_end_{},
       single_frame_{NTSC_frame_ns} {
-  sAppName = "TetrisClone";
+  sAppName = "NestrisX86";
 
   if (LOAD_FROM_BINARY) {
     if (not loadSoundAssets(*sample_player_)) {
@@ -88,7 +88,7 @@ TetrisClone::TetrisClone()
   }
 }
 
-bool TetrisClone::OnUserCreate() {
+bool NestrisX86::OnUserCreate() {
   if (ScreenWidth() != 256 || ScreenHeight() != 225) {
     LOG_ERROR("Screen size must be set to 256x225 for this application.");
     return false;
@@ -99,7 +99,7 @@ bool TetrisClone::OnUserCreate() {
   return true;
 }
 
-bool TetrisClone::OnUserUpdate(float fElapsedTime) {
+bool NestrisX86::OnUserUpdate(float fElapsedTime) {
   const auto key_events = getKeyEvents();
   const auto signal = active_processor_->processFrame(key_events);
   processProgramFlowSignal(signal);
@@ -140,7 +140,7 @@ GameOptions menuOptionsToGameOptions(const OptionScreenProcessor::OptionMap &opt
   return options;
 }
 
-void TetrisClone::processProgramFlowSignal(const ProgramFlowSignal &signal) {
+void NestrisX86::processProgramFlowSignal(const ProgramFlowSignal &signal) {
   if (signal == ProgramFlowSignal::StartGame) {
     auto options = menuOptionsToGameOptions(option_menu_processor_->getOptions());
     options.level = level_menu_processor_->getSelectedLevel();
@@ -163,7 +163,7 @@ void TetrisClone::processProgramFlowSignal(const ProgramFlowSignal &signal) {
   }
 }
 
-void TetrisClone::sleepUntilNextFrame() {
+void NestrisX86::sleepUntilNextFrame() {
   if (Clock::now() > frame_end_) {
     LOG_ERROR(
         "Runtime error: Game code is not finishing in time. The game will not run at the "
@@ -199,8 +199,7 @@ void TetrisClone::sleepUntilNextFrame() {
  *
  * Must do:
  * - Full test on linux/mac/windows
- * - add 'made with olc'
- *
+ * - Finish readme
  *
  *
  * Like to have:

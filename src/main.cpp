@@ -1,11 +1,11 @@
-#include "tetris.hpp"
+#include "nestris_x86.hpp"
 
 int main(const int argc, const char** argv)
 {
-  nestris_x86::TetrisClone tetris{};
-	if (tetris.Construct(256, 225, 4, 4))
+  nestris_x86::NestrisX86 nestetris{};
+	if (nestetris.Construct(256, 225, 4, 4))
   {
-    tetris.Start();
+    nestetris.Start();
   }
 	return 0;
 }

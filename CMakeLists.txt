@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.6)
-project(tetris_clone)
+project(nestris_x86)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -69,7 +69,7 @@ target_link_libraries(olc ${OLC_LIBS})
 
 add_library(assets_lib src/assets_cpp/images.cpp src/assets_cpp/sounds.cpp)
 
-add_executable(tetris
+add_executable(nestris_x86
         ${DATA_ENCODING_SOURCES}
         src/assets.cpp
         src/drawing_utils.cpp
@@ -86,12 +86,12 @@ add_executable(tetris
         src/main.cpp
         src/sound.cpp
         src/statistics.cpp
-        src/tetris.cpp
+        src/nestris_x86.cpp
         src/tetromino_rng.cpp
         )
 
 
-target_link_libraries(tetris olc assets_lib ${TETRIS_LIBS})
+target_link_libraries(nestris_x86 olc assets_lib ${TETRIS_LIBS})
 
 add_executable(asset_cpp_gen src/tools/asset_cpp_gen.cpp ${DATA_ENCODING_SOURCES})
 target_link_libraries(asset_cpp_gen olc ${TETRIS_LIBS})
