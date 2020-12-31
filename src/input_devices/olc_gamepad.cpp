@@ -5,7 +5,7 @@
 #include "utils/logging.hpp"
 
 #if not __APPLE__
-#include "Contributions/olcPGEX_Gamepad.h"
+#include "olcPGEX_Gamepad.h"
 #endif
 
 namespace nestris_x86 {

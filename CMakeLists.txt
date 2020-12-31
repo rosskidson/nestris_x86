@@ -7,7 +7,8 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
 
-INCLUDE_DIRECTORIES(olc)
+INCLUDE_DIRECTORIES(olcPixelGameEngine)
+INCLUDE_DIRECTORIES(olcPGEX_Gamepad)
 INCLUDE_DIRECTORIES(include)
 
 FIND_PACKAGE(PNG REQUIRED)
@@ -63,7 +64,7 @@ SET(DATA_ENCODING_SOURCES
 )
 
 
-add_library(olc olc/olcPixelGameEngine.cpp)
+add_library(olc src/olc/olcPixelGameEngine.cpp)
 target_link_libraries(olc ${OLC_LIBS})
 
 add_library(assets_lib src/assets_cpp/images.cpp src/assets_cpp/sounds.cpp)

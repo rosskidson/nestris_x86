@@ -2,7 +2,7 @@
 #include <iostream>
 #include <thread>
 
-#include "Contributions/olcPGEX_Gamepad.h"
+#include "olcPGEX_Gamepad.h"
 #include "olcPixelGameEngine.h"
 
 class Example : public olc::PixelGameEngine {
