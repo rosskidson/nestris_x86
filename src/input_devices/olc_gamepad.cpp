@@ -1,10 +1,11 @@
 #include "input_devices/olc_gamepad.hpp"
 
+#include <iso646.h>
 #include <string>
 
 #include "utils/logging.hpp"
 
-#if not __APPLE__
+#if defined(__unix__) || defined(_WIN32) || defined(WIN32) 
 #include "olcPGEX_Gamepad.h"
 #endif
 

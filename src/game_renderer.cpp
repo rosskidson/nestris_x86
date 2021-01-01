@@ -1,5 +1,6 @@
 #include "game_renderer.hpp"
 
+#include <iso646.h>
 #include <memory>
 #include <set>
 #include <sstream>
@@ -56,7 +57,7 @@ void GameRenderer::startNewGame() {
 
 olc::Sprite *GameRenderer::getBlockSprite(const int level, const int color) const try {
   return block_sprites_.at(level % 10).at(color).get();
-} catch (const std::out_of_range &e) {
+} catch (const std::out_of_range) {
   LOG_ERROR("Block sprite not loaded. Level[" << level << "] Color[" << color << "]");
   throw;
 }
@@ -220,7 +221,7 @@ void GameRenderer::renderTreyVisionStatistics(const GameState<> &state,
   drawNumber(*drawer_, get_coords(0, 1), statistics.getBurnCount(), 3);
 
   drawer_->drawString(get_coords(1, 0), "TRT:   %");
-  drawNumber(*drawer_, get_coords(1, 1), statistics.getTetrisRate(state.score) * 100, 2);
+  drawNumber(*drawer_, get_coords(1, 1), static_cast<int>(statistics.getTetrisRate(state.score) * 100), 2);
 
   drawer_->drawSprite(get_coords(2, 0), sprite_provider_->getSprite("long-bar-drought"));
   drawNumber(*drawer_, get_coords(2, 1), statistics.getLongBarDrought(), 3);

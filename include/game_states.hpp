@@ -3,6 +3,7 @@
 #include <array>
 #include <map>
 #include <memory>
+#include <stdexcept>
 
 #include "key_defines.hpp"
 #include "tetromino.hpp"

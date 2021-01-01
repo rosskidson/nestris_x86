@@ -1,6 +1,8 @@
 
 #include "frame_processors/gamepad_config_processor.hpp"
 
+#include <iso646.h>
+
 #include "drawers/pixel_drawing_interface.hpp"
 #include "input_devices/olc_gamepad.hpp"
 #include "utils/logging.hpp"

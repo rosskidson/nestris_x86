@@ -47,15 +47,15 @@ double Statistics::getTetrisRate(const int current_score) const {
   return (double)score_from_tetrises_ / std::max(1, current_score);
 }
 
-double Statistics::getBurnCount() const {
+int Statistics::getBurnCount() const {
   return burn_counter_;
 }
 
-double Statistics::getLongBarDrought() const {
+int Statistics::getLongBarDrought() const {
   return long_bar_drought_;
 }
 
-double Statistics::getDasChain() const {
+int Statistics::getDasChain() const {
   return das_chain_counter_;
 }
 

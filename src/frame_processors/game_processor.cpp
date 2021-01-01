@@ -1,6 +1,7 @@
 
 #include "frame_processors/game_processor.hpp"
 
+#include <iso646.h>
 #include <stdexcept>
 
 #include "assets.hpp"
@@ -120,8 +121,8 @@ void GameProcessor::doEntryDelayStep(const KeyEvents& key_events) {
   }
   // When the animation is almost over, update the score.
   if (line_clear_info_.animation_frame == 4) {
-    updateScoreAndLevel(line_clear_info_.rows.size(), *sample_player_, state_);
-    statistics_.update(line_clear_info_.rows.size(), state_.level);
+    updateScoreAndLevel(static_cast<int>(line_clear_info_.rows.size()), *sample_player_, state_);
+    statistics_.update(static_cast<int>(line_clear_info_.rows.size()), state_.level);
   }
   --state_.entry_delay_counter;
 }

@@ -1,6 +1,7 @@
 #include "data_encoders/data_to_string_encoder.hpp"
 
 #include <iostream>
+#include <iso646.h>
 #include <memory>
 #include <sstream>
 

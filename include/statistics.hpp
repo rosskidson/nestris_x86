@@ -16,9 +16,9 @@ class Statistics {
   int getTetrominoCount(const Tetromino& tetromino) const;
   double getTetrisRate(const int current_score) const;
 
-  double getBurnCount() const;
-  double getLongBarDrought() const;
-  double getDasChain() const;
+  int getBurnCount() const;
+  int getLongBarDrought() const;
+  int getDasChain() const;
 
  private:
   std::map<Tetromino, int> tetromino_counts_;

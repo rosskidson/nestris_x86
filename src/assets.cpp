@@ -4,6 +4,7 @@
 #include <SDL_mixer.h>
 
 #include <filesystem>
+#include <iso646.h>
 #include <sstream>
 #include <stdexcept>
 
@@ -75,8 +76,8 @@ bool SpriteProvider::loadSprites(const std::string &path) {
     if (extension != ".PNG" and extension != ".png") {
       continue;
     }
-    sprite_map_[name] = std::make_unique<olc::Sprite>(filepath.string());
-    if (not spriteValid(sprite_map_.at(name).get())) {
+    sprite_map_[name.string()] = std::make_unique<olc::Sprite>(filepath.string());
+    if (not spriteValid(sprite_map_.at(name.string()).get())) {
       LOG_ERROR("Failed loading `" << filepath << "`.");
       return false;
     }

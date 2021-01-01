@@ -1,5 +1,7 @@
 #include "game_logic.hpp"
 
+#include <iso646.h>
+
 #include "game_states.hpp"
 #include "gravity.hpp"
 

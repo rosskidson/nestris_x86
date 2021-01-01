@@ -1,6 +1,7 @@
 #pragma once
 
 #include <algorithm>
+#include <iso646.h>
 #include <iterator>
 #include <string>
 #include <vector>
@@ -72,7 +73,7 @@ class StringOption : public OptionInterface {
     }
   }
   void selectFirstOption() override { selected_option_idx_ = 0; }
-  void selectLastOption() override { selected_option_idx_ = options_.size() - 1; }
+  void selectLastOption() override { selected_option_idx_ = static_cast<int>(options_.size()) - 1; }
   std::string getSelectedOptionText() const override { return options_.at(selected_option_idx_); }
   std::string getSelectedOption() const { return getSelectedOptionText(); };
   void setOption(const std::string& value) {
@@ -84,7 +85,7 @@ class StringOption : public OptionInterface {
       }
       return;
     }
-    selected_option_idx_ = std::distance(options_.begin(), itr);
+    selected_option_idx_ = static_cast<int>(std::distance(options_.begin(), itr));
   }
 
  private:
