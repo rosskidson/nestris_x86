@@ -26,6 +26,7 @@ if(UNIX AND NOT APPLE)
             pthread
             PNG::PNG
             stdc++fs
+            asound
             ${OPENGL_LIBRARIES}
         )
 endif()
