@@ -6,6 +6,9 @@
 
 #include "utils/base64_converter.hpp"
 
+
+//#include <iostream>
+
 namespace data_encoding {
 
 DataToStringEncoder::DataToStringEncoder(std::unique_ptr<DataEncoder>&& data_encoder)
@@ -27,6 +30,8 @@ std::vector<std::string> DataToStringEncoder::encodeString(const std::vector<lon
   std::stringstream stream;
   std::vector<std::string> return_val;
   for (const auto& num : data) {
+    //std::cout << "num " << num << std::endl;
+    //std::cout << "enc " << base64_conv_->encodeNumber(num) << std::endl;
     stream << base64_conv_->encodeNumber(num) << ",";
     if (stream.str().length() > max_line_len) {
       return_val.push_back(stream.str());

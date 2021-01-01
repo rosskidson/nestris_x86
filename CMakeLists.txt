@@ -60,6 +60,7 @@ SET(TETRIS_LIBS
 SET(DATA_ENCODING_SOURCES
   src/data_encoders/data_encoder_factory.cpp
   src/data_encoders/data_to_string_encoder.cpp
+  src/data_encoders/olc_sample_encoder.cpp
   src/data_encoders/olc_sprite_encoder.cpp
   src/data_encoders/sdl_mix_chunk_encoder.cpp
 )

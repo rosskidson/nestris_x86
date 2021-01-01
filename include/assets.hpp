@@ -5,17 +5,17 @@
 #include <string>
 #include <vector>
 
-#include "sound.hpp"
 #include "olcPixelGameEngine.h"
+#include "sound.hpp"
 
-constexpr bool LOAD_FROM_BINARY = false;
+constexpr bool LOAD_FROM_BINARY = true;
 
 namespace nestris_x86 {
 
 class SpriteProvider {
  public:
   SpriteProvider();
-  SpriteProvider(const std::string& path);
+  SpriteProvider(const std::string &path);
 
   bool loadSprites(const std::string &path);
   bool loadSprites();

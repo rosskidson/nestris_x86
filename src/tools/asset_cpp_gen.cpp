@@ -1,6 +1,4 @@
 
-#include <SDL_mixer.h>
-
 #include <data_encoders/data_encoder_factory.hpp>
 #include <filesystem>
 #include <fstream>
@@ -10,8 +8,10 @@
 #include <string>
 #include <utils/logging.hpp>
 
-#define OLC_PGE_APPLICATION
+// clang-format off
 #include "olcPixelGameEngine.h"
+#include "Extensions/olcPGEX_Sound.h"
+// clang-format on
 
 using data_encoding::DataEncoderEnum;
 
@@ -27,10 +27,10 @@ void writeBinaryHeader(const std::string resource_name, const std::string& filen
   ofs << "} // namespace " << resource_name << std::endl;
 }
 
-template <typename DataPointer>
+template <typename DataType>
 void writeBinarySource(const std::string resource_name, const std::string& filename_base,
                        const DataEncoderEnum& data_encoder_type,
-                       const std::map<std::string, DataPointer>& data_map) {
+                       const std::map<std::string, DataType>& data_map) {
   const auto encoder = data_encoding::getDataToStringEncoder(data_encoder_type);
   const std::string indent = "  ";
   std::ofstream ofs(filename_base + ".cpp");
@@ -43,8 +43,8 @@ void writeBinarySource(const std::string resource_name, const std::string& filen
   ofs << indent << "{" << std::endl;
 
   bool first_element = true;
-  for (const auto& [name, data_ptr] : data_map) {
-    const auto sprite_text = encoder.objToString(data_ptr.get());
+  for (const auto& [name, data] : data_map) {
+    const auto sprite_text = encoder.objToString(data);
     if (first_element) {
       first_element = false;
     } else {
@@ -61,10 +61,10 @@ void writeBinarySource(const std::string resource_name, const std::string& filen
   ofs << "} // namespace " << resource_name << std::endl;
 }
 
-template <typename DataPointer>
+template <typename DataType>
 void writeBinaryCppFiles(const std::string resource_name, const std::string& filename_base,
                          const DataEncoderEnum& data_encoder_type,
-                         const std::map<std::string, DataPointer>& data_map) {
+                         const std::map<std::string, DataType>& data_map) {
   writeBinaryHeader(resource_name, filename_base);
   writeBinarySource(resource_name, filename_base, data_encoder_type, data_map);
 }
@@ -79,9 +79,9 @@ bool spriteValid(const olc::Sprite& sprite) {
   return sprite.height > 0 && sprite.width > 0;
 }
 
-std::map<std::string, std::unique_ptr<olc::Sprite>> loadSprites(const std::string& path) {
+std::map<std::string, olc::Sprite*> loadSprites(const std::string& path) {
   namespace fs = std::filesystem;
-  std::map<std::string, std::unique_ptr<olc::Sprite>> sprite_map;
+  std::map<std::string, olc::Sprite*> sprite_map;
   for (const auto& dir_itr : fs::directory_iterator(fs::current_path() / fs::path(path))) {
     const auto filepath = fs::path(dir_itr);
     const auto extension = filepath.extension();
@@ -89,7 +89,7 @@ std::map<std::string, std::unique_ptr<olc::Sprite>> loadSprites(const std::strin
     if (extension != ".PNG" and extension != ".png") {
       continue;
     }
-    sprite_map[name] = std::make_unique<olc::Sprite>(filepath.string());
+    sprite_map[name] = new olc::Sprite(filepath.string());
     if (not spriteValid(*sprite_map.at(name))) {
       LOG_ERROR("Failed loading `" << filepath << "`.");
       continue;
@@ -98,13 +98,9 @@ std::map<std::string, std::unique_ptr<olc::Sprite>> loadSprites(const std::strin
   return sprite_map;
 }
 
-std::map<std::string, std::unique_ptr<Mix_Chunk>> loadSounds(const std::string& path) {
-  const int result = Mix_OpenAudio(44100, AUDIO_S16SYS, 2, 512);
-  if (result < 0) {
-    throw std::runtime_error("Failed to initialize SDL sound mixer.");
-  }
+std::map<std::string, olc::AudioSample> loadSounds(const std::string& path) {
   namespace fs = std::filesystem;
-  std::map<std::string, std::unique_ptr<Mix_Chunk>> sounds_map;
+  std::map<std::string, olc::AudioSample> sounds_map;
   for (const auto& dir_itr : fs::directory_iterator(fs::current_path() / fs::path(path))) {
     const auto filepath = fs::path(dir_itr);
     const auto extension = filepath.extension();
@@ -112,12 +108,13 @@ std::map<std::string, std::unique_ptr<Mix_Chunk>> loadSounds(const std::string& 
     if (extension != ".WAV" and extension != ".wav") {
       continue;
     }
-    auto raw_ptr = Mix_LoadWAV(filepath.c_str());
-    if (raw_ptr == nullptr) {
+    olc::AudioSample sample;
+    bool success = sample.LoadFromFile(filepath.c_str());
+    if (not success || not sample.bSampleValid) {
       LOG_ERROR("Failed loading `" << filepath.string() << "`.");
       continue;
     }
-    sounds_map[name] = std::unique_ptr<Mix_Chunk>(raw_ptr);
+    sounds_map[name] = sample;
   }
   return sounds_map;
 }
@@ -126,10 +123,10 @@ int main() {
   MinimalImpl imp{};
   imp.Construct(10, 10, 8, 8);
 
-  const auto sprite_map = loadSprites("./assets/images");
-  writeBinaryCppFiles("images", "images", DataEncoderEnum::OlcSprite, sprite_map);
+  //const auto sprite_map = loadSprites("./assets/images");
+  //writeBinaryCppFiles("images", "images", DataEncoderEnum::OlcSprite, sprite_map);
 
   const auto sounds_map = loadSounds("./assets/sounds");
-  writeBinaryCppFiles("sounds", "sounds", DataEncoderEnum::SdlMixChunk, sounds_map);
+  writeBinaryCppFiles("sounds", "sounds", DataEncoderEnum::OlcAudioSample, sounds_map);
 }
 

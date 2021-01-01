@@ -4,6 +4,7 @@
 #include <stdexcept>
 
 #include "data_encoders/olc_sprite_encoder.hpp"
+#include "data_encoders/olc_sample_encoder.hpp"
 #include "data_encoders/sdl_mix_chunk_encoder.hpp"
 
 namespace data_encoding {
@@ -12,6 +13,8 @@ DataToStringEncoder getDataToStringEncoder(const DataEncoderEnum& encoder) {
   switch (encoder) {
     case (DataEncoderEnum::OlcSprite):
       return DataToStringEncoder{std::make_unique<OlcSpriteEncoder>()};
+    case (DataEncoderEnum::OlcAudioSample):
+      return DataToStringEncoder{std::make_unique<OlcAudioSampleEncoder>()};
     case (DataEncoderEnum::SdlMixChunk):
       return DataToStringEncoder{std::make_unique<SdlMixChunkEncoder>()};
   }

@@ -12,6 +12,8 @@
 #include "data_encoders/data_encoder_factory.hpp"
 #include "utils/logging.hpp"
 
+#include "Extensions/olcPGEX_Sound.h"
+
 namespace nestris_x86 {
 
 namespace fs = std::filesystem;
@@ -108,16 +110,12 @@ bool loadSoundAssets(const std::string &path, sound::SoundPlayer &sample_player)
 }
 
 bool loadSoundAssets(sound::SoundPlayer &sample_player) {
-  //LOG_INFO("Loading sounds...");
-  //const auto decoder = data_encoding::getDataToStringEncoder(DataEncoderEnum::SdlMixChunk);
-  //for (const auto &[id, code] : sounds::sounds) {
-  //  const auto raw_ptr = std::any_cast<Mix_Chunk *>(decoder.stringToObj(code));
-  //  const auto success = sample_player.loadWavFromMemory(std::unique_ptr<Mix_Chunk>(raw_ptr), id);
-  //  if (not success) {
-  //    LOG_ERROR("Failed loading sound `" << id << "`");
-  //    return false;
-  //  }
-  //}
+  LOG_INFO("Loading sounds...");
+  const auto decoder = data_encoding::getDataToStringEncoder(DataEncoderEnum::OlcAudioSample);
+  for (const auto &[id, code] : sounds::sounds) {
+    const auto sample = std::any_cast<olc::AudioSample>(decoder.stringToObj(code));
+    sample_player.loadWavFromMemory(sample, id);
+  }
   return true;
 }
 
