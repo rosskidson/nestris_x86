@@ -16,8 +16,10 @@ INCLUDE_DIRECTORIES(olcPGEX_Gamepad)
 INCLUDE_DIRECTORIES(include)
 
 if(WIN32)
-    INCLUDE_DIRECTORIES(SDL/include)
-    LINK_DIRECTORIES(C:/Users/ross/source/repos/nestris_x86/SDL/lib)
+    cmake_policy(SET CMP0015 NEW)
+
+    INCLUDE_DIRECTORIES(SDL-win32/include)
+    LINK_DIRECTORIES(SDL-win32/lib)
 
     SET(TETRIS_LIBS SDL SDL_mixer)
 
