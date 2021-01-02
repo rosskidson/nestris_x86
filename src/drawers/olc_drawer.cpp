@@ -9,7 +9,7 @@ OlcDrawer::OlcDrawer(olc::PixelGameEngine& pixel_game_engine)
 void OlcDrawer::drawSprite(const int x, const int y, const std::any& sprite) const try {
   auto olc_sprite = std::any_cast<olc::Sprite*>(sprite);
   olc_engine_ref_.DrawSprite(x, y, olc_sprite);
-} catch (const std::bad_any_cast& e) {
+} catch (const std::bad_any_cast&) {
   std::cerr
       << "Bad cast in OlcDrawer::drawSprite. The type required for std::any is an olc::Sprite*"
       << std::endl;

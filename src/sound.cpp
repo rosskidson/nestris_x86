@@ -2,6 +2,7 @@
 
 #include <SDL_mixer.h>
 
+#include <iso646.h>
 #include <memory>
 #include <stdexcept>
 

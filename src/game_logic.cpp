@@ -220,7 +220,7 @@ void updateScoreAndLevel(const int line_clears, const sound::SoundPlayer &sound_
 }
 
 int getEntryDelayFromLockHeight(const int height) {
-  return height * -0.5 + 19;
+  return static_cast<int>(height * -0.5 + 19);
 }
 
 bool applyGravity(const KeyEvents &key_events, const Gravity &gravity_provider,

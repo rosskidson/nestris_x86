@@ -19,7 +19,7 @@
 
 namespace nestris_x86 {
 
-constexpr int NTSC_frame_ns = (1.0 / NTSC_FREQUENCY) * 1e9;
+constexpr int NTSC_frame_ns = static_cast<int>((1.0 / NTSC_FREQUENCY) * 1e9);
 
 KeyStates initializeKeyStatesFromBindings(const KeyBindings &key_bindings) {
   KeyStates key_states{};
@@ -163,20 +163,23 @@ void NestrisX86::processProgramFlowSignal(const ProgramFlowSignal &signal) {
   }
 }
 
-void NestrisX86::sleepUntilNextFrame() {
+void NestrisX86::sleepUntilNextFrame(const bool debug) {
   if (Clock::now() > frame_end_) {
-    LOG_ERROR(
-        "Runtime error: Game code is not finishing in time. The game will not run at the "
-        "intended "
-        "frequency.");
+    if (debug) {
+      LOG_ERROR(
+          "Runtime error: Game code is not finishing in time. The game will not run at the "
+          "intended frequency.");
+    }
     const auto now_us =
         std::chrono::duration_cast<std::chrono::microseconds>(Clock::now().time_since_epoch());
     const auto end_of_frame_us =
         std::chrono::duration_cast<std::chrono::microseconds>(frame_end_.time_since_epoch());
     const auto overrun_us = now_us.count() - end_of_frame_us.count();
-    LOG_INFO("Now (us):          " << now_us.count());
-    LOG_INFO("End of frame (us): " << end_of_frame_us.count());
-    LOG_INFO("Time overrun (us): " << overrun_us);
+    if (debug) {
+      LOG_INFO("Now (us):          " << now_us.count());
+      LOG_INFO("End of frame (us): " << end_of_frame_us.count());
+      LOG_INFO("Time overrun (us): " << overrun_us);
+    }
 
     // If the overrun is more than a frame, reset so the game doesn't have to play catch up.
     if (overrun_us > single_frame_.count() / 1000) {

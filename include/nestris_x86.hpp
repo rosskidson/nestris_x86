@@ -33,7 +33,7 @@ class NestrisX86 : public olc::PixelGameEngine {
  private:
   void processProgramFlowSignal(const ProgramFlowSignal& signal);
 
-  void sleepUntilNextFrame();
+  void sleepUntilNextFrame(const bool debug = false);
 
   KeyEvents getKeyEvents();
 

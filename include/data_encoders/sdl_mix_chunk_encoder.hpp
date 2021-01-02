@@ -5,7 +5,7 @@
 
 #include "data_encoders/data_encoder_interface.hpp"
 
-class Mix_Chunk;
+struct Mix_Chunk;
 class Base64Converter;
 
 namespace data_encoding {

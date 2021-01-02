@@ -47,7 +47,7 @@ SpriteProvider::SpriteProvider() {
 
 olc::Sprite *SpriteProvider::getSprite(const std::string &sprite_name) const try {
   return sprite_map_.at(sprite_name).get();
-} catch (const std::out_of_range &e) {
+} catch (const std::out_of_range) {
   LOG_ERROR("Sprite not loaded. Sprite name: `" << sprite_name << "`");
   throw;
 }
@@ -100,7 +100,7 @@ bool loadSoundAssets(const std::string &path, sound::SoundPlayer &sample_player)
     if (extension != ".WAV" and extension != ".wav") {
       continue;
     }
-    ret = ret && sample_player.loadWavFromFilesystem(filepath.string(), name);
+    ret = ret && sample_player.loadWavFromFilesystem(filepath.string(), name.string());
   }
 
   return ret;

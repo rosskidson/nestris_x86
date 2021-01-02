@@ -6,6 +6,7 @@
 #include <fstream>
 #include <ios>
 #include <iostream>
+#include <iso646.h>
 #include <memory>
 #include <string>
 #include <utils/logging.hpp>
@@ -57,7 +58,7 @@ void writeBinarySource(const std::string resource_name, const std::string& filen
     ofs << indent << indent << "{" << std::endl;
     ofs << indent << indent << indent << "\"" << name << "\"," << std::endl;
     ofs << indent << indent << indent << "{" << std::endl;
-    int char_counter = 0;
+    size_t char_counter = 0;
     for (const auto& line : sprite_text) {
       ofs << indent << indent << indent << indent << "\"" << line << "\"";
       char_counter += line.size();
@@ -106,8 +107,8 @@ std::map<std::string, std::unique_ptr<olc::Sprite>> loadSprites(const std::strin
     if (extension != ".PNG" and extension != ".png") {
       continue;
     }
-    sprite_map[name] = std::make_unique<olc::Sprite>(filepath.string());
-    if (not spriteValid(*sprite_map.at(name))) {
+    sprite_map[name.string()] = std::make_unique<olc::Sprite>(filepath.string());
+    if (not spriteValid(*sprite_map.at(name.string()))) {
       LOG_ERROR("Failed loading `" << filepath << "`.");
       continue;
     }
@@ -129,12 +130,12 @@ std::map<std::string, std::unique_ptr<Mix_Chunk>> loadSounds(const std::string& 
     if (extension != ".WAV" and extension != ".wav") {
       continue;
     }
-    auto raw_ptr = Mix_LoadWAV(filepath.c_str());
+    auto raw_ptr = Mix_LoadWAV(filepath.string().c_str());
     if (raw_ptr == nullptr) {
       LOG_ERROR("Failed loading `" << filepath.string() << "`.");
       continue;
     }
-    sounds_map[name] = std::unique_ptr<Mix_Chunk>(raw_ptr);
+    sounds_map[name.string()] = std::unique_ptr<Mix_Chunk>(raw_ptr);
   }
   return sounds_map;
 }
