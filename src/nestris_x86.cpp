@@ -19,7 +19,7 @@
 
 namespace nestris_x86 {
 
-constexpr int NTSC_frame_ns = (1.0 / NTSC_FREQUENCY) * 1e9;
+constexpr int NTSC_frame_ns = static_cast<int>((1.0 / NTSC_FREQUENCY) * 1e9);
 
 KeyStates initializeKeyStatesFromBindings(const KeyBindings &key_bindings) {
   KeyStates key_states{};

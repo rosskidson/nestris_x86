@@ -91,6 +91,7 @@ OptionScreenProcessor::OptionScreenProcessor(
 
 ProgramFlowSignal OptionScreenProcessor::processKeyEvents(const KeyEvents& key_events) {
   auto& current_idx = selected_index_;
+  const int num_options = static_cast<int>(option_order_.size());
   if (key_events.at(KeyAction::RotateClockwise).pressed ||
       key_events.at(KeyAction::Start).pressed) {
     if (option_order_.at(selected_index_) == "configure_keyboard") {
@@ -116,11 +117,11 @@ ProgramFlowSignal OptionScreenProcessor::processKeyEvents(const KeyEvents& key_e
   }
   if (key_events.at(KeyAction::Up).pressed) {
     sample_player_->playSample("menu_blip");
-    current_idx = current_idx > 0 ? current_idx - 1 : option_order_.size() - 1;
+    current_idx = current_idx > 0 ? current_idx - 1 : num_options - 1;
   }
   if (key_events.at(KeyAction::Down).pressed) {
     sample_player_->playSample("menu_blip");
-    current_idx = current_idx < option_order_.size() - 1 ? current_idx + 1 : 0;
+    current_idx = current_idx < num_options - 1 ? current_idx + 1 : 0;
   }
   if (key_events.at(KeyAction::Left).pressed) {
     sample_player_->playSample("menu_blip");

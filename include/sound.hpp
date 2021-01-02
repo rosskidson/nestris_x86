@@ -4,7 +4,7 @@
 #include <memory>
 #include <string>
 
-class Mix_Chunk;
+struct Mix_Chunk;
 
 namespace sound {
 class SoundPlayer {

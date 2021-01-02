@@ -58,7 +58,7 @@ void writeBinarySource(const std::string resource_name, const std::string& filen
     ofs << indent << indent << "{" << std::endl;
     ofs << indent << indent << indent << "\"" << name << "\"," << std::endl;
     ofs << indent << indent << indent << "{" << std::endl;
-    int char_counter = 0;
+    size_t char_counter = 0;
     for (const auto& line : sprite_text) {
       ofs << indent << indent << indent << indent << "\"" << line << "\"";
       char_counter += line.size();
