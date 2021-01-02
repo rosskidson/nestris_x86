@@ -27,22 +27,6 @@ bool spriteValid(const olc::Sprite *sprite) {
 }
 }  // namespace
 
-// clang-format off
-const std::vector<std::pair<std::string, std::string>> SAMPLES{
-    {"tetromino_move.wav", "tetromino_move"},
-    {"tetromino_lock.wav", "tetromino_lock"},
-    {"tetromino_rotate.wav", "tetromino_rotate"},
-    {"tetris.wav", "tetris"},
-    {"line_clear.wav", "line_clear"},
-    {"menu_blip.wav", "menu_blip"},
-    {"menu_select_01.wav", "menu_select_01"},
-    {"menu_select_02.wav", "menu_select_02"},
-    {"pause.wav", "pause"},
-    {"level_up.wav", "level_up"},
-    {"top_out.wav", "top_out"}};
-
-// clang-format on
-
 SpriteProvider::SpriteProvider(const std::string &path) {
   if (not loadSprites(path)) {
     throw std::runtime_error("Failed initializing SpriteProvider with path `" + path + "`");
@@ -109,8 +93,14 @@ bool SpriteProvider::loadSprites() {
 
 bool loadSoundAssets(const std::string &path, sound::SoundPlayer &sample_player) {
   bool ret = true;
-  for (const auto &[filename, name] : SAMPLES) {
-    ret = ret && sample_player.loadWavFromFilesystem(path + filename, name);
+  for (const auto &dir_itr : fs::directory_iterator(fs::current_path() / fs::path(path))) {
+    const auto filepath = fs::path(dir_itr);
+    const auto extension = filepath.extension();
+    const auto name = filepath.stem();
+    if (extension != ".WAV" and extension != ".wav") {
+      continue;
+    }
+    ret = ret && sample_player.loadWavFromFilesystem(filepath.string(), name);
   }
 
   return ret;
