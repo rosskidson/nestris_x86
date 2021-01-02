@@ -2,9 +2,9 @@
 #include "assets.hpp"
 
 #include <SDL_mixer.h>
+#include <iso646.h>
 
 #include <filesystem>
-#include <iso646.h>
 #include <sstream>
 #include <stdexcept>
 
@@ -85,11 +85,19 @@ bool SpriteProvider::loadSprites(const std::string &path) {
   return true;
 }
 
+std::string concatenateLines(const std::vector<std::string> &lines) {
+  std::string ret_val;
+  for (const auto &line : lines) {
+    ret_val += line;
+  }
+  return ret_val;
+}
+
 bool SpriteProvider::loadSprites() {
   LOG_INFO("Loading sprites...");
   const auto decoder = data_encoding::getDataToStringEncoder(DataEncoderEnum::OlcSprite);
-  for (const auto &[id, code] : images::images) {
-    const auto raw_ptr = std::any_cast<olc::Sprite *>(decoder.stringToObj(code));
+  for (const auto &[id, lines] : images::images) {
+    const auto raw_ptr = std::any_cast<olc::Sprite *>(decoder.stringToObj(concatenateLines(lines)));
     sprite_map_[id] = std::unique_ptr<olc::Sprite>{raw_ptr};
     if (not spriteValid(sprite_map_.at(id).get())) {
       LOG_ERROR("Failed loading `" << id << "`.");
@@ -111,8 +119,8 @@ bool loadSoundAssets(const std::string &path, sound::SoundPlayer &sample_player)
 bool loadSoundAssets(sound::SoundPlayer &sample_player) {
   LOG_INFO("Loading sounds...");
   const auto decoder = data_encoding::getDataToStringEncoder(DataEncoderEnum::SdlMixChunk);
-  for (const auto &[id, code] : sounds::sounds) {
-    const auto raw_ptr = std::any_cast<Mix_Chunk *>(decoder.stringToObj(code));
+  for (const auto &[id, line] : sounds::sounds) {
+    const auto raw_ptr = std::any_cast<Mix_Chunk *>(decoder.stringToObj(concatenateLines(line)));
     const auto success = sample_player.loadWavFromMemory(std::unique_ptr<Mix_Chunk>(raw_ptr), id);
     if (not success) {
       LOG_ERROR("Failed loading sound `" << id << "`");

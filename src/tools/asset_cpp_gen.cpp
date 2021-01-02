@@ -15,15 +15,19 @@
 
 using data_encoding::DataEncoderEnum;
 
+constexpr int MAX_STRING_LENGTH = 7000; // MSVC cannot compile very long strings.
+
 void writeBinaryHeader(const std::string resource_name, const std::string& filename_base) {
   std::ofstream ofs(filename_base + ".hpp");
   ofs << "#pragma once" << std::endl;
   ofs << std::endl;
   ofs << "#include <map>" << std::endl;
   ofs << "#include <string>" << std::endl;
+  ofs << "#include <vector>" << std::endl;
   ofs << std::endl;
   ofs << "namespace " << resource_name << " {" << std::endl;
-  ofs << "const extern std::map<std::string, std::string> " << resource_name << ";" << std::endl;
+  ofs << "const extern std::map<std::string, std::vector<std::string>> " << resource_name << ";"
+      << std::endl;
   ofs << "} // namespace " << resource_name << std::endl;
 }
 
@@ -39,7 +43,7 @@ void writeBinarySource(const std::string resource_name, const std::string& filen
   ofs << std::endl;
   ofs << std::endl;
   ofs << "namespace " << resource_name << " {" << std::endl;
-  ofs << "const std::map<std::string, std::string> " << resource_name << std::endl;
+  ofs << "const std::map<std::string, std::vector<std::string>> " << resource_name << std::endl;
   ofs << indent << "{" << std::endl;
 
   bool first_element = true;
@@ -50,10 +54,23 @@ void writeBinarySource(const std::string resource_name, const std::string& filen
     } else {
       ofs << indent << indent << "," << std::endl;
     }
-    ofs << indent << indent << "{\"" << name << "\"," << std::endl;
+    ofs << indent << indent << "{" << std::endl;
+    ofs << indent << indent << indent << "\"" << name << "\"," << std::endl;
+    ofs << indent << indent << indent << "{" << std::endl;
+    int char_counter = 0;
     for (const auto& line : sprite_text) {
-      ofs << indent << indent << " \"" << line << "\"" << std::endl;
+      ofs << indent << indent << indent << indent << "\"" << line << "\"";
+      char_counter += line.size();
+      if(char_counter > 7000) {
+        ofs << "," << std::endl;
+        char_counter = 0;
+      }
+      else {
+        ofs << std::endl;
+      }
     }
+    ofs << indent << indent << indent << indent << "\"\"" << std::endl;
+    ofs << indent << indent << indent << "}" << std::endl;
     ofs << indent << indent << "}" << std::endl;
   }
 
