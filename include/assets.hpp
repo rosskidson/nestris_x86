@@ -8,7 +8,7 @@
 #include "sound.hpp"
 #include "olcPixelGameEngine.h"
 
-constexpr bool LOAD_FROM_BINARY = false;
+constexpr bool LOAD_FROM_BINARY = true;
 
 namespace nestris_x86 {
 
