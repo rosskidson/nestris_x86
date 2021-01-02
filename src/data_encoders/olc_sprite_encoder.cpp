@@ -11,7 +11,7 @@ namespace data_encoding {
 std::unique_ptr<olc::Sprite> createSprite(const std::vector<long>& data) {
   const int width = data.at(0);
   const int height = data.at(1);
-  if (data.size() != (width * height) + 2) {
+  if (static_cast<int>(data.size()) != (width * height) + 2) {
     std::cerr << "[ERROR]: Sprite size does not match meta information"
               << " Width: " << width << " Height: " << height << " Num_Pixels: " << width * height
               << " Actual pixels " << (int)data.size() - 2 << std::endl;
@@ -48,7 +48,7 @@ std::vector<long> OlcSpriteEncoder::objToData(const std::any& object,
   olc::Sprite* sprite_ptr;
   try {
     sprite_ptr = std::any_cast<olc::Sprite*>(object);
-  } catch (std::bad_any_cast& e) {
+  } catch (std::bad_any_cast&) {
     LOG_ERROR("Failed std::any_cast in OlcSpriteEncoder::objToData");
     throw;
   }

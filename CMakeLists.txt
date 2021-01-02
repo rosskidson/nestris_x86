@@ -19,50 +19,55 @@ INCLUDE_DIRECTORIES(olcPixelGameEngine)
 INCLUDE_DIRECTORIES(olcPGEX_Gamepad)
 INCLUDE_DIRECTORIES(include)
 
-FIND_PACKAGE(PNG REQUIRED)
-FIND_PACKAGE(SDL_mixer REQUIRED)
-FIND_PACKAGE(SDL REQUIRED)
-FIND_PACKAGE(OpenGL REQUIRED)
-INCLUDE_DIRECTORIES(${SDL_INCLUDE_DIR} ${SDL_MIXER_INCLUDE_DIRS})
-#LINUX
-#sudo apt install libsdl-mixer1.2-dev libsdl1.2-dev
+if(WIN32)
+    INCLUDE_DIRECTORIES(SDL/include)
+    LINK_DIRECTORIES(C:/Users/ross/source/repos/nestris_x86/SDL/lib)
 
-if(UNIX AND NOT APPLE)
-    MESSAGE("Building for linux...")
-    SET(OLC_LIBS
+    SET(TETRIS_LIBS SDL SDL_mixer)
+
+else()
+    FIND_PACKAGE(PNG REQUIRED)
+    FIND_PACKAGE(SDL_mixer REQUIRED)
+    FIND_PACKAGE(SDL REQUIRED)
+    FIND_PACKAGE(OpenGL REQUIRED)
+    INCLUDE_DIRECTORIES(${SDL_INCLUDE_DIR} ${SDL_MIXER_INCLUDE_DIRS})
+
+    SET(TETRIS_LIBS
+        ${SDL_MIXER_LIBRARIES}
+        ${SDL_LIBRARY}
+        )
+
+    #MacOS
+    #brew install libpng sdl_mixer
+    if(APPLE)
+        MESSAGE("Building for MacOS...")
+
+        #I would have thought that this needs to go BEFORE FIND_PACKAGE(SDL...)
+        list(INSERT CMAKE_FRAMEWORK_PATH 0 /System/Library/Frameworks)
+
+        FIND_PACKAGE(GLUT REQUIRED)
+
+        SET(OLC_LIBS
+                GLUT::GLUT
+                PNG::PNG
+                ${OPENGL_LIBRARIES}
+            )
+    #LINUX
+    #sudo apt install libsdl-mixer1.2-dev libsdl1.2-dev
+    else()
+        MESSAGE("Building for linux...")
+        SET(OLC_LIBS
             X11
             pthread
             PNG::PNG
             stdc++fs
             ${OPENGL_LIBRARIES}
-        )
-endif()
-
-#MacOS
-#brew install libpng sdl_mixer
-
-if(APPLE)
-    MESSAGE("Building for MacOS...")
-
-#I would have thought that this needs to go BEFORE FIND_PACKAGE(SDL...)
-    list(INSERT CMAKE_FRAMEWORK_PATH 0 /System/Library/Frameworks)
-
-    FIND_PACKAGE(OpenGL REQUIRED)
-    FIND_PACKAGE(GLUT REQUIRED)
-
-    SET(OLC_LIBS
-            GLUT::GLUT
-            PNG::PNG
-            ${OPENGL_LIBRARIES}
-        )
-
+            )
+    endif()
 endif()
 
 
-SET(TETRIS_LIBS
-  ${SDL_MIXER_LIBRARIES}
-  ${SDL_LIBRARY}
-)
+
 
 SET(DATA_ENCODING_SOURCES
   src/data_encoders/data_encoder_factory.cpp
