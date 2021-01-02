@@ -203,6 +203,9 @@ void NestrisX86::sleepUntilNextFrame() {
  *
  *
  * Like to have:
+ * - Change default gamepad bindings for windows (up and down reversed)
+ * - cancel button on controller config screen
+ * - Save config option
  * - Compress binary data
  *
  *
@@ -214,7 +217,7 @@ void NestrisX86::sleepUntilNextFrame() {
  *
  *
  * Bugs:
- * - timing overrun errors in the menu on macos
+ * - timing overrun errors in the menu on macos and windows in the first few frames
  *
  *
  * Refactor/code improvements:
