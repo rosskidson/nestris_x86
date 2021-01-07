@@ -94,7 +94,7 @@ void LevelScreenProcessor::renderLevelSelector(const int level) const {
   const PixelDrawingInterface::Color selector_color{252, 151, 56, 255};
 
   auto get_selector_coords = [&](const int level) -> PixelDrawingInterface::Coords {
-    const int y = (level % 10 > 4) ? level_selector.y + selector_size.height : level_selector.y;
+    const int y = level_selector.y + ((level % 10 > 4) ? selector_size.height : 0);
     return {(selector_size.width * (level % 5)) + level_selector.x + 1, y + 2};
   };
 
