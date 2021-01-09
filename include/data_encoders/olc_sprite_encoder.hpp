@@ -18,4 +18,6 @@ class OlcSpriteEncoder : public DataEncoder {
   std::vector<long> objToData(const std::any& object, const int max_line_len = 80) const override;
 };
 
+void testPixelEncoding();
+
 }
