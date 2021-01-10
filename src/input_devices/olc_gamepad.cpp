@@ -26,10 +26,12 @@ class OlcGamePad::Impl {
 namespace {
 // clang-format off
 // copy pasted from olc source code and formatted to strings.
+// These are not entirely accurate. See the getDefaultKeyBindings function for default bindings 
+// across different operating systems.
 const std::map<int, std::string> CODE_TO_NAME{
   {-1,  "NONE"},
-  {1,  "FACE_D"},
   {0,  "FACE_L"},
+  {1,  "FACE_D"},
   {2,  "FACE_R"},
   {3,  "FACE_U"},
   {4,  "L1"},
@@ -42,8 +44,8 @@ const std::map<int, std::string> CODE_TO_NAME{
   {9,  "START"},
   {14, "DPAD_L"},
   {15, "DPAD_R"},
-  {16, "DPAD_D"},
-  {17, "DPAD_U"}
+  {16, "DPAD_U"},
+  {17, "DPAD_D"}
 };
 // clang-format on
 constexpr int OLC_NUMBER_OF_KEYS = 18;
