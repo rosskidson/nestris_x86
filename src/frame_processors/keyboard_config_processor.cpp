@@ -11,20 +11,17 @@ using pdi = PixelDrawingInterface;
 KeyboardConfigProcessor::KeyboardConfigProcessor(
     std::unique_ptr<PixelDrawingInterface>&& drawer,
     const std::shared_ptr<sound::SoundPlayer>& sample_player,
-    std::unique_ptr<InputInterface>&& input_interface, const KeyBindings& initial_bindings)
+    std::shared_ptr<InputInterface>& input_interface, const KeyBindings& initial_bindings)
     : sample_player_(sample_player),
       key_bindings_(initial_bindings),
+      default_bindings_(initial_bindings),
       active_key_{KeyAction::COUNT},
       selector_idx_{},
       wait_until_key_lifted_{true},
       keybinding_active_{},
       frame_counter_{std::make_unique<std::atomic_int>(0)},
       drawer_(std::move(drawer)),
-      input_ptr_(std::move(input_interface)) {}
-
-KeyBindings KeyboardConfigProcessor::getDefaultBindings() {
-  return getDefaultKeyBindings(*input_ptr_);
-}
+      input_ptr_(input_interface) {}
 
 ProgramFlowSignal KeyboardConfigProcessor::processKeyEvents(const KeyEvents& key_events) {
   if (key_events.at(KeyAction::Up).pressed) {
@@ -45,7 +42,7 @@ ProgramFlowSignal KeyboardConfigProcessor::processKeyEvents(const KeyEvents& key
       wait_until_key_lifted_ = true;
     }
     if (selector_idx_ == 1) {
-      key_bindings_ = this->getDefaultBindings();
+      key_bindings_ = default_bindings_;
     }
     if (selector_idx_ == 2) {
       return ProgramFlowSignal::OptionsScreen;

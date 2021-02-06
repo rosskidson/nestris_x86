@@ -1,17 +1,16 @@
 #pragma once
 
-#include <map>
 #include <memory>
+#include <string>
 
 #include "input_interface.hpp"
 
 namespace nestris_x86 {
 
-class OlcGamePad : public InputInterface {
+class SdlGamePad : public InputInterface {
  public:
-  OlcGamePad();
-  ~OlcGamePad();
-  bool detectAndInit();
+  SdlGamePad();
+  ~SdlGamePad();
 
   bool getKeyState(const KeyCode key_code) override;
   KeyCode getPressedKey() override;

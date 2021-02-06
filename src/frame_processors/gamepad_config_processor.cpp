@@ -23,23 +23,23 @@ KeyBindings GamePadConfigProcessor::getDefaultBindings() {
 }
 
 ProgramFlowSignal GamePadConfigProcessor::processFrame(const KeyEvents& key_events) {
-  auto gamepad_raw_ptr = dynamic_cast<OlcGamePad*>(input_ptr_.get());
-  if (not gamepad_raw_ptr) {
-    LOG_ERROR("Failed to cast gamepad config processor's input interface to a gamepad.");
-    return ProgramFlowSignal::EndProgram;
-  }
-  if (not gamepad_raw_ptr->detectAndInit()) {
-#if __APPLE__
-    renderMacOsSupportUnavailable();
-#else
-    renderWaitForControllerScreen();
-#endif
-    if (key_events.at(KeyAction::Start).pressed) {
-      return ProgramFlowSignal::OptionsScreen;
-    } else {
-      return ProgramFlowSignal::FrameSuccess;
-    }
-  }
+  //auto gamepad_raw_ptr = dynamic_cast<OlcGamePad*>(input_ptr_.get());
+  //if (not gamepad_raw_ptr) {
+  //  LOG_ERROR("Failed to cast gamepad config processor's input interface to a gamepad.");
+  //  return ProgramFlowSignal::EndProgram;
+  //}
+//  if (not gamepad_raw_ptr->detectAndInit()) {
+//#if __APPLE__
+//    renderMacOsSupportUnavailable();
+//#else
+//    renderWaitForControllerScreen();
+//#endif
+    //if (key_events.at(KeyAction::Start).pressed) {
+    //  return ProgramFlowSignal::OptionsScreen;
+    //} else {
+    //  return ProgramFlowSignal::FrameSuccess;
+    //}
+  //}
   return KeyboardConfigProcessor::processFrame(key_events);
 }
 

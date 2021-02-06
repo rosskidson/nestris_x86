@@ -12,9 +12,9 @@ class OlcKeyboard : public InputInterface {
  public:
   OlcKeyboard(olc::PixelGameEngine& pixel_game_engine_ref);
 
-  bool getKeyState(const KeyCode key_code) const override;
+  bool getKeyState(const KeyCode key_code) override;
 
-  KeyCode getPressedKey() const override;
+  KeyCode getPressedKey() override;
 
   std::string keyCodeToStr(const KeyCode key_code) const override;
   KeyCode lookupKeyCode(const std::string& key_name) const override;

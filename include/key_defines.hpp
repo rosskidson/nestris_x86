@@ -1,7 +1,7 @@
 #pragma once
 
-#include <map>
 #include <array>
+#include <map>
 
 #include "input_devices/input_interface.hpp"
 
@@ -26,16 +26,9 @@ enum class KeyAction {
 
 constexpr int key_action_size = static_cast<int>(KeyAction::COUNT);
 const std::array<std::string, key_action_size> action_names{
-    "Up",
-    "Down",
-    "Left",
-    "Right",
-    "Rotate CW  (A)",
-    "Rotate CCW (B)",
-    "Start"};
+    "Up", "Down", "Left", "Right", "Rotate CW  (A)", "Rotate CCW (B)", "Start"};
 
-
-inline std::string keyActionToString(const KeyAction& key_action) {
+inline std::string keyActionToString(const KeyAction &key_action) {
   return action_names[static_cast<int>(key_action)];
 }
 
@@ -55,30 +48,18 @@ inline KeyBindings getDefaultKeyBindings(const InputInterface &key_input) {
   return key_bindings;
 }
 
-#ifdef _WIN32
 inline KeyBindings getDefaultGamePadBindings(const InputInterface &key_input) {
   KeyBindings key_bindings;
   key_bindings[KeyAction::Up] = key_input.lookupKeyCode("DPAD_U");
   key_bindings[KeyAction::Down] = key_input.lookupKeyCode("DPAD_D");
   key_bindings[KeyAction::Left] = key_input.lookupKeyCode("DPAD_L");
   key_bindings[KeyAction::Right] = key_input.lookupKeyCode("DPAD_R");
-  key_bindings[KeyAction::RotateClockwise] = key_input.lookupKeyCode("FACE_D");      // NES gamepad A
-  key_bindings[KeyAction::RotateAntiClockwise] = key_input.lookupKeyCode("FACE_L");  // NES gamepad B
-  key_bindings[KeyAction::Start] = key_input.lookupKeyCode("R2");
-  return key_bindings;
-}
-#else
-inline KeyBindings getDefaultGamePadBindings(const InputInterface &key_input) {
-  KeyBindings key_bindings;
-  key_bindings[KeyAction::Up] = key_input.lookupKeyCode("DPAD_D");
-  key_bindings[KeyAction::Down] = key_input.lookupKeyCode("DPAD_U");
-  key_bindings[KeyAction::Left] = key_input.lookupKeyCode("DPAD_L");
-  key_bindings[KeyAction::Right] = key_input.lookupKeyCode("DPAD_R");
-  key_bindings[KeyAction::RotateClockwise] = key_input.lookupKeyCode("FACE_R");      // NES gamepad A
-  key_bindings[KeyAction::RotateAntiClockwise] = key_input.lookupKeyCode("FACE_D");  // NES gamepad B
+  key_bindings[KeyAction::RotateClockwise] = key_input.lookupKeyCode("FACE_R");  // NES gamepad A
+  key_bindings[KeyAction::RotateAntiClockwise] =
+      key_input.lookupKeyCode("FACE_D");  // NES gamepad B
   key_bindings[KeyAction::Start] = key_input.lookupKeyCode("START");
   return key_bindings;
 }
-#endif
+//#endif
 
 }  // namespace nestris_x86
