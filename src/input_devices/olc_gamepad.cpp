@@ -16,8 +16,8 @@ namespace nestris_x86 {
 class OlcGamePad::Impl {
  public:
   bool detectAndInit() { return false; }
-  bool getKeyState(const KeyCode key_code) const { return false; }
-  InputInterface::KeyCode getPressedKey() const { return getNullKey(); }
+  bool getKeyState(const KeyCode key_code) { return false; }
+  InputInterface::KeyCode getPressedKey() { return getNullKey(); }
   std::string keyCodeToStr(const KeyCode key_code) const { return "Invalid key"; }
   InputInterface::KeyCode lookupKeyCode(const std::string& key_name) const { return getNullKey(); }
   InputInterface::KeyCode getNullKey() const { return -1; }
@@ -91,7 +91,7 @@ class OlcGamePad::Impl {
     return false;
   }
 
-  bool getKeyState(const KeyCode key_code) const {
+  bool getKeyState(const KeyCode key_code) {
     if (not gamepad_ptr_ || not gamepad_ptr_->valid) {
       return false;
     }
@@ -99,7 +99,7 @@ class OlcGamePad::Impl {
     return gamepad_ptr_->getButton(keyCodeToOlc(key_code)).bHeld;
   }
 
-  InputInterface::KeyCode getPressedKey() const {
+  InputInterface::KeyCode getPressedKey() {
     for (int i = 0; i < 18; ++i) {
       if (getKeyState(i)) {
         return i;
@@ -141,11 +141,11 @@ bool OlcGamePad::detectAndInit() {
   return pimpl_->detectAndInit();
 }
 
-bool OlcGamePad::getKeyState(const KeyCode key_code) const {
+bool OlcGamePad::getKeyState(const KeyCode key_code) {
   return pimpl_->getKeyState(key_code);
 }
 
-InputInterface::KeyCode OlcGamePad::getPressedKey() const {
+InputInterface::KeyCode OlcGamePad::getPressedKey() {
   return pimpl_->getPressedKey();
 }
 

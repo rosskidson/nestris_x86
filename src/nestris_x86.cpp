@@ -11,8 +11,8 @@
 #include "frame_processors/keyboard_config_processor.hpp"
 #include "frame_processors/level_screen_processor.hpp"
 #include "frame_processors/option_screen_processor.hpp"
-#include "input_devices/olc_gamepad.hpp"
 #include "input_devices/olc_keyboard.hpp"
+#include "input_devices/sdl_gamepad.hpp"
 #include "key_defines.hpp"
 #include "option.hpp"
 #include "utils/logging.hpp"
@@ -38,7 +38,6 @@ KeyEvent getButtonState(const bool button_old_state, const bool button_new_state
 }
 
 KeyEvents NestrisX86::getKeyEvents() {
-  dynamic_cast<OlcGamePad &>(*gamepad_input_).detectAndInit();
   KeyEvents ret_val{};
   for (const auto &[action, keyboard_key] : keyboard_key_bindings_) {
     const auto &gamepad_key = gamepad_key_bindings_.at(action);
@@ -54,9 +53,9 @@ KeyEvents NestrisX86::getKeyEvents() {
 NestrisX86::NestrisX86()
     : sample_player_{std::make_shared<sound::SoundPlayer>()},
       sprite_provider_{std::make_shared<SpriteProvider>()},
-      keyboard_input_{std::make_unique<OlcKeyboard>(*this)},
+      keyboard_input_{std::make_shared<OlcKeyboard>(*this)},
       keyboard_key_bindings_{getDefaultKeyBindings(*keyboard_input_)},
-      gamepad_input_{std::make_unique<OlcGamePad>()},
+      gamepad_input_{std::make_shared<SdlGamePad>()},
       gamepad_key_bindings_{getDefaultGamePadBindings(*gamepad_input_)},
       game_options_{std::make_shared<GameOptions>()},
       game_frame_processor_{std::make_shared<GameProcessor>(
@@ -66,10 +65,10 @@ NestrisX86::NestrisX86()
       option_menu_processor_{std::make_shared<OptionScreenProcessor>(
           std::make_unique<OlcDrawer>(*this), sample_player_, sprite_provider_)},
       keyboard_config_processor_{std::make_shared<KeyboardConfigProcessor>(
-          std::make_unique<OlcDrawer>(*this), sample_player_, std::make_unique<OlcKeyboard>(*this),
+          std::make_unique<OlcDrawer>(*this), sample_player_, keyboard_input_,
           keyboard_key_bindings_)},
-      gamepad_config_processor_{std::make_shared<GamePadConfigProcessor>(
-          std::make_unique<OlcDrawer>(*this), sample_player_, std::make_unique<OlcGamePad>(),
+      gamepad_config_processor_{std::make_shared<KeyboardConfigProcessor>(
+          std::make_unique<OlcDrawer>(*this), sample_player_, gamepad_input_,
           gamepad_key_bindings_)},
       active_processor_{level_menu_processor_},
       key_states_{initializeKeyStatesFromBindings(keyboard_key_bindings_)},
@@ -103,7 +102,7 @@ bool NestrisX86::OnUserUpdate(float fElapsedTime) {
   const auto key_events = getKeyEvents();
   const auto signal = active_processor_->processFrame(key_events);
   processProgramFlowSignal(signal);
-  sleepUntilNextFrame();
+  sleepUntilNextFrame(true);
   return not(GetKey(olc::Key::Q).bHeld || signal == ProgramFlowSignal::EndProgram);
 }
 

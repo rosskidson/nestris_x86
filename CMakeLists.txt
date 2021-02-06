@@ -89,11 +89,12 @@ add_executable(nestris_x86
         src/frame_processors/level_screen_processor.cpp
         src/frame_processors/option_screen_processor.cpp
         src/frame_processors/keyboard_config_processor.cpp
-        src/frame_processors/gamepad_config_processor.cpp
+        #src/frame_processors/gamepad_config_processor.cpp
         src/game_logic.cpp
         src/game_renderer.cpp
         src/input_devices/olc_keyboard.cpp
         src/input_devices/olc_gamepad.cpp
+        src/input_devices/sdl_gamepad.cpp
         src/main.cpp
         src/sound.cpp
         src/statistics.cpp

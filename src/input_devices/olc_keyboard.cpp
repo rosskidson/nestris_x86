@@ -31,11 +31,11 @@ const std::map<std::string, int> OlcKeyboard::name_code_lookup = getLookupTable(
 OlcKeyboard::OlcKeyboard(olc::PixelGameEngine& pixel_game_engine_ref)
     : pixel_game_engine_ref_(pixel_game_engine_ref) {}
 
-bool OlcKeyboard::getKeyState(const KeyCode key_code) const {
+bool OlcKeyboard::getKeyState(const KeyCode key_code) {
   return pixel_game_engine_ref_.GetKey(keyCodeToOlc(key_code)).bHeld;
 }
 
-InputInterface::KeyCode OlcKeyboard::getPressedKey() const {
+InputInterface::KeyCode OlcKeyboard::getPressedKey() {
   for (int i = 1; i < num_keys; ++i) {
     if (getKeyState(i)) {
       return i;

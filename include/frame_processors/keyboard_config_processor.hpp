@@ -14,7 +14,7 @@ class KeyboardConfigProcessor : public FrameProcessorInterface {
  public:
   KeyboardConfigProcessor(std::unique_ptr<PixelDrawingInterface>&& drawer,
                           const std::shared_ptr<sound::SoundPlayer>& sample_player,
-                          std::unique_ptr<InputInterface>&& input_interface,
+                          std::shared_ptr<InputInterface>& input_interface,
                           const KeyBindings& initial_bindings);
 
   ProgramFlowSignal processFrame(const KeyEvents& key_events);
@@ -29,6 +29,7 @@ class KeyboardConfigProcessor : public FrameProcessorInterface {
   std::shared_ptr<sound::SoundPlayer> sample_player_;
   std::shared_ptr<SpriteProvider> sprite_provider_;
   KeyBindings key_bindings_;
+  KeyBindings default_bindings_;
   KeyAction active_key_;
   int selector_idx_;
   bool wait_until_key_lifted_;
@@ -36,11 +37,10 @@ class KeyboardConfigProcessor : public FrameProcessorInterface {
   std::unique_ptr<std::atomic_int> frame_counter_;
 
  protected:
-  virtual KeyBindings getDefaultBindings();
   void clearScreen() const;
 
   std::unique_ptr<PixelDrawingInterface> drawer_;
-  std::unique_ptr<InputInterface> input_ptr_;
+  std::shared_ptr<InputInterface> input_ptr_;
 };
 
 }  // namespace nestris_x86
