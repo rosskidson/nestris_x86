@@ -108,6 +108,9 @@ target_link_libraries(nestris_x86 olc assets_lib ${TETRIS_LIBS})
 add_executable(asset_cpp_gen src/tools/asset_cpp_gen.cpp ${DATA_ENCODING_SOURCES})
 target_link_libraries(asset_cpp_gen olc ${TETRIS_LIBS})
 
+add_executable(sdl_gamepad src/tools/sdl_gamepad.cpp)
+target_link_libraries(sdl_gamepad ${TETRIS_LIBS})
+
 if(NOT APPLE)
   add_executable(testbed src/tools/button_tester.cpp)
   target_link_libraries(testbed olc ${OLC_LIBS})
