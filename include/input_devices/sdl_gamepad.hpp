@@ -19,6 +19,9 @@ class SdlGamePad : public InputInterface {
   KeyCode lookupKeyCode(const std::string& key_name) const override;
   KeyCode getNullKey() const override;
 
+  void registerAxisAsButton(const int axis_number, const double axis_at_rest,
+                            const double axis_pressed) override;
+
  private:
   class Impl;
   std::unique_ptr<Impl> pimpl_;

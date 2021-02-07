@@ -21,6 +21,9 @@ class OlcKeyboard : public InputInterface {
 
   KeyCode getNullKey() const override;
 
+  void registerAxisAsButton(const int axis_number, const double axis_at_rest,
+                            const double axis_pressed) override;
+
  private:
   static KeyCode olcToKeyCode(const olc::Key& key);
   static olc::Key keyCodeToOlc(const KeyCode key_code);

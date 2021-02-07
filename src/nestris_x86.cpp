@@ -85,6 +85,17 @@ NestrisX86::NestrisX86()
       throw std::runtime_error("Failed loading sound samples.");
     }
   }
+
+  gamepad_input_->registerAxisAsButton(0, 0, -32768);
+  gamepad_input_->registerAxisAsButton(0, 0, 32767);
+  gamepad_input_->registerAxisAsButton(1, 0, -32768);
+  gamepad_input_->registerAxisAsButton(1, 0, 32767);
+  gamepad_input_->registerAxisAsButton(2, 0, -32768);
+  gamepad_input_->registerAxisAsButton(2, 0, 32767);
+  gamepad_input_->registerAxisAsButton(3, 0, -32768);
+  gamepad_input_->registerAxisAsButton(3, 0, 32767);
+  gamepad_input_->registerAxisAsButton(4, -32768, 32767);
+  gamepad_input_->registerAxisAsButton(5, -32768, 32767);
 }
 
 bool NestrisX86::OnUserCreate() {
@@ -199,15 +210,13 @@ void NestrisX86::sleepUntilNextFrame(const bool debug) {
 /**
  * TODO:
  *
- * Must do:
- * - Full test on linux/mac/windows
- * - Finish readme
+ * Most important
+ * - Test sdl changes on windows and mac
  *
  *
  * Like to have:
- * - Change default gamepad bindings for windows (up and down reversed)
- * - cancel button on controller config screen
  * - Save config option
+ * - High score
  * - Compress binary data
  *
  *
@@ -223,8 +232,6 @@ void NestrisX86::sleepUntilNextFrame(const bool debug) {
  *
  *
  * Refactor/code improvements:
- * - make an asset provider that returns anys for sounds and images
- * - Remove magic numbers in game_logic (entry delay, line clear frame numbers)
  * - Remove std::rand() in line clear
  */
 
