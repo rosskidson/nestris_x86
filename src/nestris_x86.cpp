@@ -212,11 +212,15 @@ void NestrisX86::sleepUntilNextFrame(const bool debug) {
  *
  * Most important
  * - Test sdl changes on windows and mac
+ * - pad 6 digit score with space
  *
  *
  * Like to have:
- * - Save config option
- * - High score
+ * - Yaml config for 
+ *   - persistent config
+ *   - registering analog axes
+ *   - high scores
+ *
  * - Compress binary data
  *
  *
