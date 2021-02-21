@@ -14,7 +14,7 @@ class GamePadConfigProcessor : public KeyboardConfigProcessor {
                          std::unique_ptr<InputInterface>&& input_interface,
                          const KeyBindings& initial_bindings);
 
-  KeyBindings getDefaultBindings() override;
+  KeyBindings getDefaultBindings();
 
   ProgramFlowSignal processFrame(const KeyEvents& key_events) override;
 

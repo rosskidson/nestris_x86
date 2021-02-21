@@ -55,11 +55,41 @@ KeyEvents NestrisX86::getKeyEvents() {
   return ret_val;
 }
 
-void saveConfigToFile(const YAML::Node& node) {
-  std::ofstream ofs(CONFIG_PATH);
-  if(ofs.good()) {
-    ofs << node;
+YAML::Node keyBindingsToYaml(const KeyBindings &key_bindings) {
+  YAML::Node node;
+  for (const auto &[key_action, key_code] : key_bindings) {
+    node[keyActionToString(key_action)] = key_code;
   }
+  return node;
+}
+
+std::optional<KeyBindings> keyBindingsFromYaml(const YAML::Node &node) try {
+  KeyBindings bindings;
+  for (const auto &yaml_val : node) {
+    const auto name = stringToKeyAction(yaml_val.first.as<std::string>());
+    if(name == KeyAction::COUNT) {
+      return std::nullopt;
+    }
+    const auto &val = yaml_val.second.as<InputInterface::KeyCode>();
+    bindings[name] = val;
+  }
+  return bindings;
+} catch (const YAML::Exception &e) {
+  LOG_ERROR("Exception thrown loading key bindings from YAML: `" << e.what() << "`");
+  return std::nullopt;
+}
+
+void saveConfigToFile(const YAML::Node &game_options, const YAML::Node &keyboard_bindings,
+                      const YAML::Node &gamepad_bindings) {
+  std::ofstream ofs(CONFIG_PATH);
+  if (not ofs.good()) {
+    return;
+  }
+  YAML::Node config;
+  config["game_options"] = game_options;
+  config["keyboard_bindings"] = keyboard_bindings;
+  config["gamepad_bindings"] = gamepad_bindings;
+  ofs << config;
 }
 
 std::optional<YAML::Node> loadYamlConfig() try {
@@ -111,7 +141,19 @@ NestrisX86::NestrisX86()
 
   const auto yaml_node = loadYamlConfig();
   if (yaml_node.has_value()) {
-    option_menu_processor_->setOptionsYaml(*yaml_node);
+    option_menu_processor_->setOptionsYaml((*yaml_node)["game_options"]);
+    const auto key_bindings = keyBindingsFromYaml((*yaml_node)["keyboard_bindings"]);
+    if(key_bindings.has_value()) {
+      keyboard_key_bindings_ = *key_bindings;
+      keyboard_config_processor_->setKeyBindings(*key_bindings);
+    }
+
+    const auto gamepad_bindings = keyBindingsFromYaml((*yaml_node)["gamepad_bindings"]);
+    if(gamepad_bindings.has_value()) {
+      gamepad_key_bindings_ = *gamepad_bindings;
+      gamepad_config_processor_->setKeyBindings(*gamepad_bindings);
+    }
+
     LOG_INFO("Loaded config from file `" << CONFIG_PATH << "`");
   }
 
@@ -125,6 +167,7 @@ NestrisX86::NestrisX86()
   gamepad_input_->registerAxisAsButton(3, 0, 32767);
   gamepad_input_->registerAxisAsButton(4, -32768, 32767);
   gamepad_input_->registerAxisAsButton(5, -32768, 32767);
+
 }
 
 bool NestrisX86::OnUserCreate() {
@@ -185,7 +228,9 @@ void NestrisX86::processProgramFlowSignal(const ProgramFlowSignal &signal) {
     options.level = level_menu_processor_->getSelectedLevel();
     single_frame_ = Duration_ns{static_cast<int>((1.0 / options.game_frequency) * 1e9)};
     game_frame_processor_->reset(options);
-    saveConfigToFile(option_menu_processor_->getOptionsAsYaml());
+    saveConfigToFile(option_menu_processor_->getOptionsAsYaml(),
+                     keyBindingsToYaml(keyboard_key_bindings_),
+                     keyBindingsToYaml(gamepad_key_bindings_));
     active_processor_ = game_frame_processor_;
   } else if (signal == ProgramFlowSignal::LevelSelectorScreen) {
     active_processor_ = level_menu_processor_;
@@ -248,7 +293,7 @@ void NestrisX86::sleepUntilNextFrame(const bool debug) {
  * Like to have:
  * - Yaml config for
  *   - [done] persistent config
- *   - gamepad/keyboard config
+ *   - [done] gamepad/keyboard config
  *   - registering analog axes
  *   - high scores
  *

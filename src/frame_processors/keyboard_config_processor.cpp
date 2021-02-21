@@ -121,4 +121,9 @@ KeyBindings KeyboardConfigProcessor::getKeyBindings() const {
   return key_bindings_;
 }
 
+void KeyboardConfigProcessor::setKeyBindings(const KeyBindings& key_bindings) {
+  key_bindings_ = key_bindings;
+}
+
+
 }  // namespace nestris_x86
