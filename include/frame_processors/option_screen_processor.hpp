@@ -1,5 +1,7 @@
 #pragma once
 
+#include <yaml-cpp/yaml.h>
+
 #include <memory>
 #include <set>
 
@@ -22,6 +24,9 @@ class OptionScreenProcessor : public FrameProcessorInterface {
   ProgramFlowSignal processFrame(const KeyEvents& key_events);
 
   const OptionMap& getOptions() { return options_; }
+
+  YAML::Node getOptionsAsYaml() const;
+  void setOptionsYaml(const YAML::Node& node);
 
  private:
   ProgramFlowSignal processKeyEvents(const KeyEvents& key_events);

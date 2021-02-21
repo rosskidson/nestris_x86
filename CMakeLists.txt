@@ -51,7 +51,7 @@ else()
                 ${OPENGL_LIBRARIES}
             )
     #LINUX
-    #sudo apt install libsdl-mixer1.2-dev libsdl1.2-dev
+    #sudo apt install libsdl-mixer1.2-dev libsdl1.2-dev libyaml-cpp-dev
     else()
         MESSAGE("Building for linux...")
         SET(OLC_LIBS
@@ -59,6 +59,7 @@ else()
             pthread
             PNG::PNG
             stdc++fs
+            yaml-cpp
             ${OPENGL_LIBRARIES}
             )
     endif()
