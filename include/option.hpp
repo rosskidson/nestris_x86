@@ -1,7 +1,8 @@
 #pragma once
 
-#include <algorithm>
 #include <iso646.h>
+
+#include <algorithm>
 #include <iterator>
 #include <string>
 #include <vector>
@@ -20,6 +21,7 @@ class OptionInterface {
   virtual void selectPrevOption() = 0;
   virtual void selectFirstOption() = 0;
   virtual void selectLastOption() = 0;
+  virtual void setOptionFromString(const std::string& val) = 0;
   virtual std::string getSelectedOptionText() const = 0;
   std::string getDisplayName() { return display_name_; }
   void selectNextOptionWrapAround() {
@@ -44,6 +46,7 @@ class BoolOption : public OptionInterface {
   void selectPrevOption() override { option_value_ = false; }
   void selectFirstOption() override { option_value_ = false; }
   void selectLastOption() override { option_value_ = true; }
+  void setOptionFromString(const std::string& val) override { option_value_ = (val == "ON"); }
   std::string getSelectedOptionText() const override { return option_value_ ? "ON" : "OFF"; }
   bool getSelectedOption() const { return option_value_; }
   void setOption(const bool value) { option_value_ = value; }
@@ -74,6 +77,7 @@ class StringOption : public OptionInterface {
   }
   void selectFirstOption() override { selected_option_idx_ = 0; }
   void selectLastOption() override { selected_option_idx_ = static_cast<int>(options_.size()) - 1; }
+  void setOptionFromString(const std::string& val) override { setOption(val); }
   std::string getSelectedOptionText() const override { return options_.at(selected_option_idx_); }
   std::string getSelectedOption() const { return getSelectedOptionText(); };
   void setOption(const std::string& value) {
@@ -119,6 +123,7 @@ class IntOption : public OptionInterface {
   }
   void selectFirstOption() override { value_ = min_value_; }
   void selectLastOption() override { value_ = max_value_; }
+  void setOptionFromString(const std::string& val) override { setOption(std::stoi(val)); }
   std::string getSelectedOptionText() const override { return std::to_string(value_); }
   int getSelectedOption() const { return value_; }
   void setOption(const int value) {
@@ -150,6 +155,7 @@ class DummyOption : public OptionInterface {
   void selectPrevOption() override {}
   void selectFirstOption() override {}
   void selectLastOption() override {}
+  void setOptionFromString(const std::string& val) override {}
   std::string getSelectedOptionText() const override { return {}; }
 };
 

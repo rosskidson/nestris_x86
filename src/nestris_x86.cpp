@@ -1,8 +1,12 @@
 #include "nestris_x86.hpp"
 
+#include <yaml-cpp/yaml.h>
+
 #include <chrono>
 #include <ctime>
+#include <fstream>
 #include <memory>
+#include <optional>
 #include <thread>  //sleep until
 
 #include "assets.hpp"
@@ -20,6 +24,7 @@
 namespace nestris_x86 {
 
 constexpr int NTSC_frame_ns = static_cast<int>((1.0 / NTSC_FREQUENCY) * 1e9);
+const std::string CONFIG_PATH = "config.yaml";
 
 KeyStates initializeKeyStatesFromBindings(const KeyBindings &key_bindings) {
   KeyStates key_states{};
@@ -48,6 +53,24 @@ KeyEvents NestrisX86::getKeyEvents() {
     key_states_[action] = new_key_state;
   }
   return ret_val;
+}
+
+void saveConfigToFile(const YAML::Node& node) {
+  std::ofstream ofs(CONFIG_PATH);
+  if(ofs.good()) {
+    ofs << node;
+  }
+}
+
+std::optional<YAML::Node> loadYamlConfig() try {
+  std::ifstream ifs(CONFIG_PATH);
+  if (ifs.good()) {
+    return YAML::Load(ifs);
+  }
+  return std::nullopt;
+} catch (const YAML::Exception &e) {
+  LOG_ERROR("Failed to load nestris config from yaml `" << CONFIG_PATH << "`.");
+  return std::nullopt;
 }
 
 NestrisX86::NestrisX86()
@@ -84,6 +107,12 @@ NestrisX86::NestrisX86()
     if (not loadSoundAssets("./assets/sounds/", *sample_player_)) {
       throw std::runtime_error("Failed loading sound samples.");
     }
+  }
+
+  const auto yaml_node = loadYamlConfig();
+  if (yaml_node.has_value()) {
+    option_menu_processor_->setOptionsYaml(*yaml_node);
+    LOG_INFO("Loaded config from file `" << CONFIG_PATH << "`");
   }
 
   gamepad_input_->registerAxisAsButton(0, 0, -32768);
@@ -156,6 +185,7 @@ void NestrisX86::processProgramFlowSignal(const ProgramFlowSignal &signal) {
     options.level = level_menu_processor_->getSelectedLevel();
     single_frame_ = Duration_ns{static_cast<int>((1.0 / options.game_frequency) * 1e9)};
     game_frame_processor_->reset(options);
+    saveConfigToFile(option_menu_processor_->getOptionsAsYaml());
     active_processor_ = game_frame_processor_;
   } else if (signal == ProgramFlowSignal::LevelSelectorScreen) {
     active_processor_ = level_menu_processor_;
@@ -216,8 +246,9 @@ void NestrisX86::sleepUntilNextFrame(const bool debug) {
  *
  *
  * Like to have:
- * - Yaml config for 
- *   - persistent config
+ * - Yaml config for
+ *   - [done] persistent config
+ *   - gamepad/keyboard config
  *   - registering analog axes
  *   - high scores
  *

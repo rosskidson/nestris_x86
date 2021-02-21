@@ -89,6 +89,26 @@ OptionScreenProcessor::OptionScreenProcessor(
   }
 }
 
+YAML::Node OptionScreenProcessor::getOptionsAsYaml() const {
+  YAML::Node node;
+  for(const auto& [name, option]: options_) {
+    node[name] = option->getSelectedOptionText();
+  }
+  return node;
+}
+
+void OptionScreenProcessor::setOptionsYaml(const YAML::Node& node) {
+  for(const auto& yaml_val: node){
+    const auto& name = yaml_val.first.as<std::string>();
+    const auto& val = yaml_val.second.as<std::string>();
+    if(options_.count(name) == 0) {
+      LOG_ERROR("Bad key in yaml found `" << name << "`.");
+      continue;
+    }
+    options_.at(name)->setOptionFromString(val);
+  }
+}
+
 ProgramFlowSignal OptionScreenProcessor::processKeyEvents(const KeyEvents& key_events) {
   auto& current_idx = selected_index_;
   const int num_options = static_cast<int>(option_order_.size());
