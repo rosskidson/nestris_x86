@@ -4,6 +4,7 @@
 #include <map>
 
 #include "input_devices/input_interface.hpp"
+#include "utils/logging.hpp"
 
 namespace nestris_x86 {
 
@@ -30,6 +31,32 @@ const std::array<std::string, key_action_size> action_names{
 
 inline std::string keyActionToString(const KeyAction &key_action) {
   return action_names[static_cast<int>(key_action)];
+}
+
+inline KeyAction stringToKeyAction(const std::string &action) {
+  if (action == "Up") {
+    return KeyAction::Up;
+  }
+  if (action == "Down") {
+    return KeyAction::Down;
+  }
+  if (action == "Left") {
+    return KeyAction::Left;
+  }
+  if (action == "Right") {
+    return KeyAction::Right;
+  }
+  if (action == "Rotate CW  (A)") {
+    return KeyAction::RotateClockwise;
+  }
+  if (action == "Rotate CCW (B)") {
+    return KeyAction::RotateAntiClockwise;
+  }
+  if (action == "Start") {
+    return KeyAction::Start;
+  }
+  LOG_ERROR("No key action found for string `" << action << "`.");
+  return KeyAction::COUNT;
 }
 
 using KeyBindings = std::map<KeyAction, InputInterface::KeyCode>;

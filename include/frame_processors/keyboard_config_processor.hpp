@@ -20,6 +20,7 @@ class KeyboardConfigProcessor : public FrameProcessorInterface {
   ProgramFlowSignal processFrame(const KeyEvents& key_events);
 
   KeyBindings getKeyBindings() const;
+  void setKeyBindings(const KeyBindings& key_bindings);
 
  private:
   ProgramFlowSignal processKeyEvents(const KeyEvents& key_events);

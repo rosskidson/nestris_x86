@@ -142,6 +142,7 @@ class SdlGamePad::Impl {
   void registerAxisAsButton(const int axis_number, const double axis_at_rest,
                             const double axis_pressed) {
     const auto new_button = key_code_name_map_.addEntry("AXISB");
+    button_states_[new_button.code] = false;
     axis_triggers_.push_back({axis_number, axis_at_rest, axis_pressed, new_button.code});
   }
 
