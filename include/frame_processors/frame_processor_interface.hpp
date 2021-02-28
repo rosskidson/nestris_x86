@@ -9,6 +9,7 @@ enum class ProgramFlowSignal {
   StartGame,               // A new game should be created and a game processor should start.
   OptionsScreen,           // Open options screen.
   LevelSelectorScreen,     // Open level selector screen.
+  NewHighScoreScreen,      // Screen for entering your name for a new high score.
   KeyboardConfigScreen,    // Screen for keyboard binds.
   ControllerConfigScreen,  // Screen for controller binds.
   EndProgram               // End the program.

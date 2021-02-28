@@ -284,6 +284,8 @@ void NestrisX86::processProgramFlowSignal(const ProgramFlowSignal &signal) {
     active_processor_ = keyboard_config_processor_;
   } else if (signal == ProgramFlowSignal::ControllerConfigScreen) {
     active_processor_ = gamepad_config_processor_;
+  } else if (signal == ProgramFlowSignal::NewHighScoreScreen) {
+    active_processor_ = level_menu_processor_;
   }
 }
 
