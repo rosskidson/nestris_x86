@@ -94,7 +94,6 @@ add_executable(nestris_x86
         src/game_logic.cpp
         src/game_renderer.cpp
         src/input_devices/olc_keyboard.cpp
-        src/input_devices/olc_gamepad.cpp
         src/input_devices/sdl_gamepad.cpp
         src/main.cpp
         src/sound.cpp

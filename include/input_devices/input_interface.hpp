@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <vector>
 
 namespace nestris_x86 {
 
@@ -21,7 +22,14 @@ class InputInterface {
   // TODO:: Make a gamepad interface that inherits from Input Interface for this.
   //   That way keyboard etc. doesn't need a no-op implementation.
   virtual void registerAxisAsButton(const int axis_number, const double axis_at_rest,
-                            const double axis_pressed) = 0;
+                                    const double axis_pressed) = 0;
+
+  struct RegisteredAxisMovement {
+    int axis_number;
+    double axis_at_rest;
+    double axis_pressed;
+  };
+  virtual std::vector<RegisteredAxisMovement> getRegisteredAxes() const = 0;
 };
 
 }  // namespace nestris_x86
