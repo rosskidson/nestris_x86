@@ -4,6 +4,7 @@
 #include <map>
 #include <memory>
 #include <stdexcept>
+#include <string>
 
 #include "key_defines.hpp"
 #include "tetromino.hpp"
@@ -25,9 +26,12 @@ struct GameState {
         active_tetromino{},
         next_tetromino{},
         score{},
-        high_score{},
         topped_out{},
-        paused{} {}
+        paused{} ,
+        press_down_lock{},
+        press_down_counter{},
+        viz_wall_charge_frame_count{},
+        high_scores{{1000, "HOWARD"}} {}
   // clang-format on
 
   using Grid = std::array<std::array<int, H>, W>;
@@ -42,12 +46,12 @@ struct GameState {
   TetrominoState active_tetromino;
   Tetromino next_tetromino;
   int score;
-  int high_score;
   bool topped_out;
   bool paused;
   bool press_down_lock;
   int press_down_counter;
   int viz_wall_charge_frame_count;
+  std::map<int, std::string> high_scores;
 };
 
 inline bool entryDelay(const GameState<>& state) {

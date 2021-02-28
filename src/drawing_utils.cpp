@@ -8,7 +8,6 @@
 namespace nestris_x86 {
 using pdi = PixelDrawingInterface;
 
-// TODO:: Add max out logic
 void drawNumber(const PixelDrawingInterface& drawer, const int x, const int y, const int num,
                 const int pad, const pdi::Color& color) {
   const auto clipped_num = std::min(num, static_cast<int>(std::pow(10, pad) - 1));

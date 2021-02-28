@@ -2,6 +2,8 @@
 #include "frame_processors/game_processor.hpp"
 
 #include <iso646.h>
+
+#include <iterator>
 #include <stdexcept>
 
 #include "assets.hpp"
@@ -69,6 +71,7 @@ bool GameProcessor::spawnNewTetromino(GameState<>& state) {
 GameState<> GameProcessor::getNewState(const int level) {
   auto state = GameState<>{};
   state.level = level;
+  state.high_scores = state_.high_scores;
   state.active_tetromino = {getRandomTetromino(), 5, 0, 0};
   state.next_tetromino = getRandomTetromino();
   state.gravity_counter = GRAVITY_FIRST_FRAME;
@@ -127,11 +130,20 @@ void GameProcessor::doEntryDelayStep(const KeyEvents& key_events) {
   --state_.entry_delay_counter;
 }
 
+bool checkForHighScore(GameState<>& state) {
+  auto insertion = state.high_scores.insert({state.score, ""});
+  return std::distance(insertion.first, state.high_scores.end()) < 3;
+}
+
 ProgramFlowSignal GameProcessor::processFrame(const KeyEvents& key_events) {
   if (state_.topped_out) {
     const bool end_game = updateTopOutState(key_events, top_out_frame_counter_, state_);
     if (end_game) {
-      return ProgramFlowSignal::LevelSelectorScreen;
+      if (checkForHighScore(state_)) {
+        return ProgramFlowSignal::NewHighScoreScreen;
+      } else {
+        return ProgramFlowSignal::LevelSelectorScreen;
+      }
     }
   } else if (state_.paused) {
     if (key_events.at(KeyAction::Start).pressed) {

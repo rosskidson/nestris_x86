@@ -1,6 +1,7 @@
 #include "game_renderer.hpp"
 
 #include <iso646.h>
+
 #include <memory>
 #include <set>
 #include <sstream>
@@ -68,7 +69,7 @@ void GameRenderer::renderText(const GameState<> &state, const Statistics &stats)
   constexpr pdi::Coords score_pos{192, 56};
   constexpr pdi::Coords level_pos{208, 160};
   drawNumber(*drawer_, lines_pos, state.lines, 3);
-  drawNumber(*drawer_, high_score_pos, state.high_score, 7);
+  drawNumber(*drawer_, high_score_pos, state.high_scores.rbegin()->first, 7);
   drawNumber(*drawer_, score_pos, state.score, 7);
   drawNumber(*drawer_, level_pos, state.level, 2);
 }
@@ -221,7 +222,8 @@ void GameRenderer::renderTreyVisionStatistics(const GameState<> &state,
   drawNumber(*drawer_, get_coords(0, 1), statistics.getBurnCount(), 3);
 
   drawer_->drawString(get_coords(1, 0), "TRT:   %");
-  drawNumber(*drawer_, get_coords(1, 1), static_cast<int>(statistics.getTetrisRate(state.score) * 100), 2);
+  drawNumber(*drawer_, get_coords(1, 1),
+             static_cast<int>(statistics.getTetrisRate(state.score) * 100), 2);
 
   drawer_->drawSprite(get_coords(2, 0), sprite_provider_->getSprite("long-bar-drought"));
   drawNumber(*drawer_, get_coords(2, 1), statistics.getLongBarDrought(), 3);
@@ -229,13 +231,13 @@ void GameRenderer::renderTreyVisionStatistics(const GameState<> &state,
   drawer_->drawString(get_coords(4, 0), "DAS");
   drawer_->drawString(get_coords(5, 0), "CHAIN");
   auto get_das_chain_color = [](const int das_chain) {
-    if(das_chain < 4) {
+    if (das_chain < 4) {
       return pdi::RED();
-    } else if(das_chain < 8) {
+    } else if (das_chain < 8) {
       return pdi::Color{255, 132, 0, 255};
-    } else if(das_chain < 10) {
+    } else if (das_chain < 10) {
       return pdi::YELLOW();
-    } else if(das_chain < 12) {
+    } else if (das_chain < 12) {
       return pdi::Color{200, 255, 0, 255};
     } else {
       return pdi::GREEN();
@@ -245,11 +247,14 @@ void GameRenderer::renderTreyVisionStatistics(const GameState<> &state,
   drawNumber(*drawer_, get_coords(4, 1), das_chain, 3, get_das_chain_color(das_chain));
 
   const auto are_sprite = entryDelay(state) ? "button-on" : "button-off";
-  drawer_->drawSprite(get_coords(7, 0) + pdi::Coords{-3,-1}, sprite_provider_->getSprite(are_sprite));
+  drawer_->drawSprite(get_coords(7, 0) + pdi::Coords{-3, -1},
+                      sprite_provider_->getSprite(are_sprite));
   drawer_->drawString(get_coords(7, 0) + pdi::Coords{-1, 0}, "ENTRY DL", pdi::BLACK());
 
-  const auto wall_charge_sprite = state.viz_wall_charge_frame_count > 0 ? "button-on" : "button-off";
-  drawer_->drawSprite(get_coords(8, 0) + pdi::Coords{-3,-1}, sprite_provider_->getSprite(wall_charge_sprite));
+  const auto wall_charge_sprite =
+      state.viz_wall_charge_frame_count > 0 ? "button-on" : "button-off";
+  drawer_->drawSprite(get_coords(8, 0) + pdi::Coords{-3, -1},
+                      sprite_provider_->getSprite(wall_charge_sprite));
   drawer_->drawString(get_coords(8, 0) + pdi::Coords{-1, 0}, "WALL CHR", pdi::BLACK());
 }
 
