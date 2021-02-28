@@ -24,6 +24,8 @@ class OlcKeyboard : public InputInterface {
   void registerAxisAsButton(const int axis_number, const double axis_at_rest,
                             const double axis_pressed) override;
 
+  std::vector<RegisteredAxisMovement> getRegisteredAxes() const override;
+
  private:
   static KeyCode olcToKeyCode(const olc::Key& key);
   static olc::Key keyCodeToOlc(const KeyCode key_code);

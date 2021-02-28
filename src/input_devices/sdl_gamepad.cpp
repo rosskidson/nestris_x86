@@ -146,6 +146,15 @@ class SdlGamePad::Impl {
     axis_triggers_.push_back({axis_number, axis_at_rest, axis_pressed, new_button.code});
   }
 
+  std::vector<InputInterface::RegisteredAxisMovement> getRegisteredAxes() const {
+    std::vector<InputInterface::RegisteredAxisMovement> registered_axes;
+    for (const auto& axis_trigger : axis_triggers_) {
+      registered_axes.emplace_back(InputInterface::RegisteredAxisMovement{
+          axis_trigger.axis_number, axis_trigger.axis_at_rest, axis_trigger.axis_pressed});
+    }
+    return registered_axes;
+  }
+
  private:
   struct AxisMovementTrigger {
     int axis_number;
@@ -229,6 +238,10 @@ InputInterface::KeyCode SdlGamePad::getNullKey() const {
 void SdlGamePad::registerAxisAsButton(const int axis_number, const double axis_at_rest,
                                       const double axis_pressed) {
   pimpl_->registerAxisAsButton(axis_number, axis_at_rest, axis_pressed);
+}
+
+std::vector<InputInterface::RegisteredAxisMovement> SdlGamePad::getRegisteredAxes() const {
+  return pimpl_->getRegisteredAxes();
 }
 
 }  // namespace nestris_x86

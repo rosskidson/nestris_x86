@@ -22,6 +22,8 @@ class SdlGamePad : public InputInterface {
   void registerAxisAsButton(const int axis_number, const double axis_at_rest,
                             const double axis_pressed) override;
 
+  std::vector<RegisteredAxisMovement> getRegisteredAxes() const override;
+
  private:
   class Impl;
   std::unique_ptr<Impl> pimpl_;

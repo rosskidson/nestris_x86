@@ -1,4 +1,5 @@
 #include "input_devices/olc_keyboard.hpp"
+
 #include "utils/logging.hpp"
 
 namespace nestris_x86 {
@@ -68,6 +69,10 @@ InputInterface::KeyCode OlcKeyboard::getNullKey() const {
 void OlcKeyboard::registerAxisAsButton(const int axis_number, const double axis_at_rest,
                                        const double axis_pressed) {
   LOG_ERROR("No axis functionality available for keyboard.");
+}
+
+std::vector<InputInterface::RegisteredAxisMovement> OlcKeyboard::getRegisteredAxes() const {
+  return {};
 }
 
 }  // namespace nestris_x86

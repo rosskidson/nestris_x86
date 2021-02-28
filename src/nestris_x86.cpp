@@ -26,6 +26,38 @@ namespace nestris_x86 {
 constexpr int NTSC_frame_ns = static_cast<int>((1.0 / NTSC_FREQUENCY) * 1e9);
 const std::string CONFIG_PATH = "config.yaml";
 
+void registerAnalogAxesFromYamlConfig(const YAML::Node &node, InputInterface &input_device) try {
+  for (const auto &axis_config : node) {
+    const int axis_id = axis_config["axis_id"].as<int>();
+    const int idle = axis_config["idle_val"].as<int>();
+    const int max = axis_config["max_val"].as<int>();
+    LOG_INFO("Registering analog axis[" << axis_id << "]: idle: " << idle << " max: " << max);
+    input_device.registerAxisAsButton(axis_id, idle, max);
+  }
+} catch (const YAML::Exception &e) {
+  LOG_ERROR(__FUNCTION__ << ": Yaml exception thrown: " << e.what());
+}
+
+YAML::Node serializeRegisteredAxesToYaml(
+    const std::vector<InputInterface::RegisteredAxisMovement> &axis_movements) {
+  YAML::Node node;
+  for (const auto &axis_movement : axis_movements) {
+    YAML::Node axis_node;
+    axis_node["axis_id"] = axis_movement.axis_number;
+    axis_node["idle_val"] = axis_movement.axis_at_rest;
+    axis_node["max_val"] = axis_movement.axis_pressed;
+    node.push_back(axis_node);
+  }
+  return node;
+}
+
+void registerDefaultAxes(InputInterface &gamepad_input) {
+  gamepad_input.registerAxisAsButton(0, 0, 32767);
+  gamepad_input.registerAxisAsButton(0, 0, -32767);
+  gamepad_input.registerAxisAsButton(1, 0, 32767);
+  gamepad_input.registerAxisAsButton(1, 0, -32767);
+}
+
 KeyStates initializeKeyStatesFromBindings(const KeyBindings &key_bindings) {
   KeyStates key_states{};
   for (const auto &pair : key_bindings) {
@@ -67,7 +99,7 @@ std::optional<KeyBindings> keyBindingsFromYaml(const YAML::Node &node) try {
   KeyBindings bindings;
   for (const auto &yaml_val : node) {
     const auto name = stringToKeyAction(yaml_val.first.as<std::string>());
-    if(name == KeyAction::COUNT) {
+    if (name == KeyAction::COUNT) {
       return std::nullopt;
     }
     const auto &val = yaml_val.second.as<InputInterface::KeyCode>();
@@ -79,8 +111,10 @@ std::optional<KeyBindings> keyBindingsFromYaml(const YAML::Node &node) try {
   return std::nullopt;
 }
 
-void saveConfigToFile(const YAML::Node &game_options, const YAML::Node &keyboard_bindings,
-                      const YAML::Node &gamepad_bindings) {
+void saveConfigToFile(const YAML::Node &game_options,       //
+                      const YAML::Node &keyboard_bindings,  //
+                      const YAML::Node &gamepad_bindings,   //
+                      const YAML::Node &axis_movements) {
   std::ofstream ofs(CONFIG_PATH);
   if (not ofs.good()) {
     return;
@@ -89,6 +123,7 @@ void saveConfigToFile(const YAML::Node &game_options, const YAML::Node &keyboard
   config["game_options"] = game_options;
   config["keyboard_bindings"] = keyboard_bindings;
   config["gamepad_bindings"] = gamepad_bindings;
+  config["register_analog_axis_as_dbutton"] = axis_movements;
   ofs << config;
 }
 
@@ -141,33 +176,36 @@ NestrisX86::NestrisX86()
 
   const auto yaml_node = loadYamlConfig();
   if (yaml_node.has_value()) {
-    option_menu_processor_->setOptionsYaml((*yaml_node)["game_options"]);
-    const auto key_bindings = keyBindingsFromYaml((*yaml_node)["keyboard_bindings"]);
-    if(key_bindings.has_value()) {
-      keyboard_key_bindings_ = *key_bindings;
-      keyboard_config_processor_->setKeyBindings(*key_bindings);
+    if ((*yaml_node)["game_options"]) {
+      option_menu_processor_->setOptionsYaml((*yaml_node)["game_options"]);
+    }
+    if ((*yaml_node)["keyboard_bindings"]) {
+      const auto key_bindings = keyBindingsFromYaml((*yaml_node)["keyboard_bindings"]);
+      if (key_bindings.has_value()) {
+        keyboard_key_bindings_ = *key_bindings;
+        keyboard_config_processor_->setKeyBindings(*key_bindings);
+      }
     }
 
-    const auto gamepad_bindings = keyBindingsFromYaml((*yaml_node)["gamepad_bindings"]);
-    if(gamepad_bindings.has_value()) {
-      gamepad_key_bindings_ = *gamepad_bindings;
-      gamepad_config_processor_->setKeyBindings(*gamepad_bindings);
+    if ((*yaml_node)["gamepad_bindings"]) {
+      const auto gamepad_bindings = keyBindingsFromYaml((*yaml_node)["gamepad_bindings"]);
+      if (gamepad_bindings.has_value()) {
+        gamepad_key_bindings_ = *gamepad_bindings;
+        gamepad_config_processor_->setKeyBindings(*gamepad_bindings);
+      }
+    }
+
+    if ((*yaml_node)["register_analog_axis_as_dbutton"]) {
+      registerAnalogAxesFromYamlConfig((*yaml_node)["register_analog_axis_as_dbutton"],
+                                       *gamepad_input_);
+    } else {
+      registerDefaultAxes(*gamepad_input_);
     }
 
     LOG_INFO("Loaded config from file `" << CONFIG_PATH << "`");
+  } else {
+    registerDefaultAxes(*gamepad_input_);
   }
-
-  gamepad_input_->registerAxisAsButton(0, 0, -32768);
-  gamepad_input_->registerAxisAsButton(0, 0, 32767);
-  gamepad_input_->registerAxisAsButton(1, 0, -32768);
-  gamepad_input_->registerAxisAsButton(1, 0, 32767);
-  gamepad_input_->registerAxisAsButton(2, 0, -32768);
-  gamepad_input_->registerAxisAsButton(2, 0, 32767);
-  gamepad_input_->registerAxisAsButton(3, 0, -32768);
-  gamepad_input_->registerAxisAsButton(3, 0, 32767);
-  gamepad_input_->registerAxisAsButton(4, -32768, 32767);
-  gamepad_input_->registerAxisAsButton(5, -32768, 32767);
-
 }
 
 bool NestrisX86::OnUserCreate() {
@@ -230,7 +268,8 @@ void NestrisX86::processProgramFlowSignal(const ProgramFlowSignal &signal) {
     game_frame_processor_->reset(options);
     saveConfigToFile(option_menu_processor_->getOptionsAsYaml(),
                      keyBindingsToYaml(keyboard_key_bindings_),
-                     keyBindingsToYaml(gamepad_key_bindings_));
+                     keyBindingsToYaml(gamepad_key_bindings_),
+                     serializeRegisteredAxesToYaml(gamepad_input_->getRegisteredAxes()));
     active_processor_ = game_frame_processor_;
   } else if (signal == ProgramFlowSignal::LevelSelectorScreen) {
     active_processor_ = level_menu_processor_;
@@ -291,10 +330,11 @@ void NestrisX86::sleepUntilNextFrame(const bool debug) {
  *
  *
  * Like to have:
+ * - high scores
  * - Yaml config for
  *   - [done] persistent config
  *   - [done] gamepad/keyboard config
- *   - registering analog axes
+ *   - [done] registering analog axes
  *   - high scores
  *
  * - Compress binary data
