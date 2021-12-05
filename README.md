@@ -38,7 +38,7 @@ This game depends on SDL-mixer
 
 Linux:
 ```
-sudo apt install libsdl-mixer1.2-dev libsdl1.2-dev
+sudo apt install libsdl-mixer1.2-dev libsdl1.2-dev libsdl-image1.2-dev
 ```
 MacOS:
 ```
