@@ -146,8 +146,5 @@ The tetris wiki was also very useful in providing details about das mechanics an
 The emulator of choice for development on this project is fceux:
 - http://fceux.com/web/home.html
 
-### Tetris effect
-It was not the intent of this project to copy or undermine tetris effect connected with its classic tetris mode. This project was started well before the new modes tetris effect were announced, and it also has somewhat of a different scope.  If you like NES tetris and have a windows system, go and get tetris effect connected.
-
 ### Bugs, suggestions, feedback
 Any feedback is very welcome! Open an issue or simply email me directly: ross dot kidson at gmail dot com
