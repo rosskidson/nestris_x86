@@ -1,6 +1,7 @@
 #pragma once
 
 #include <any>
+#include <cstdint>
 #include <string>
 
 namespace nestris_x86 {
